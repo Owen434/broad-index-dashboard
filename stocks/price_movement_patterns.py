@@ -797,7 +797,18 @@ def plot_interactive(df, name, code, sector, output_dir, sector_display=None):
     # 90个文件就是 400MB+ 的磁盘写入（Windows 上还要过一遍杀软扫描）。
     # 'directory' 只在输出目录放一份 plotly.min.js，各图表引用它，依然可离线打开
     fig.write_html(filepath, include_plotlyjs=PLOTLY_JS_MODE,
-                   full_html=True, auto_open=False)
+                   full_html=True, auto_open=False, config={'responsive': True})
+    # Plotly 默认不写 viewport meta，手机打开会按桌面宽度渲染再整体缩小；补一行
+    with open(filepath, 'r', encoding='utf-8') as f:
+        _html = f.read()
+    if 'name="viewport"' not in _html:
+        _html = _html.replace(
+            '<head>',
+            '<head>\n    <meta name="viewport" content="width=device-width, initial-scale=1">',
+            1
+        )
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(_html)
     print(f"✅ 成功生成图表: {filepath}")
 
 # ----------------------------- 5.5 板块股票池：读取 / 勾选 / 去重 -----------------------------

@@ -1039,9 +1039,9 @@ def _summary_bar_html(rows):
 
 
 def _filter_bar_html(rows):
-    """分类按钮（板块类别：行业 / 概念 / 宽基…）+ 具体板块下拉。
-    基金版是「持有 / 板块 / 自选」三个固定按钮，个股版改成按板块类别动态生成，
-    一只票横跨多个类别时，几个分类都能筛到它。"""
+    """具体板块下拉筛选（比如 A股宽基 / 港股宽基 / 美股宽基 / 外盘宽基）。
+    BROAD_INDEX_ONLY 模式下所有标的都是「宽基」这一个类别，类别切换按钮没有意义，
+    只保留板块下拉。"""
     cats, cat2boards = [], {}
     for r in rows:
         for b, c in r['bpairs']:
@@ -1049,13 +1049,6 @@ def _filter_bar_html(rows):
                 cats.append(c)
             if b:
                 cat2boards.setdefault(c, set()).add(b)
-    order = {'行业': 0, '概念': 1, '宽基': 2}
-    cats.sort(key=lambda c: (order.get(c, 9), c))
-
-    btns = '<button class="type-btn active" data-cat="__ALL__">全部</button>'
-    for c in cats:
-        n = sum(1 for r in rows if c in r['cats'])
-        btns += f'<button class="type-btn" data-cat="{_esc(c)}">{_esc(c)}（{n}）</button>'
 
     opts = '<option value="">全部板块</option>'
     for c in cats:
@@ -1070,9 +1063,7 @@ def _filter_bar_html(rows):
 
     return (
         '<div class="btn-group filter-row">'
-        '<span style="margin-right:10px; color:#aaa;">分类：</span>'
-        f'{btns}'
-        '<span style="margin:0 8px 0 18px; color:#aaa;">板块：</span>'
+        '<span style="margin-right:10px; color:#aaa;">板块：</span>'
         f'<select id="board-select" class="board-select">{opts}</select>'
         '</div>'
     )
@@ -1408,6 +1399,7 @@ def build_matrix_17(rows, out_path):
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>个股近{SHOW_HIST_DAYS}日八大指标交互式矩阵</title>
     <style>{MATRIX_CSS}</style>
 </head>
@@ -1567,6 +1559,7 @@ def build_matrix_19(rows, out_path):
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>个股过热评分矩阵 + T+1 情景模拟</title>
     <style>{MATRIX_CSS}</style>
 </head>
@@ -1676,9 +1669,9 @@ def build_zigzag_18(rows, out_path):
         print("⚠️ 没有可用于波段看板的标的，已跳过")
         return
 
-    # 顶部「类型」下拉：全部 → 板块类别（行业/概念/宽基）→ 具体板块。
-    # 基金版是 持有/板块/自选，个股版换成板块与概念，一只票横跨多个板块时几处都能选到。
-    order = {'行业': 0, '概念': 1, '宽基': 2}
+    # 顶部「板块」下拉：全部 → 具体板块（比如 A股宽基/港股宽基/美股宽基/外盘宽基）。
+    # BROAD_INDEX_ONLY 模式下类别永远只有"宽基"一种，类别级选项和"全部"完全重复，
+    # 所以这里只保留"全部" + 具体板块两级，不再单独列类别。
     cats, cat_boards = [], {}
     for r in items:
         for b, c in r['bpairs']:
@@ -1686,20 +1679,17 @@ def build_zigzag_18(rows, out_path):
                 cats.append(c)
             if b:
                 cat_boards.setdefault(c, set()).add(b)
-    cats.sort(key=lambda c: (order.get(c, 9), c))
 
     def keys_of(pred):
         picked = [r for r in items if pred(r)]
         picked.sort(key=lambda r: r['heat'].get('score', 0), reverse=True)
         return [r['zz']['key'] for r in picked]
 
-    all_types = ['全部'] + cats
+    all_types = ['全部']
     type_funds = {'全部': keys_of(lambda r: True)}
     for c in cats:
-        type_funds[c] = keys_of(lambda r, c=c: c in r['cats'])
-    for c in cats:
         for b in sorted(cat_boards.get(c, [])):
-            label = f"{c}·{b}"
+            label = b if len(cats) <= 1 else f"{c}·{b}"
             type_funds[label] = keys_of(lambda r, b=b: b in r['boards'])
             all_types.append(label)
 
