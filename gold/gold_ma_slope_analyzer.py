@@ -149,8 +149,19 @@ def plot_ma_and_slopes_html(df, windows=[5, 20, 30, 60], num_days=252, output_fi
     fig.update_xaxes(title_text="日期", tickformat="%Y-%m-%d", hoverformat="%Y-%m-%d",
                       gridcolor="#333333", row=2, col=1)
     
-    # 保存为 HTML 文件
-    fig.write_html(output_filename)
+    # 保存为 HTML 文件（config 加 responsive，让图表随窗口/手机屏幕宽度自适应）
+    fig.write_html(output_filename, config={'responsive': True})
+    # Plotly 默认不写 viewport meta，手机打开会按桌面宽度渲染再整体缩小；补一行就好
+    with open(output_filename, 'r', encoding='utf-8') as f:
+        html = f.read()
+    if 'name="viewport"' not in html:
+        html = html.replace(
+            '<head>',
+            '<head>\n    <meta name="viewport" content="width=device-width, initial-scale=1">',
+            1
+        )
+        with open(output_filename, 'w', encoding='utf-8') as f:
+            f.write(html)
     print(f"交互式图表已成功生成: {os.path.abspath(output_filename)}")
     
     # 自动在浏览器中打开（若需可取消注释）
