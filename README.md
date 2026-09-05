@@ -90,6 +90,11 @@ cd ../stocks && python stock_analysis_suite.py
 - `funds/fetch_fund_nav.py` 走的是场外/联接基金的净值接口，`funds_universe_example.csv`
   里如果混了场内 ETF 代码，个别可能抓不到净值（脚本会打印失败列表并跳过，不影响其余基金）。
 
-## License
+## 许可证与致谢
 
-MIT（如果你想换成别的协议，在这里改）
+### License
+本项目采用 [MIT License](LICENSE) 开源协议。
+
+### 致谢与声明
+- **数据支持**：本项目底层数据抓取依赖于优秀的开源项目 [AKShare](https://github.com/akfamily/akshare)，在此对开源社区及维护者们表示诚挚的感谢！
+- **免责声明**：本项目所有输出的看板、评分、策略与回测结果仅供个人量化学习与技术交流之用，不构成任何投资建议。投资者据此操作，风险自负。
