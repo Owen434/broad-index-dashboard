@@ -10,7 +10,7 @@ on:
 # 导致最后 push 的时候 "non-fast-forward" 报错
 concurrency:
   group: daily-update
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -63,11 +63,12 @@ jobs:
           ls -la docs/
 
       - name: Sync with remote before committing
-        # 如果这段时间仓库被别的提交改过（比如手动 push 了代码），先合并一下，
-        # 避免下一步提交时因为分支落后于远端而被拒绝
+        # 自动暂存生成的文档，拉取最新代码，然后再将文档应用回来
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
-          git rebase origin/main || git rebase --abort
+          git rebase --autostash origin/main
         continue-on-error: true
 
       - name: Commit and push docs/
