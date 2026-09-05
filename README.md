@@ -18,7 +18,7 @@
 ![黄金](https://img.shields.io/badge/COMEX-黄金-f39c12)
 ![ETF](https://img.shields.io/badge/45只-ETF资金流-16a085)
 
-<img src="docs/screenshots/宽基波段信号量化看板.png" width="720">
+<img src="docs/宽基波段信号量化看板.png" width="720">
 
 </div>
 
