@@ -1,0 +1,62 @@
+name: Daily data update
+
+on:
+  schedule:
+    # 北京时间每天 18:30（收盘后）跑一次，对应 UTC 10:30
+    - cron: '30 10 * * 1-5'
+  workflow_dispatch: {}   # 也可以在 Actions 页面手动点一下立即跑
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run gold slope analyzer
+        working-directory: gold
+        run: python gold_ma_slope_analyzer.py
+        continue-on-error: true   # 单个数据源抽风不该拖垮整条流水线
+
+      - name: Run ETF broad-base dashboard
+        working-directory: etf
+        run: python etf_broadbase_dashboard.py
+        continue-on-error: true
+
+      - name: Run fund indicator scripts
+        working-directory: funds
+        run: |
+          python fund_indicators_matrix.py
+          python fund_score_matrix.py
+          python fund_riskrank_percentile.py
+        continue-on-error: true
+
+      - name: Run stock analysis suite (broad indices only)
+        working-directory: stocks
+        run: python stock_analysis_suite.py
+        continue-on-error: true
+
+      - name: Collect HTML outputs into docs/
+        run: |
+          mkdir -p docs
+          find . -maxdepth 3 -name "*.html" -not -path "./docs/*" -exec cp {} docs/ \;
+          ls -la docs/
+
+      - name: Commit and push docs/
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: 自动更新每日数据看板 [skip ci]"
+          file_pattern: "docs/**"
