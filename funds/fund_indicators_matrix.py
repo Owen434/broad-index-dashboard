@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 基金近六十日八大指标交互式矩阵
-==========================================
-指标口径与 zigzag_signal_analyzer.py 完全一致：
-  1) 净值先做「后复权」（拆分 / 份额折算 / 大比例分红），再计算指标；
-  2) 八大指标、过热评分、状态标签全部直接调用 18 号脚本里的函数，
-     算法只维护一份，两个看板的数值永远不会漂移。
 """
 import os
 import sys
@@ -17,11 +12,6 @@ import numpy as np
 
 warnings.filterwarnings('ignore')
 
-# ==========================================
-# 复用 18 号脚本的指标内核
-# ==========================================
-# 把两个脚本放在同一目录下即可。18 号脚本的主程序写在 __name__ == "__main__" 保护里，
-# 这里 import 它只会拿到函数定义，不会触发它去生成 HTML。
 CORE_FILE_CANDIDATES = [
     'zigzag_signal_analyzer.py',
 ]
@@ -92,20 +82,19 @@ hist_df = hist_df.dropna(subset=['单位净值', '日期'])
 hist_df.sort_values(['基金代码', '日期'], inplace=True)
 
 # ==========================================
-# 按基金计算指标（口径 = 18 号脚本）
+# 按基金计算指标
 # ==========================================
 data_dict = {}      # display_name -> DataFrame (index=日期, columns=指标)
 heat_scores = {}
 dates_set = set()
 
-print(">>> 正在计算各基金八大指标（净值已复权，口径与 18 号脚本一致）...")
+print(">>> 正在计算各基金八大指标...")
 for code, (name, typ) in fund_dict.items():
     df_fund = hist_df[hist_df['基金代码'] == code].copy()
     if df_fund.empty:
         print(f" ⚠️ 未找到基金 {code} - {name} 的历史数据，已跳过")
         continue
 
-    # 与 18 号脚本相同的清洗：同一天只保留最后一条，按日期升序
     df_fund = df_fund.drop_duplicates(subset=['日期'], keep='last').sort_values('日期')
     if len(df_fund) < MIN_ROWS:
         print(f" ⚠️ 基金 {code} 数据不足 {MIN_ROWS} 条，已跳过")
@@ -118,7 +107,6 @@ for code, (name, typ) in fund_dict.items():
     adj_close, split_events = build_adjusted_nav(df_fund, code, name)
     ind = compute_eight_indicators(adj_close)
 
-    # 评分同样走 18 号脚本的函数，保证顶部风险标签与波段信号面板一致
     net_count_s, intensity_s, all_red_s, all_green_s = compute_heat_score_series(ind)
     score_s = calc_score_series(net_count_s, intensity_s)
 

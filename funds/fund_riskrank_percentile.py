@@ -54,9 +54,7 @@ EXPORT_CSV = True
 # 这两个值直接决定 HTML 体积，嫌大就往下调
 SHIP_DAYS = DATE_CHOICES + TREND_DAYS
 
-# ==========================================
-# 复用 18 号脚本的指标内核
-# ==========================================
+
 CORE_FILE_CANDIDATES = [
     'zigzag_signal_analyzer.py',
 ]
@@ -93,11 +91,6 @@ MIN_ROWS = core.MIN_ROWS
 # 状态查找表
 # ==========================================
 def build_status_table():
-    """
-    前端要按评分显示状态徽章，但状态阈值属于 18 号内核的口径，不能在 JS 里
-    重写一遍。做法是以 0.5 分为步长把 get_status_action 的结果全部枚举出来，
-    下发成查找表，前端只查表、不做任何阈值判断。
-    """
     uniq, keys, idx = [], [], []
     for i in range(201):
         st, mn, ac, cl = get_status_action(i / 2.0)
@@ -151,7 +144,7 @@ hist_df.sort_values(['基金代码', '日期'], inplace=True)
 # ==========================================
 # 逐只基金计算完整评分序列
 # ==========================================
-print(">>> 正在计算各基金过热评分序列（净值已复权，口径与 18 号脚本一致）...")
+print(">>> 正在计算各基金过热评分序列...")
 print(f">>> 分位窗口 {LOOKBACK_DAYS} 日 | 可选日期 {DATE_CHOICES} 个 | 走势 {TREND_DAYS} 日")
 
 score_map = {}
@@ -394,7 +387,7 @@ var D = window.__FUND_DATA__;
 var CFG = D.cfg, DATES = D.dates, FUNDS = D.funds;
 FUNDS.forEach(function(f, i) { f.i = i; });
 
-// 状态查表：阈值口径来自 18 号内核，前端只查不判
+
 function statusOf(sc) {
     if (sc === null || sc === undefined || isNaN(sc)) return null;
     return D.statusDefs[D.score2status[Math.round(Math.max(0, Math.min(100, sc)) * 2)]];
