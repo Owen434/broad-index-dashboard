@@ -1,14 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-A股个股分析总控脚本（形态 + 八大指标矩阵 + 波段看板 + 评分矩阵 四合一）
-==========================================================================
-【设计原则】
-1. 指标算法绝重写：八大指标 / 过热评分 / 状态分档 / ZigZag / 图表构建。
-   取数 / 形态识别 / 缺口 / 涨跌停 / 量价 仍然 100% 调用 Price_movement_patterns.py 里的函数。
-2. 基金版按 持有/板块/自选 分类 → 个股版改按 板块类别（行业 / 概念）分类，
-   并额外提供「具体板块」下拉筛选（一只票横跨多个板块时，几个分类都能筛到它）。
-3. 基金版要先做净值复权(build_adjusted_nav)；个股走 akshare 前复权(qfq)接口，
-   本身已是连续可比序列，故跳过复权环节，其余口径完全一致。
+A股宽基分析总控脚本（形态 + 八大指标矩阵 + 波段看板 + 评分矩阵 四合一）
 
 【运行前提】
     price_movement_patterns.py      取数 + 形态内核（不在本仓库里，需自行提供）
@@ -681,7 +673,6 @@ def build_tasks(pool, choice):
 # 5. 单只标的的完整分析（放在进程池里跑）
 # ==========================================================================
 def _relabel_nav_fig(fig):
-    """18 号内核的图是给基金画的，把「净值」字样换成个股口径的「价格」。"""
     for tr in fig.data:
         if getattr(tr, 'name', None):
             tr.name = str(tr.name).replace('单位净值', '收盘价').replace('净值', '价格')
@@ -723,7 +714,6 @@ def analyze_one(args):
             return res
 
         # ---------- ② 八大指标 + 过热评分（口径 = 18 号内核）----------
-        # 个股取的是前复权价，本身连续可比，故不走基金那套 build_adjusted_nav 复权
         close = pd.to_numeric(df['Close'], errors='coerce').dropna()
         close = close[~close.index.duplicated(keep='last')].sort_index()
         if cfg['max_bars'] and len(close) > cfg['max_bars']:
@@ -898,7 +888,6 @@ def write_pattern_excel(all_signals_list, output_directory):
     ovs_src = combined_df[combined_df['归属'] == '国外']
     ovs_df = build_agg(ovs_src, ['日期', '类型', '板块类别', '板块']) if not ovs_src.empty else pd.DataFrame()
 
-    # ---- 市场基准：按去重个股统计全市场等权收益与净广度，供 7.py 剔 beta 用 ----
     uni = (combined_df[combined_df['类型'] == '板块']
            .drop_duplicates(['日期', '归属', '股票代码']))
     mkt = uni.groupby(['日期', '归属']).agg(
@@ -1363,7 +1352,7 @@ def _range_buttons_html(label):
 
 
 # ==========================================================================
-# 9. ② 近六十日八大指标交互式矩阵（原 17 号脚本，分析对象换成个股）
+# 9. ② 近六十日八大指标交互式矩阵
 # ==========================================================================
 def _cell_color(v, red_ge=None, green_le=None):
     if v is None or (isinstance(v, float) and np.isnan(v)):
