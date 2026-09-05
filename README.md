@@ -1,4 +1,4 @@
-# stock-analysis
+# broad-index-dashboard
 
 A股 / 基金 / 黄金 的量化看板脚本集合，输出都是自带交互的单文件 HTML（Plotly），
 每天由 GitHub Actions 自动跑一遍，结果发布在 GitHub Pages，无需本地部署即可直接看效果。
@@ -36,6 +36,21 @@ cd ../funds && python fund_indicators_matrix.py && python fund_score_matrix.py &
 cd ../stocks && python stock_analysis_suite.py
 ```
 
+## 在线看板
+
+Pages 开启后（见下面第 5 步），链接固定是这几个（首次 Actions 成功运行前会 404）：
+
+| 看板 | 链接 |
+|---|---|
+| 宽基指数 · 八大指标矩阵 | https://owen434.github.io/broad-index-dashboard/stock_8indicators_matrix.html |
+| 宽基指数 · ZigZag波段看板 | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
+| 宽基指数 · 评分矩阵 | https://owen434.github.io/broad-index-dashboard/stock_scorematrix.html |
+| 板块基金 · 八大指标矩阵 | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
+| 板块基金 · 评分矩阵 | https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
+| 板块基金 · 风险排名百分位 | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
+| 45只宽基ETF · 申赎资金流看板 | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
+| 黄金多周期均线与斜率 | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
+
 ## 部署到 GitHub（从零开始，每一步都写清楚点哪里）
 
 有两种把代码传上去的方式，**选一种就行**：
@@ -48,7 +63,7 @@ cd ../stocks && python stock_analysis_suite.py
 ### 第 1 步：在 GitHub 上新建一个空仓库
 
 1. 浏览器打开 github.com，登录后点右上角 **+** → **New repository**
-2. `Repository name` 填 `stock-analysis`（或你喜欢的名字）
+2. `Repository name` 填 `broad-index-dashboard`
 3. 选 **Public**（要开源必须是 Public，Pages 免费版也要求 Public 仓库）
 4. **不要**勾选下面的 "Add a README file"、".gitignore"、"license" 任何一个
 5. 点 **Create repository**
@@ -57,7 +72,7 @@ cd ../stocks && python stock_analysis_suite.py
 
 1. 新建好的空仓库页面上，找到 **uploading an existing file** 这个蓝色链接点进去
    （如果没看到，就在仓库页面点 **Add file** → **Upload files**）
-2. 打开我发你的 zip，解压到桌面随便一个文件夹（比如桌面上的 `stock-analysis` 文件夹），
+2. 打开我发你的 zip，解压到桌面随便一个文件夹（比如桌面上的 `broad-index-dashboard` 文件夹），
    解压后里面应该能直接看到 `stocks/`、`funds/`、`etf/`、`gold/`、`README.md` 这些
 3. 用**文件管理器**（Windows 资源管理器 / Mac Finder）打开这个解压后的文件夹，
    **全选里面所有的文件和文件夹**（`Ctrl+A` 或 `Cmd+A`），
@@ -99,7 +114,7 @@ git init
 git add .
 git commit -m "init: 开源版量化看板"
 git branch -M main
-git remote add origin https://github.com/<你的用户名>/<仓库名>.git
+git remote add origin https://github.com/Owen434/broad-index-dashboard.git
 git push -u origin main
 ```
 `git push` 会弹出登录框：Username 填 GitHub 用户名，Password 粘贴上面那串 `ghp_...` 令牌
@@ -137,7 +152,7 @@ git push -u origin main
 3. **Branch** 选 `main`，右边目录下拉选 **/docs**
 4. 点 **Save**
 5. 页面顶部会出现一行提示，等 1~2 分钟后刷新，会显示一个链接，格式是
-   `https://<你的用户名>.github.io/<仓库名>/`
+   `https://Owen434.github.io/broad-index-dashboard/`
 
 **注意顺序**：一定要等第 4 步 Actions 至少成功跑完一次（这样 `docs/` 目录里才有真正的 HTML，
 而不是只有一个空的 `index.html`），否则打开链接点进去的图表链接会 404。
