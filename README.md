@@ -80,7 +80,7 @@ cd ../stocks && python stock_analysis_suite.py
 ![基金风险排名与历史分位](docs/基金风险排名与历史分位.png)
 
 ### 个股评分矩阵
-![个股评分矩阵](docs/个股评分矩阵.png)
+![宽基评分矩阵](docs/宽基评分矩阵.png)
 
 ## 已知限制
 
