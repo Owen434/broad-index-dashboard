@@ -12,7 +12,7 @@
      每个模拟单元格同时给出相对当日评分的变化（如 +6分），
      用来回答「明天再涨 2% 会不会冲进高风险区」这类问题。
 
-指标与评分口径依旧 100% 调用 18_zigzag_signal_analyzer.py 的函数，绝不重写。
+指标与评分口径依旧 100% 调用 zigzag_signal_analyzer.py 的函数，绝不重写。
 """
 import os
 import sys
@@ -36,8 +36,7 @@ CELL_SHOW_INDICATOR_TIP = True   # 单元格是否附带八大指标 hover 提�
 # 复用 18 号脚本的指标内核
 # ==========================================
 CORE_FILE_CANDIDATES = [
-    '18_zigzag_signal_analyzer.py',
-    '18.zigzag_signal_analyzer.py',
+    'zigzag_signal_analyzer.py',
 ]
 
 

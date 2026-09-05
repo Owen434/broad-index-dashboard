@@ -20,7 +20,7 @@ v3 相对 v1 的改动：
 
 为支撑 2)、3)，Python 端不再算死一份排名，而是下发一个紧凑的评分矩阵，
 排名与统计在浏览器端实时重算。评分与指标口径仍 100% 调用
-18_zigzag_signal_analyzer.py 的函数，绝不重写。
+zigzag_signal_analyzer.py 的函数，绝不重写。
 """
 import os
 import sys
@@ -46,8 +46,8 @@ HOT_THRESHOLD = 70       # 「连续偏热」的评分阈值
 COLD_THRESHOLD = 30      # 「连续偏冷」的评分阈值
 MIN_PCT_SAMPLES = 30     # 算分位所需的最少样本，不足则显示 --
 
-OUTPUT_HTML = '20.Fund_RiskRank_Percentile.html'
-OUTPUT_CSV = '20.Fund_RiskRank_Percentile.csv'
+OUTPUT_HTML = 'fund_riskrank_percentile.html'
+OUTPUT_CSV = 'fund_riskrank_percentile.csv'
 EXPORT_CSV = True
 
 # 下发到前端的交易日数 = 可选日期数 + 走势回溯长度
@@ -58,8 +58,7 @@ SHIP_DAYS = DATE_CHOICES + TREND_DAYS
 # 复用 18 号脚本的指标内核
 # ==========================================
 CORE_FILE_CANDIDATES = [
-    '18_zigzag_signal_analyzer.py',
-    '18.zigzag_signal_analyzer.py',
+    'zigzag_signal_analyzer.py',
 ]
 
 

@@ -2,7 +2,7 @@
 """
 基金近六十日八大指标交互式矩阵
 ==========================================
-指标口径与 18_zigzag_signal_analyzer.py 完全一致：
+指标口径与 zigzag_signal_analyzer.py 完全一致：
   1) 净值先做「后复权」（拆分 / 份额折算 / 大比例分红），再计算指标；
   2) 八大指标、过热评分、状态标签全部直接调用 18 号脚本里的函数，
      算法只维护一份，两个看板的数值永远不会漂移。
@@ -23,8 +23,7 @@ warnings.filterwarnings('ignore')
 # 把两个脚本放在同一目录下即可。18 号脚本的主程序写在 __name__ == "__main__" 保护里，
 # 这里 import 它只会拿到函数定义，不会触发它去生成 HTML。
 CORE_FILE_CANDIDATES = [
-    '18_zigzag_signal_analyzer.py',
-    '18.zigzag_signal_analyzer.py',
+    'zigzag_signal_analyzer.py',
 ]
 
 
