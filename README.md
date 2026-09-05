@@ -30,19 +30,18 @@ docs/     示例 HTML 输出（GitHub Actions 每个交易日自动重新生成�
 
 ## 看板一览
 
-**① 宽基指数**（含 ETF 资金流）
-- 八大指标矩阵
-- ZigZag 波段看板
-- 评分矩阵
-- 45只宽基ETF资金流看板
+| 分类 | 看板 | 链接 |
+|---|---|---|
+| **① 宽基指数**（含 ETF 资金流） | 八大指标矩阵 | https://owen434.github.io/broad-index-dashboard/stock_8indicators_matrix.html |
+| | ZigZag 波段看板 | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
+| | 评分矩阵 | https://owen434.github.io/broad-index-dashboard/stock_scorematrix.html |
+| | 45只宽基ETF资金流看板 | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
+| **② 板块基金** | 八大指标矩阵 | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
+| | 评分矩阵 | https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
+| | 风险排名百分位 | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
+| **③ 黄金** | 多周期均线与斜率 | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
 
-**② 板块基金**
-- 八大指标矩阵
-- 评分矩阵
-- 风险排名百分位
-
-**③ 黄金**
-- COMEX黄金多周期均线与斜率
+（链接对应 `docs/` 目录下 GitHub Actions 每个交易日自动重新生成的 HTML，首次运行前打开会 404。）
 
 ## 关于示例数据
 
