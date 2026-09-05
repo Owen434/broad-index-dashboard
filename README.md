@@ -72,6 +72,9 @@ cd ../stocks && python stock_analysis_suite.py
 多数看板右上角自带"📷 保存截图"按钮，直接点一下就能导出。）
 ![个股波段信号量化看板](docs/个股波段信号量化看板.png)
 ![ETF资金流向](docs/ETF资金流向.png)
+![基金风险排名与历史分位](docs/基金风险排名与历史分位.png)
+![个股评分矩阵](docs/个股评分矩阵.png)
+
 
 ## 已知限制
 
