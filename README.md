@@ -32,7 +32,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | 分类 | 看板 | 预览 | 在线链接 |
 |---|---|---|---|
 | **① 宽基指数**（含 ETF 资金流） | 八大指标矩阵 | *（截图待补）* | https://owen434.github.io/broad-index-dashboard/stock_8indicators_matrix.html |
-| | ZigZag 波段看板 | <img src="docs/screenshots/宽基波段信号量化看板.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
+| | ZigZag 波段看板 | <img src="docs/宽基波段信号量化看板.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
 | | 评分矩阵 | <img src="docs/screenshots/宽基风险评分矩阵.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_scorematrix.html |
 | | 45只宽基ETF资金流看板 | <img src="docs/screenshots/ETF资金流向.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
 | **② 板块基金** | 八大指标矩阵 | *（截图待补）* | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
