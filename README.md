@@ -1,23 +1,45 @@
-# broad-index-dashboard
+<div align="center">
+
+# 📊 broad-index-dashboard
+
+**A股宽基指数 / 板块基金 / 黄金 的量化分析工具集**
+
+每个脚本产出一份自带交互的单文件 HTML（Plotly 渲染），双击打开就能用，
+不需要装浏览器插件，也不用起本地服务器——每个交易日凌晨还会自动重新生成一份最新的。
+
+[![Daily data update](https://github.com/Owen434/broad-index-dashboard/actions/workflows/daily-update.yml/badge.svg)](https://github.com/Owen434/broad-index-dashboard/actions/workflows/daily-update.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](requirements.txt)
+[![Powered by AKShare](https://img.shields.io/badge/data-AKShare-orange.svg)](https://akshare.akfamily.xyz/)
+[![Powered by Plotly](https://img.shields.io/badge/charts-Plotly-3f4f75.svg)](https://plotly.com/python/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](#license)
+
+![A股](https://img.shields.io/badge/A股-宽基指数-c0392b)
+![板块基金](https://img.shields.io/badge/板块-基金-2980b9)
+![黄金](https://img.shields.io/badge/COMEX-黄金-f39c12)
+![ETF](https://img.shields.io/badge/45只-ETF资金流-16a085)
+
+<img src="docs/screenshots/宽基波段信号量化看板.png" width="720">
+
+</div>
 
 ## 目录
 
-- [项目特点](#项目特点)
-- [目录结构](#目录结构)
-- [看板一览](#看板一览)
-- [关于示例数据](#关于示例数据)
-- [本地运行](#本地运行)
-- [已知限制](#已知限制)
+- 🎯 [项目特点](#项目特点)
+- 📁 [目录结构](#目录结构)
+- 📋 [看板一览](#看板一览)
+- 📌 [关于示例数据](#关于示例数据)
+- ▶️ [本地运行](#本地运行)
+- ⚠️ [已知限制](#已知限制)
 
 ## 项目特点
 
-| | |
-|---|---|
-| 🎯 **只看宽基，不追热点个股** | 分析对象限定在沪深300、上证50、纳斯达克这类宽基指数和板块类 ETF/基金，一次性看清市场整体状态，不需要盯着几千只个股。 |
-| 📐 **指标算法统一口径** | MACD / RSI / BIAS / KDJ / CCI / SAR / BOLL / BW% 八大指标 + ZigZag 波浪辨识 + 过热评分，所有脚本共用同一套内核（`zigzag_signal_analyzer.py`），换脚本看数据口径不会变。 |
-| 🖱️ **交互式而不是静态图** | K线形态、指标矩阵、评分看板都能缩放、切换时间范围、导出截图，不是一张扁平的 PNG。 |
-| 📦 **单文件 HTML，离线可开** | Plotly.js 按需内嵌或走本地目录引用，生成的 HTML 拷走就能用，不依赖联网。 |
-| 🔄 **每日自动更新** | GitHub Actions 定时跑一遍，最新数据自动发布到本仓库的 GitHub Pages，不用自己维护服务器。 |
+<table>
+<tr><td width="220">🎯 <b>只看宽基，不追热点个股</b></td><td>分析对象限定在沪深300、上证50、纳斯达克这类宽基指数和板块类 ETF/基金，一次性看清市场整体状态，不需要盯着几千只个股。</td></tr>
+<tr><td>📐 <b>指标算法统一口径</b></td><td>MACD / RSI / BIAS / KDJ / CCI / SAR / BOLL / BW% 八大指标 + ZigZag 波浪辨识 + 过热评分，所有脚本共用同一套内核（<code>zigzag_signal_analyzer.py</code>），换脚本看数据口径不会变。</td></tr>
+<tr><td>🖱️ <b>交互式而不是静态图</b></td><td>K线形态、指标矩阵、评分看板都能缩放、切换时间范围、导出截图，不是一张扁平的 PNG。</td></tr>
+<tr><td>📦 <b>单文件 HTML，离线可开</b></td><td>Plotly.js 按需内嵌或走本地目录引用，生成的 HTML 拷走就能用，不依赖联网。</td></tr>
+<tr><td>🔄 <b>每日自动更新</b></td><td>GitHub Actions 定时跑一遍，最新数据自动发布到本仓库的 GitHub Pages，不用自己维护服务器。</td></tr>
+</table>
 
 ## 目录结构
 
