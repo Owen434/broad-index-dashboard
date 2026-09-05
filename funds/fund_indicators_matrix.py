@@ -83,7 +83,7 @@ for _, row in target_df.iterrows():
 # ==========================================
 # 读取历史净值
 # ==========================================
-hist_df = load_csv_smart("1.基金历史净值.csv")
+hist_df = load_csv_smart("fund_nav_history.csv")
 hist_df.columns = hist_df.columns.str.strip()
 hist_df['基金代码'] = hist_df['基金代码'].astype(str).str.split('.').str[0].str.strip().str.zfill(6)
 hist_df['单位净值'] = pd.to_numeric(hist_df['单位净值'].astype(str).str.replace(',', ''), errors='coerce')
@@ -226,12 +226,28 @@ for code, (name, typ) in fund_dict.items():
     display_name = f"{name}({code})" 
     name_to_type[display_name] = typ
 
+# -------------------- 类型筛选按钮：按 CSV 里「类型」列实际出现的值动态生成 --------------------
+# 不再写死"板块"，"持有"/"自选"/或任何自定义标签都会自动出现一个对应按钮。
+def _esc_attr(s):
+    return str(s).replace('"', '&quot;')
+
+_type_counts = {}
+for name in index_names:
+    t = name_to_type.get(name, '未分类')
+    _type_counts[t] = _type_counts.get(t, 0) + 1
+
+type_buttons_html = '<button class="type-btn active" data-type="__ALL__">全部</button>'
+for t in sorted(_type_counts):
+    type_buttons_html += (f'<button class="type-btn" data-type="{_esc_attr(t)}">'
+                          f'{t}（{_type_counts[t]}）</button>')
+
 # -------------------- 生成HTML（交互部分与原代码完全一致，仅修改区域->类型） --------------------
 html_content = f"""
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>基金近六十日六大指标交互式矩阵</title>
     <style>
         body {{
@@ -434,11 +450,10 @@ html_content = f"""
 
     {summary_bar_html}
 
-    <!-- 类型切换按钮 -->
+    <!-- 类型切换按钮：按 CSV 里实际出现的「类型」值动态生成 -->
     <div class="btn-group">
         <span style="margin-right:10px; color:#aaa;">类型：</span>
-        <button id="btn-all" class="active">全部</button>
-        <button id="btn-sector">板块</button>
+        {type_buttons_html}
     </div>
 
     <!-- 时间范围切换按钮（控制显示最近多少个交易日的列） -->
@@ -482,8 +497,8 @@ html_content += "</tr></thead><tbody>"
 for name in index_names:
     df_ind = data_dict[name]
     typ = name_to_type.get(name, '')
-    # 类型映射为class：目前公开版只保留「板块」一类，其余自定义类型归入 sector 之外的通用样式
-    type_class = "sector" if typ == "板块" else ""
+    # data-type 直接用 CSV 里的真实类型值（"板块"、"持有"或任何自定义标签都行）
+    type_class = typ
 
     hs = heat_scores.get(name, {})
     row_status = hs.get('status', '⚪ 无数据')
@@ -492,7 +507,7 @@ for name in index_names:
     row_score = hs.get('score', 0)
 
     html_content += (
-        f'<tr data-type="{type_class}" data-status="{row_slug}">'
+        f'<tr data-type="{_esc_attr(type_class)}" data-status="{row_slug}">'
         f'<td class="index-name-td">'
         f'<div class="fund-name">{name}</div>'
         f'<div class="risk-badge" style="color:{row_color};border-color:{row_color};">'
@@ -566,9 +581,8 @@ html_content += """
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ---- 类型切换 ----
-    const btnAll = document.getElementById('btn-all');
-    const btnSector = document.getElementById('btn-sector');
+    // ---- 类型切换（按钮是动态生成的，数量不固定）----
+    const typeBtns = document.querySelectorAll('.type-btn');
     const rows = document.querySelectorAll('tr[data-type]');
 
     // ---- 顶部风险汇总条联动 ----
@@ -596,26 +610,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setType(type) {
         rows.forEach(row => {
-            if (type === 'all') {
-                row.classList.remove('hidden');
-            } else {
-                if (row.dataset.type === type) {
-                    row.classList.remove('hidden');
-                } else {
-                    row.classList.add('hidden');
-                }
-            }
+            row.classList.toggle('hidden', type !== '__ALL__' && row.dataset.type !== type);
         });
         // 更新按钮激活样式
-        [btnAll, btnSector].forEach(btn => btn.classList.remove('active'));
-        if (type === 'all') btnAll.classList.add('active');
-        else if (type === 'sector') btnSector.classList.add('active');
+        typeBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.type === type));
         // 联动更新顶部风险汇总条
         updateSummary();
     }
 
-    btnAll.addEventListener('click', function() { setType('all'); });
-    btnSector.addEventListener('click', function() { setType('sector'); });
+    typeBtns.forEach(btn => btn.addEventListener('click', function() { setType(this.dataset.type); }));
 
     // 初始加载时也统计一次（默认是"全部"，与后端渲染的初始值一致，但保证逻辑统一）
     updateSummary();

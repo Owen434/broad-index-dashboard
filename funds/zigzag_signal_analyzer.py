@@ -1347,10 +1347,10 @@ def load_csv_smart(file_path):
 # ==========================================
 if __name__ == "__main__":
     target_file = "funds_universe_example.csv"
-    nav_file = "1.基金历史净值.csv"
+    nav_file = "fund_nav_history.csv"
 
     if not os.path.exists(target_file) or not os.path.exists(nav_file):
-        print("错误：缺失 funds_universe_example.csv 或 1.基金历史净值.csv 文件！")
+        print("错误：缺失 funds_universe_example.csv 或 fund_nav_history.csv 文件！")
         raise SystemExit(0)
 
     target_df = load_csv_smart(target_file)

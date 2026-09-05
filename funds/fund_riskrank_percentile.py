@@ -140,7 +140,7 @@ for _, row in target_df.iterrows():
 # ==========================================
 # 读取历史净值
 # ==========================================
-hist_df = load_csv_smart("1.基金历史净值.csv")
+hist_df = load_csv_smart("fund_nav_history.csv")
 hist_df.columns = hist_df.columns.str.strip()
 hist_df['基金代码'] = hist_df['基金代码'].astype(str).str.split('.').str[0].str.strip().str.zfill(6)
 hist_df['单位净值'] = pd.to_numeric(hist_df['单位净值'].astype(str).str.replace(',', ''), errors='coerce')

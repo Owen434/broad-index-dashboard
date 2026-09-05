@@ -178,7 +178,7 @@ for _, row in target_df.iterrows():
 # ==========================================
 # 读取历史净值
 # ==========================================
-hist_df = load_csv_smart("1.基金历史净值.csv")
+hist_df = load_csv_smart("fund_nav_history.csv")
 hist_df.columns = hist_df.columns.str.strip()
 hist_df['基金代码'] = hist_df['基金代码'].astype(str).str.split('.').str[0].str.strip().str.zfill(6)
 hist_df['单位净值'] = pd.to_numeric(hist_df['单位净值'].astype(str).str.replace(',', ''), errors='coerce')
@@ -340,6 +340,22 @@ for code, (name, typ) in fund_dict.items():
     name_to_type[display_name] = typ
 
 
+def _esc_attr(s):
+    return str(s).replace('"', '&quot;')
+
+
+# 类型筛选按钮：按 CSV 里「类型」列实际出现的值动态生成，不写死"板块"
+_type_counts = {}
+for _name in index_names:
+    _t = name_to_type.get(_name, '未分类')
+    _type_counts[_t] = _type_counts.get(_t, 0) + 1
+
+type_buttons_html = '<button class="type-btn active" data-type="__ALL__">全部</button>'
+for _t in sorted(_type_counts):
+    type_buttons_html += (f'<button class="type-btn" data-type="{_esc_attr(_t)}">'
+                          f'{_t}（{_type_counts[_t]}）</button>')
+
+
 def render_badge(status, color, score, delta=None, tip='', extra_class=''):
     """统一的评分徽章渲染：🟡 偏热 · 69分 （+6）"""
     bg = _hex_to_rgba(color, 0.14)
@@ -373,6 +389,7 @@ html_content = f"""
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>基金过热评分矩阵 + T+1 情景模拟</title>
     <style>
         body {{
@@ -563,11 +580,10 @@ html_content = f"""
 
     {summary_bar_html}
 
-    <!-- 类型切换按钮 -->
+    <!-- 类型切换按钮：按 CSV 里实际出现的「类型」值动态生成 -->
     <div class="btn-group">
         <span style="margin-right:10px; color:#aaa;">类型：</span>
-        <button id="btn-all" class="active">全部</button>
-        <button id="btn-sector">板块</button>
+        {type_buttons_html}
     </div>
 
     <!-- 时间范围切换按钮（只作用于历史列） -->
@@ -620,7 +636,7 @@ html_content += "</tr></thead><tbody>"
 for name in index_names:
     df_ind = data_dict[name]
     typ = name_to_type.get(name, '')
-    type_class = "sector" if typ == "板块" else ""
+    type_class = typ  # data-type 直接用 CSV 里的真实类型值
 
     hs = heat_scores.get(name, {})
     row_status = hs.get('status', '⚪ 无数据')
@@ -630,7 +646,7 @@ for name in index_names:
     row_action = str(hs.get('action', '')).replace('"', "'")
 
     html_content += (
-        f'<tr data-type="{type_class}" data-status="{row_slug}">'
+        f'<tr data-type="{_esc_attr(type_class)}" data-status="{row_slug}">'
         f'<td class="index-name-td">'
         f'<div class="fund-name">{name}</div>'
         f'<div class="risk-badge" style="color:{row_color};border-color:{row_color};" title="{row_action}">'
@@ -677,9 +693,8 @@ html_content += """
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ---- 类型切换 ----
-    const btnAll = document.getElementById('btn-all');
-    const btnSector = document.getElementById('btn-sector');
+    // ---- 类型切换（按钮是动态生成的，数量不固定）----
+    const typeBtns = document.querySelectorAll('.type-btn');
     const rows = document.querySelectorAll('tr[data-type]');
 
     const summaryItems = document.querySelectorAll('.summary-item');
@@ -706,20 +721,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setType(type) {
         rows.forEach(row => {
-            if (type === 'all') {
-                row.classList.remove('hidden');
-            } else {
-                row.classList.toggle('hidden', row.dataset.type !== type);
-            }
+            row.classList.toggle('hidden', type !== '__ALL__' && row.dataset.type !== type);
         });
-        [btnAll, btnSector].forEach(btn => btn.classList.remove('active'));
-        if (type === 'all') btnAll.classList.add('active');
-        else if (type === 'sector') btnSector.classList.add('active');
+        typeBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.type === type));
         updateSummary();
     }
 
-    btnAll.addEventListener('click', function() { setType('all'); });
-    btnSector.addEventListener('click', function() { setType('sector'); });
+    typeBtns.forEach(btn => btn.addEventListener('click', function() { setType(this.dataset.type); }));
     updateSummary();
 
     // ---- 时间范围切换：只对历史列生效，T+1 模拟列不受影响 ----
