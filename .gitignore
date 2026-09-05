@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.parquet
+stock_charts_output/
+*.xlsx
+.DS_Store
