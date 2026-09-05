@@ -25,23 +25,22 @@ funds/    板块基金指标矩阵 / ZigZag信号 / 评分矩阵 / 风险排名�
           含 zigzag_signal_analyzer.py（指标 + 评分 + 绘图内核，被 stocks/ 复用）
 etf/      45只宽基ETF的申赎资金流看板
 gold/     COMEX黄金多周期均线与斜率分析
-docs/     示例 HTML 输出（GitHub Actions 每个交易日自动重新生成，仅供预览，不建议手动改）
+docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅供预览，不建议手动改）
 ```
 
 ## 看板一览
+| 分类 | 看板 | 预览 | 在线链接 |
+|---|---|---|---|
+| **① 宽基指数**（含 ETF 资金流） | 八大指标矩阵 | *（截图待补）* | https://owen434.github.io/broad-index-dashboard/stock_8indicators_matrix.html |
+| | ZigZag 波段看板 | <img src="docs/screenshots/宽基波段信号量化看板.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
+| | 评分矩阵 | <img src="docs/screenshots/宽基风险评分矩阵.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_scorematrix.html |
+| | 45只宽基ETF资金流看板 | <img src="docs/screenshots/ETF资金流向.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
+| **② 板块基金** | 八大指标矩阵 | *（截图待补）* | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
+| | 评分矩阵 | *（截图待补）* | https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
+| | 风险排名百分位 | <img src="docs/screenshots/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
+| **③ 黄金** | 多周期均线与斜率 | <img src="docs/screenshots/黄金多周期均线及动能斜率分析系统.png" width="360"> | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
 
-| 分类 | 看板 | 链接 |
-|---|---|---|
-| **① 宽基指数**（含 ETF 资金流） | 八大指标矩阵 | https://owen434.github.io/broad-index-dashboard/stock_8indicators_matrix.html |
-| | ZigZag 波段看板 | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
-| | 评分矩阵 | https://owen434.github.io/broad-index-dashboard/stock_scorematrix.html |
-| | 45只宽基ETF资金流看板 | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
-| **② 板块基金** | 八大指标矩阵 | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
-| | 评分矩阵 | https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
-| | 风险排名百分位 | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
-| **③ 黄金** | 多周期均线与斜率 | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
-
-（链接对应 `docs/` 目录下 GitHub Actions 每个交易日自动重新生成的 HTML，首次运行前打开会 404。）
+（链接对应 `docs/` 目录下 GitHub Actions 每个交易日自动重新生成的 HTML，首次运行前打开会 404。
 
 ## 关于示例数据
 
