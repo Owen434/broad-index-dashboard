@@ -2,8 +2,8 @@ name: Daily data update
 
 on:
   schedule:
-    # 北京时间每天 18:30（收盘后）跑一次，对应 UTC 10:30
-    - cron: '30 10 * * 1-5'
+    # 北京时间每天 23:00 跑一次，等场外基金净值基本都公布完了，对应 UTC 15:00
+    - cron: '0 15 * * 1-5'
   workflow_dispatch: {}   # 也可以在 Actions 页面手动点一下立即跑
 
 permissions:
