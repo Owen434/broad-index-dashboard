@@ -2,20 +2,9 @@
 """
 A股个股分析总控脚本（形态 + 八大指标矩阵 + 波段看板 + 评分矩阵 四合一）
 ==========================================================================
-把原来分散在四个脚本里的能力合并成一条流水线，分析对象由「基金」改为「个股」：
-
-    ztjj_board_stocks.csv  ──勾选板块/概念──▶  取数(Price_movement_patterns)
-            │
-            ├─▶ ① K线形态与缺口 HTML + 板块形态统计汇总.xlsx   （原 Price_movement_patterns.py）
-            ├─▶ ② 近60日八大指标交互式矩阵                      （原 17_Fund_6Indicators_Matrix.py）
-            ├─▶ ③ ZigZag 波浪 + 波段信号量化看板                （原 18_zigzag_signal_analyzer.py）
-            └─▶ ④ 过热评分矩阵 + T+1 涨跌情景模拟               （原 19_Fund_ScoreMatrix.py）
-
 【设计原则】
-1. 指标算法绝不重写：八大指标 / 过热评分 / 状态分档 / ZigZag / 图表构建
-   仍然 100% 调用 18_zigzag_signal_analyzer.py 里的函数；
+1. 指标算法绝重写：八大指标 / 过热评分 / 状态分档 / ZigZag / 图表构建。
    取数 / 形态识别 / 缺口 / 涨跌停 / 量价 仍然 100% 调用 Price_movement_patterns.py 里的函数。
-   本脚本只负责「串流程 + 出页面」，阈值改一处全局生效的架构不变。
 2. 基金版按 持有/板块/自选 分类 → 个股版改按 板块类别（行业 / 概念）分类，
    并额外提供「具体板块」下拉筛选（一只票横跨多个板块时，几个分类都能筛到它）。
 3. 基金版要先做净值复权(build_adjusted_nav)；个股走 akshare 前复权(qfq)接口，
@@ -24,8 +13,6 @@ A股个股分析总控脚本（形态 + 八大指标矩阵 + 波段看板 + 评�
 【运行前提】
     price_movement_patterns.py      取数 + 形态内核（不在本仓库里，需自行提供）
     ../funds/zigzag_signal_analyzer.py  指标 + 评分 + 绘图内核（本仓库自带）
-    ztjj_board_stocks.csv           板块成分股，仅在 BROAD_INDEX_ONLY=False 时才需要
-    target_stocks.csv               可选，仅用于并入国外标的
 
 【开源版说明】默认 BROAD_INDEX_ONLY=True：只跑十来个宽基指数，不需要上面两个 CSV，
 输出三份 HTML 只含宽基数据，不含任何个股。想恢复"按板块勾选个股"的完整功能，
@@ -1400,11 +1387,11 @@ def build_matrix_17(rows, out_path):
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>个股近{SHOW_HIST_DAYS}日八大指标交互式矩阵</title>
+    <title>宽基近{SHOW_HIST_DAYS}日八大指标交互式矩阵</title>
     <style>{MATRIX_CSS}</style>
 </head>
 <body>
-    <h2>个股近{SHOW_HIST_DAYS}日核心指标矩阵（MACD, RSI, BIAS, KDJ, CCI, SAR, BOLL, BW%）</h2>
+    <h2>宽基近{SHOW_HIST_DAYS}日核心指标矩阵（MACD, RSI, BIAS, KDJ, CCI, SAR, BOLL, BW%）</h2>
     <div class="subtitle">
         数据源：akshare 前复权日线；指标口径与 18 号波段内核完全一致。
         分类按板块类别（行业 / 概念）划分，一只票横跨多个板块时几个分类都能筛到它。
@@ -1505,7 +1492,7 @@ def build_matrix_17(rows, out_path):
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-var SHOT_NAME = '个股指标矩阵';
+var SHOT_NAME = '宽基指标矩阵';
 document.addEventListener('DOMContentLoaded', function() {
 """ + MATRIX_COMMON_JS + MATRIX_IND_TOGGLE_JS + """
 });
@@ -1515,11 +1502,11 @@ document.addEventListener('DOMContentLoaded', function() {
 """
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html)
-    print(f"✅ 成功生成个股指标矩阵: {out_path}")
+    print(f"✅ 成功生成宽基指标矩阵: {out_path}")
 
 
 # ==========================================================================
-# 10. ④ 过热评分矩阵 + T+1 情景模拟（原 19 号脚本，分析对象换成个股）
+# 10. ④ 过热评分矩阵 + T+1 情景模拟
 # ==========================================================================
 def render_badge(status, color, score, delta=None, tip='', extra_class=''):
     """统一的评分徽章渲染：🟡 偏热 · 69分 （+6）"""
@@ -1560,11 +1547,11 @@ def build_matrix_19(rows, out_path):
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>个股过热评分矩阵 + T+1 情景模拟</title>
+    <title>宽基过热评分矩阵 + T+1 情景模拟</title>
     <style>{MATRIX_CSS}</style>
 </head>
 <body>
-    <h2>个股过热评分矩阵（近{SHOW_HIST_DAYS}日） + 下一交易日涨跌情景模拟</h2>
+    <h2>宽基过热评分矩阵（近{SHOW_HIST_DAYS}日） + 下一交易日涨跌情景模拟</h2>
     <div class="subtitle">
         单元格 = 当日八大指标算出的过热评分与状态；鼠标悬停可看八大指标明细。
         左侧 T+1 列 = 假设下一交易日涨跌该幅度 → 推算收盘价 → 重算指标 → 重算评分，括号内为相对今日评分的变化。
@@ -1646,7 +1633,7 @@ def build_matrix_19(rows, out_path):
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-var SHOT_NAME = '个股评分矩阵';
+var SHOT_NAME = '宽基评分矩阵';
 document.addEventListener('DOMContentLoaded', function() {
 """ + MATRIX_COMMON_JS + MATRIX_SIM_TOGGLE_JS + """
 });
@@ -1656,11 +1643,11 @@ document.addEventListener('DOMContentLoaded', function() {
 """
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html)
-    print(f"✅ 成功生成个股评分矩阵: {out_path}")
+    print(f"✅ 成功生成宽基评分矩阵: {out_path}")
 
 
 # ==========================================================================
-# 11. ③ ZigZag 波浪 + 波段信号量化看板（原 18 号脚本的主程序，改喂个股）
+# 11. ③ ZigZag 波浪 + 波段信号量化看板
 # ==========================================================================
 def build_zigzag_18(rows, out_path):
     C = core()
@@ -1718,7 +1705,7 @@ def build_zigzag_18(rows, out_path):
 
     # 内核模板是给基金写的，这里只改文案，结构与交互一字不动
     html = C.HTML_TEMPLATE
-    html = html.replace('基金波段信号量化看板', '个股波段信号量化看板')
+    html = html.replace('基金波段信号量化看板', '宽基波段信号量化看板')
     html = html.replace('>基金</label>', '>股票</label>')
     html = html.replace('净值走势', '价格走势')
 
@@ -1744,7 +1731,7 @@ def build_zigzag_18(rows, out_path):
 
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html)
-    print(f"✅ 成功生成个股波段信号看板: {out_path}（收录 {len(items)} 只标的）")
+    print(f"✅ 成功生成宽基波段信号看板: {out_path}（收录 {len(items)} 只标的）")
 
 
 # ==========================================================================
