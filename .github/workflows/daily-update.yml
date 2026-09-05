@@ -6,6 +6,12 @@ on:
     - cron: '0 15 * * 1-5'
   workflow_dispatch: {}   # 也可以在 Actions 页面手动点一下立即跑
 
+# 避免手动触发和定时任务同时跑、或者跑的过程中仓库又被别的提交改动，
+# 导致最后 push 的时候 "non-fast-forward" 报错
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -39,6 +45,7 @@ jobs:
       - name: Run fund indicator scripts
         working-directory: funds
         run: |
+          python fetch_fund_nav.py
           python fund_indicators_matrix.py
           python fund_score_matrix.py
           python fund_riskrank_percentile.py
@@ -54,6 +61,14 @@ jobs:
           mkdir -p docs
           find . -maxdepth 3 -name "*.html" -not -path "./docs/*" -exec cp {} docs/ \;
           ls -la docs/
+
+      - name: Sync with remote before committing
+        # 如果这段时间仓库被别的提交改过（比如手动 push 了代码），先合并一下，
+        # 避免下一步提交时因为分支落后于远端而被拒绝
+        run: |
+          git fetch origin main
+          git rebase origin/main || git rebase --abort
+        continue-on-error: true
 
       - name: Commit and push docs/
         uses: stefanzweifel/git-auto-commit-action@v5
