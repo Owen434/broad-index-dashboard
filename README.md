@@ -70,6 +70,7 @@ cd ../stocks && python stock_analysis_suite.py
 （跑完本地脚本后，把生成的 HTML 截图放进 `docs/screenshots/` 目录，然后在这里贴图，
 比如 `![宽基指数矩阵](docs/screenshots/stock_8indicators_matrix.png)`。
 多数看板右上角自带"📷 保存截图"按钮，直接点一下就能导出。）
+`![宽基指数矩阵](docs/个股波段信号量化看板.png)`
 
 ## 已知限制
 
