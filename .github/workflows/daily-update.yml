@@ -3,7 +3,7 @@ name: Daily data update
 on:
   schedule:
     # 北京时间每天 23:00 跑一次，等场外基金净值基本都公布完了，对应 UTC 15:00
-    - cron: '0 15 * * 1-5'
+    - cron: '30 15 * * *'
   workflow_dispatch: {}   # 也可以在 Actions 页面手动点一下立即跑
 
 # 避免手动触发和定时任务同时跑、或者跑的过程中仓库又被别的提交改动，
