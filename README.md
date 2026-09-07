@@ -7,7 +7,7 @@
 每个脚本产出一份自带交互的单文件 HTML（Plotly 渲染），双击打开就能用，
 不需要装浏览器插件，也不用起本地服务器——每个交易日凌晨还会自动重新生成一份最新的。
 
-[![Daily data update](https://github.com/Owen434/broad-index-dashboard/actions/workflows/daily-update.yml/badge.svg)](https://github.com/Owen434/broad-index-dashboard/actions/workflows/daily-update.yml)
+[![Daily data update](https://github.com/Owen434/broad-index-dashboard/actions/workflows/daily-update.yml/badge.svg)](https://github.com/Owen434/broad-index-dashboard/actions/workflows/daily_update.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](requirements.txt)
 [![Powered by AKShare](https://img.shields.io/badge/data-AKShare-orange.svg)](https://akshare.akfamily.xyz/)
 [![Powered by Plotly](https://img.shields.io/badge/charts-Plotly-3f4f75.svg)](https://plotly.com/python/)
