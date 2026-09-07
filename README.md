@@ -18,12 +18,14 @@
 ![黄金](https://img.shields.io/badge/COMEX-黄金-f39c12)
 ![ETF](https://img.shields.io/badge/45只-ETF资金流-16a085)
 
-
+<img src="docs/宽基波段信号量化看板.png" width="720">
 
 </div>
 
 <!-- DAILY_SUMMARY:BEGIN -->
 ## 📅 今日风险速览 · 2025-02-21
+
+<img src="docs/daily_summary.png" width="900">
 
 - **宽基指数**：7 个，最热 上证指数 🟡 偏热（77 分）；高风险及以上 0 个
 - **ETF 资金流**：最拥挤板块 医药医疗（净赎回 -5.06 亿）🟠 高风险，绝对值分位 90%
