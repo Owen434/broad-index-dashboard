@@ -94,4 +94,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: 自动更新每日数据看板 [skip ci]"
-          file_pattern: "docs/**"
+          # README 里的"今日风险速览"那段也是每天重写的, 不加进来就永远停在第一次
+          file_pattern: "docs/** README.md"
