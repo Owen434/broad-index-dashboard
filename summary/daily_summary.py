@@ -94,6 +94,11 @@ RISK_TIERS = [
 ]
 RISK_NONE = ("⚪ 无数据", "#888888", "无数据")
 
+# 从冷到热的六档中文名, 基金分布表按这个顺序开列
+TIER_NAMES = [t[3] for t in RISK_TIERS]
+TIER_LABELS = {t[3]: t[1] for t in RISK_TIERS}
+TIER_COLORS = {t[3]: t[2] for t in RISK_TIERS}
+
 
 def risk_from_score(score) -> tuple[str, str, str]:
     """0~100 分 -> (emoji标签, 颜色, 中文标签)"""
@@ -244,8 +249,41 @@ def build_broad_section(indices: dict[str, dict]) -> list[dict]:
 
 
 # ============================================================ ③ ETF 分板块资金流
+ETF_PCT_WINDOW = 120          # 净申赎分位的滚动窗口(交易日), 与 4 号脚本口径一致
+ETF_PCT_MIN = 40
+
+
+def signed_pct_rank(s: pd.Series, window: int = ETF_PCT_WINDOW,
+                    min_periods: int = ETF_PCT_MIN) -> pd.Series:
+    """当前值在过去 window 个样本里的分位(0~1), 剔除当前值本身。
+
+    刻意用带方向的原值而不是绝对值: 绝对值分位把"大额净申购"和"大额净赎回"
+    压成同一个数, 结果是资金进场(机会)和资金撤退(风险)拿到同一个标签。
+    """
+    def _f(x: np.ndarray) -> float:
+        cur, hist = x[-1], x[:-1]
+        hist = hist[~np.isnan(hist)]
+        if np.isnan(cur) or hist.size == 0:
+            return np.nan
+        return float((hist < cur).mean())
+    return s.rolling(window, min_periods=min_periods).apply(_f, raw=True)
+
+
+def flow_signal(pct):
+    """净申赎分位 -> 资金信号。
+
+    方向和其他板块的红蓝语义保持一致: 红 = 该警惕, 蓝 = 可考虑加仓。
+    分位越高 = 放量净申购 = 资金进场 -> 落在蓝色一侧;
+    分位越低 = 放量净赎回 = 资金撤退 -> 落在红色一侧。
+    所以这里把分位翻转过来再套同一张阈值表。
+    """
+    if pct is None or (isinstance(pct, float) and np.isnan(pct)):
+        return RISK_NONE
+    return risk_from_score((1.0 - float(pct)) * 100.0)
+
+
 def build_etf_section() -> list[dict]:
-    """只取"合并板块"(基金代码以 G: 开头的那些行), 按 |净申赎金额| 的滚动分位定风险。
+    """只取"合并板块"(基金代码以 G: 开头的那些行), 按带方向的净申赎分位定信号。
 
     单只 ETF 的行也在同一个 parquet 里, 这里刻意不看 —— 需求是板块级别的
     资金异动, 单只的拆分/折算噪声在合并口径下已经被平掉一部分。
@@ -271,11 +309,13 @@ def build_etf_section() -> list[dict]:
     rows = []
     for name, sub in g.groupby("分组", sort=False):
         sub = sub.sort_values("日期")
+        # parquet 里现成的是"绝对值分位", 这里按原值重算一份带方向的
+        pct_s = signed_pct_rank(pd.Series(sub["净申赎金额"].values, index=sub["日期"].values))
         cur = sub[sub["日期"] == last]
         amount = cur["净申赎金额"].iloc[0] if len(cur) else np.nan
-        pct = cur["净申赎绝对值分位"].iloc[0] if len(cur) else np.nan
+        pct = pct_s.get(last, np.nan)
         recent = sub.loc[sub["日期"] >= recent_start, "净申赎金额"].sum(min_count=1)
-        label, color, plain = risk_from_pct(pct)
+        label, color, plain = flow_signal(pct)
         rows.append({
             "group": name,
             "amount_yi": None if pd.isna(amount) else float(amount) / YI,
@@ -291,11 +331,19 @@ def build_etf_section() -> list[dict]:
     elif have < len(rows):
         DATA_HEALTH.append(f"ETF: {len(rows) - have}/{len(rows)} 个板块缺份额, 仅价格")
 
+    # 分位从高到低: 放量净申购的排最上, 放量净赎回的沉到最下
     rows.sort(key=lambda r: (-1 if r["pct"] is None else r["pct"]), reverse=True)
     return [{"as_of": last.strftime("%Y-%m-%d"), **r} for r in rows]
 
 
 # ============================================================ ④ 板块基金
+def rank_slots(detail: list[dict], n: int, hottest_first: bool) -> list[dict]:
+    """取评分最高/最低的 n 只, 排名连同名字一起返回, 给"最热/最冷"两行填格子。"""
+    scored = [x for x in detail if x["score"] is not None]
+    scored.sort(key=lambda x: x["score"], reverse=hottest_first)
+    return scored[:n]
+
+
 def build_fund_section() -> tuple[list[dict], list[dict]]:
     """返回 (按类型汇总, 单只基金明细)。只看最新日期的评分。"""
     if not (FUND_NAV.exists() and FUND_UNIVERSE.exists()):
@@ -357,13 +405,13 @@ def build_fund_section() -> tuple[list[dict], list[dict]]:
         valid = sub["score"].dropna()
         avg = float(valid.mean()) if len(valid) else None
         label, color, plain = risk_from_score(avg)
-        hottest = sub.sort_values("score", ascending=False).iloc[0] if len(valid) else None
+        # 六档各有几只 —— 比"过热/超冷两个数"更能看出分布是集中还是两头翘
+        tiers = {t: int((sub["plain"] == t).sum()) for t in TIER_NAMES}
         groups.append({
             "type": kind, "count": int(len(sub)), "scored": int(len(valid)),
+            "date": sub["date"].max(),
             "avg_score": avg, "risk": label, "color": color, "plain": plain,
-            "hot_n": int((sub["score"] >= 80).sum()),
-            "cold_n": int((sub["score"] < 40).sum()),
-            "hottest": None if hottest is None else f"{hottest['name']}({hottest['score']:.0f})",
+            "tiers": tiers,
         })
     groups.sort(key=lambda g: (-1e9 if g["avg_score"] is None else g["avg_score"]), reverse=True)
     detail.sort(key=lambda d: (-1e9 if d["score"] is None else d["score"]), reverse=True)
@@ -643,11 +691,12 @@ def render_png(payload: dict, font_name: str) -> None:
     # ---- ③ ETF 分板块资金流
     etf = d["etf"]
     if etf:
-        c.section("③ ETF 分板块资金流风险 · 仅合并板块",
-                  f"截至 {etf[0]['as_of']} · 风险 = |净申赎金额| 的滚动分位")
+        c.section("③ ETF 分板块资金流信号 · 仅合并板块",
+                  f"截至 {etf[0]['as_of']} · 分位越高=放量净申购(资金进场), "
+                  f"越低=放量净赎回(资金撤退)")
         cols = [("板块", 20, "left"), ("方向", 10, "left"), ("当日净申赎", 15, "right"),
-                (f"近{ETF_RECENT_DAYS}日累计", 15, "right"), ("绝对值分位", 13, "right"),
-                ("风险等级", 27, "left")]
+                (f"近{ETF_RECENT_DAYS}日累计", 15, "right"), ("净申赎分位", 13, "right"),
+                ("资金信号", 27, "left")]
         rows = []
         for r in etf:
             amt = r["amount_yi"]
@@ -665,35 +714,37 @@ def render_png(payload: dict, font_name: str) -> None:
     # ---- ④ 板块基金
     fg, fd = d["fund_groups"], d["fund_detail"]
     if fg:
-        c.section("④ 板块基金风险汇总 · 只看最新日期",
-                  f"共 {sum(g['count'] for g in fg)} 只基金")
-        cols = [("类型", 20, "left"), ("只数", 10, "right"), ("已评分", 10, "right"),
-                ("平均评分", 13, "right"), ("过热/超冷", 15, "right"), ("风险等级", 32, "left")]
-        rows = [[
-            {"text": g["type"], "bold": True},
-            str(g["count"]), str(g["scored"]),
-            {"text": _f(g["avg_score"], ".0f", " 分"), "color": g["color"], "bold": True},
-            f"{g['hot_n']} / {g['cold_n']}",
-            {"text": g["plain"], "badge": True, "color": g["color"]},
-        ] for g in fg]
-        c.table(cols, rows)
+        as_of = max((g["date"] for g in fg if g.get("date")), default="")
+        c.section(f"④ 板块基金风险汇总 · 截至 {as_of}",
+                  f"共 {sum(g['count'] for g in fg)} 只基金 · 后两行按名次排列, "
+                  f"格子位置不代表所在档位")
+        tier_w = (100 - 34) / len(TIER_NAMES)
+        cols = [("类型 / 排行", 20, "left"), ("只数", 7, "right"), ("平均评分", 7, "right")] + [
+            (t, tier_w, "center") for t in TIER_NAMES]
+        rows = []
+        for g in fg:
+            rows.append([
+                {"text": g["type"], "bold": True},
+                str(g["count"]),
+                {"text": _f(g["avg_score"], ".0f"), "color": g["color"], "bold": True},
+            ] + [{"text": str(g["tiers"].get(t, 0)) + " 只",
+                  "color": TIER_COLORS[t] if g["tiers"].get(t) else SUB}
+                 for t in TIER_NAMES])
 
-        top = [x for x in fd if x["score"] is not None][:FUND_TOP_N]
-        if top:
-            c.section("　　最热的几只基金", "按当日过热评分降序")
-            cols = [("基金", 30, "left"), ("代码", 12, "left"), ("类型", 12, "left"),
-                    ("涨跌幅", 12, "right"), ("评分", 10, "right"), ("风险等级", 24, "left")]
-            rows = []
-            for x in top:
-                chg = x["chg"]
-                ccol = "#FF6B6B" if (chg or 0) > 0 else ("#4ADE80" if (chg or 0) < 0 else SUB)
-                rows.append([
-                    {"text": x["name"], "bold": True}, x["code"], x["type"],
-                    {"text": _f(chg, "+.2f", "%"), "color": ccol},
-                    {"text": _f(x["score"], ".0f"), "color": x["color"], "bold": True},
-                    {"text": x["plain"], "badge": True, "color": x["color"]},
-                ])
-            c.table(cols, rows)
+        n = len(TIER_NAMES)
+        for label, hot in (("最热 Top6 名次→", True), ("最冷 Top6 名次→", False)):
+            picks = rank_slots(fd, n, hot)
+            row = [{"text": label, "bold": True}, "--", "--"]
+            for i in range(n):
+                if i < len(picks):
+                    x = picks[i]
+                    # 图上格子窄, 名字截断到 6 个字, 完整名字看 md / json
+                    nm = x["name"] if len(x["name"]) <= 6 else x["name"][:6] + "…"
+                    row.append({"text": f"{nm} {x['score']:.0f}", "color": x["color"]})
+                else:
+                    row.append("--")
+            rows.append(row)
+        c.table(cols, rows)
 
     # ---- ⑤ 黄金
     gold = d["gold"]
@@ -757,9 +808,11 @@ def build_md_lines(d: dict) -> list[str]:
         L.append("")
 
     if d["etf"]:
-        L += [f"## ③ ETF 分板块资金流风险（仅合并板块，截至 {d['etf'][0]['as_of']}）", "",
+        L += [f"## ③ ETF 分板块资金流信号（仅合并板块，截至 {d['etf'][0]['as_of']}）", "",
+              "> 分位为**带方向**的滚动分位：越接近 100% = 放量净申购（资金进场，偏机会），"
+              "越接近 0% = 放量净赎回（资金撤退，偏风险）。", "",
               f"| 板块 | 方向 | 当日净申赎(亿元) | 近{ETF_RECENT_DAYS}日(亿元) | "
-              "绝对值分位 | 风险等级 |", "|---|---|---:|---:|---:|---|"]
+              "净申赎分位 | 资金信号 |", "|---|---|---:|---:|---:|---|"]
         for r in d["etf"]:
             L.append(f"| {r['group']} | {r['direction']} | {_f(r['amount_yi'], '+,.2f')} | "
                      f"{_f(r['recent_yi'], '+,.2f')} | "
@@ -768,14 +821,23 @@ def build_md_lines(d: dict) -> list[str]:
         L.append("")
 
     if d["fund_groups"]:
-        L += ["## ④ 板块基金风险汇总（只看最新日期）", "",
-              "| 类型 | 只数 | 已评分 | 平均评分 | 过热/超冷 | 最热 | 风险等级 |",
-              "|---|---:|---:|---:|---:|---|---|"]
-        for g in d["fund_groups"]:
-            L.append(f"| {g['type']} | {g['count']} | {g['scored']} | "
-                     f"{_f(g['avg_score'], '.0f')} | {g['hot_n']} / {g['cold_n']} | "
-                     f"{g['hottest'] or '--'} | {g['risk']} |")
-        L.append("")
+        fgs, fd = d["fund_groups"], d["fund_detail"]
+        as_of = max((g["date"] for g in fgs if g.get("date")), default="")
+        n = len(TIER_NAMES)
+        L += [f"## ④ 板块基金风险汇总（截至 {as_of}）", "",
+              "| 类型 / 排行 | 只数 | 平均评分 | "
+              + " | ".join(TIER_LABELS[t] for t in TIER_NAMES) + " |",
+              "|---|---:|---:|" + "---:|" * n]
+        for g in fgs:
+            L.append(f"| **{g['type']}** | {g['count']} | {_f(g['avg_score'], '.0f')} | "
+                     + " | ".join(f"{g['tiers'].get(t, 0)} 只" for t in TIER_NAMES) + " |")
+        for label, hot in (("最热 Top6（名次 →）", True), ("最冷 Top6（名次 →）", False)):
+            picks = rank_slots(fd, n, hot)
+            cells = [f"{i + 1}. {x['name']} {x['score']:.0f}" for i, x in enumerate(picks)]
+            cells += ["--"] * (n - len(cells))
+            L.append(f"| **{label}** | -- | -- | " + " | ".join(cells) + " |")
+        L += ["", "> 第一行是六档的只数分布；后两行按名次从左到右排，"
+                  "格子落在哪一列只表示名次，与该列的档位无关。", ""]
 
     if d["gold"]:
         head = next((g for g in d["gold"] if g["window"] == "价格"), None)
@@ -820,13 +882,18 @@ def _headline(d: dict) -> list[str]:
     etf = [r for r in d["etf"] if r["pct"] is not None]
     if etf:
         t = etf[0]
-        out.append(f"- **ETF 资金流**：最拥挤板块 {t['group']}（{t['direction']} "
-                   f"{t['amount_yi']:+,.2f} 亿）{t['risk']}，绝对值分位 {t['pct'] * 100:.0f}%")
+        out.append(f"- **ETF 资金流**：净申赎分位最高 {t['group']}（{t['direction']} "
+                   f"{t['amount_yi']:+,.2f} 亿，分位 {t['pct'] * 100:.0f}%）{t['risk']}；"
+                   f"最低 {etf[-1]['group']}（{etf[-1]['direction']} "
+                   f"{etf[-1]['amount_yi']:+,.2f} 亿，分位 {etf[-1]['pct'] * 100:.0f}%）"
+                   f"{etf[-1]['risk']}")
     fg = [g for g in d["fund_groups"] if g["avg_score"] is not None]
     if fg:
         g = fg[0]
-        out.append(f"- **板块基金**：{g['type']} 平均 {g['avg_score']:.0f} 分 {g['risk']}，"
-                   f"过热 {g['hot_n']} 只 / 超冷 {g['cold_n']} 只")
+        dist = "、".join(f"{TIER_LABELS[t]} {g['tiers'][t]}"
+                        for t in TIER_NAMES if g["tiers"].get(t))
+        out.append(f"- **板块基金**：{g['type']} 平均 {g['avg_score']:.0f} 分 {g['risk']}"
+                   + (f"（{dist}）" if dist else ""))
     gold = next((g for g in d["gold"] if g["window"] == "综合"), None)
     if gold and gold["pct"] is not None:
         out.append(f"- **COMEX 黄金**：四周期斜率均值分位 {gold['pct'] * 100:.0f}% {gold['risk']}")
