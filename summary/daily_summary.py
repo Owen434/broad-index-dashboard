@@ -715,31 +715,31 @@ def render_png(payload: dict, font_name: str) -> None:
     fg, fd = d["fund_groups"], d["fund_detail"]
     if fg:
         as_of = max((g["date"] for g in fg if g.get("date")), default="")
+        gist = " · ".join(
+            f"{g['type']} {g['count']} 只, 平均 {_f(g['avg_score'], '.0f')} 分 {g['plain']}"
+            for g in fg)
         c.section(f"④ 板块基金风险汇总 · 截至 {as_of}",
-                  f"共 {sum(g['count'] for g in fg)} 只基金 · 后两行按名次排列, "
-                  f"格子位置不代表所在档位")
-        tier_w = (100 - 34) / len(TIER_NAMES)
-        cols = [("类型 / 排行", 20, "left"), ("只数", 7, "right"), ("平均评分", 7, "right")] + [
-            (t, tier_w, "center") for t in TIER_NAMES]
+                  f"{gist} · 后两行按名次排列, 格子位置不代表所在档位")
+        # 只数 / 平均评分不占列: 一个类型就一个数, 挤在表里反而把六档压窄了,
+        # 挪到表下面那行说明里
+        tier_w = (100 - 20) / len(TIER_NAMES)
+        cols = [("类型 / 排行", 20, "left")] + [(t, tier_w, "center") for t in TIER_NAMES]
         rows = []
         for g in fg:
-            rows.append([
-                {"text": g["type"], "bold": True},
-                str(g["count"]),
-                {"text": _f(g["avg_score"], ".0f"), "color": g["color"], "bold": True},
-            ] + [{"text": str(g["tiers"].get(t, 0)) + " 只",
-                  "color": TIER_COLORS[t] if g["tiers"].get(t) else SUB}
-                 for t in TIER_NAMES])
+            rows.append([{"text": g["type"], "bold": True}]
+                        + [{"text": str(g["tiers"].get(t, 0)) + " 只",
+                            "color": TIER_COLORS[t] if g["tiers"].get(t) else SUB}
+                           for t in TIER_NAMES])
 
         n = len(TIER_NAMES)
         for label, hot in (("最热 Top6 名次→", True), ("最冷 Top6 名次→", False)):
             picks = rank_slots(fd, n, hot)
-            row = [{"text": label, "bold": True}, "--", "--"]
+            row = [{"text": label, "bold": True}]
             for i in range(n):
                 if i < len(picks):
                     x = picks[i]
                     # 图上格子窄, 名字截断到 6 个字, 完整名字看 md / json
-                    nm = x["name"] if len(x["name"]) <= 6 else x["name"][:6] + "…"
+                    nm = x["name"] if len(x["name"]) <= 7 else x["name"][:7] + "…"
                     row.append({"text": f"{nm} {x['score']:.0f}", "color": x["color"]})
                 else:
                     row.append("--")
@@ -825,18 +825,20 @@ def build_md_lines(d: dict) -> list[str]:
         as_of = max((g["date"] for g in fgs if g.get("date")), default="")
         n = len(TIER_NAMES)
         L += [f"## ④ 板块基金风险汇总（截至 {as_of}）", "",
-              "| 类型 / 排行 | 只数 | 平均评分 | "
-              + " | ".join(TIER_LABELS[t] for t in TIER_NAMES) + " |",
-              "|---|---:|---:|" + "---:|" * n]
+              "| 类型 / 排行 | " + " | ".join(TIER_LABELS[t] for t in TIER_NAMES) + " |",
+              "|---|" + "---:|" * n]
         for g in fgs:
-            L.append(f"| **{g['type']}** | {g['count']} | {_f(g['avg_score'], '.0f')} | "
+            L.append(f"| **{g['type']}** | "
                      + " | ".join(f"{g['tiers'].get(t, 0)} 只" for t in TIER_NAMES) + " |")
         for label, hot in (("最热 Top6（名次 →）", True), ("最冷 Top6（名次 →）", False)):
             picks = rank_slots(fd, n, hot)
             cells = [f"{i + 1}. {x['name']} {x['score']:.0f}" for i, x in enumerate(picks)]
             cells += ["--"] * (n - len(cells))
-            L.append(f"| **{label}** | -- | -- | " + " | ".join(cells) + " |")
-        L += ["", "> 第一行是六档的只数分布；后两行按名次从左到右排，"
+            L.append(f"| **{label}** | " + " | ".join(cells) + " |")
+        gist = "；".join(
+            f"**{g['type']}** 共 {g['count']} 只，平均 {_f(g['avg_score'], '.0f')} 分 {g['risk']}"
+            for g in fgs)
+        L += ["", f"> {gist}。第一行是六档的只数分布；后两行按名次从左到右排，"
                   "格子落在哪一列只表示名次，与该列的档位无关。", ""]
 
     if d["gold"]:
