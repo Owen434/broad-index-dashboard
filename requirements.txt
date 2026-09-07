@@ -4,3 +4,4 @@ numpy
 plotly
 openpyxl
 pyarrow
+matplotlib
