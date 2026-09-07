@@ -59,6 +59,14 @@ FUND_UNIVERSE = DIR_FUNDS / "funds_universe_example.csv"
 OUT_PNG = DIR_DOCS / "daily_summary.png"
 OUT_MD = DIR_DOCS / "daily_summary.md"
 OUT_JSON = DIR_DOCS / "daily_summary.json"
+README = ROOT / "README.md"
+
+# README 里被自动改写的那一段的边界。两行标记之间的内容每天整段替换,
+# 标记之外的手写内容一个字都不动。第一次跑时如果找不到标记, 会自动
+# 插到正文第一个 "## " 标题之前, 并把标记一起写进去。
+MARK_BEGIN = "<!-- DAILY_SUMMARY:BEGIN -->"
+MARK_END = "<!-- DAILY_SUMMARY:END -->"
+INJECT_README = True
 
 # 图片里画几列 T+1 情景。全量 13 列(±6%)横向太宽, 默认只画 ±3%,
 # Markdown / JSON 里仍然是全量。
@@ -723,8 +731,10 @@ def render_png(payload: dict, font_name: str) -> None:
 
 
 # ============================================================ Markdown / JSON
-def render_md(d: dict) -> None:
+def build_md_lines(d: dict) -> list[str]:
     L = [f"# 每日风险汇总 · {d['date']}", "",
+         # 同目录下的相对路径, GitHub 的 blob 页和 Pages 都认
+         f"![每日风险汇总]({OUT_PNG.name})", "",
          "> 风险口径：`🔵 冰点<20 · 🟦 偏冷<40 · 🟢 正常<60 · 🟡 偏热<80 · "
          "🟠 高风险<90 · 🔴 极端风险≥90`，分位数(0~1)乘 100 后套同一张表。", ""]
 
@@ -787,9 +797,91 @@ def render_md(d: dict) -> None:
 
     L += ["---", f"生成时间 {d['generated_at']}　数据源 AKShare。",
           "本页为技术观察，不构成任何投资建议。"]
+    return L
+
+
+def render_md(d: dict) -> list[str]:
+    L = build_md_lines(d)
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
     OUT_MD.write_text("\n".join(L), encoding="utf-8")
     print(f"✅ 文字版: {OUT_MD}")
+    return L
+
+
+def _headline(d: dict) -> list[str]:
+    """四条一句话结论, 给 README 折叠区外面那一层看。"""
+    out = []
+    broad = [r for r in d["broad"] if r["score"] is not None]
+    if broad:
+        top = broad[0]
+        hot = sum(1 for r in broad if r["score"] >= 80)
+        out.append(f"- **宽基指数**：{len(broad)} 个，最热 {top['name']} {top['risk']}"
+                   f"（{top['score']:.0f} 分）；高风险及以上 {hot} 个")
+    etf = [r for r in d["etf"] if r["pct"] is not None]
+    if etf:
+        t = etf[0]
+        out.append(f"- **ETF 资金流**：最拥挤板块 {t['group']}（{t['direction']} "
+                   f"{t['amount_yi']:+,.2f} 亿）{t['risk']}，绝对值分位 {t['pct'] * 100:.0f}%")
+    fg = [g for g in d["fund_groups"] if g["avg_score"] is not None]
+    if fg:
+        g = fg[0]
+        out.append(f"- **板块基金**：{g['type']} 平均 {g['avg_score']:.0f} 分 {g['risk']}，"
+                   f"过热 {g['hot_n']} 只 / 超冷 {g['cold_n']} 只")
+    gold = next((g for g in d["gold"] if g["window"] == "综合"), None)
+    if gold and gold["pct"] is not None:
+        out.append(f"- **COMEX 黄金**：四周期斜率均值分位 {gold['pct'] * 100:.0f}% {gold['risk']}")
+    return out
+
+
+def inject_readme(d: dict, md_lines: list[str]) -> None:
+    """把汇总嵌进 README 的两行标记之间。
+
+    README 里只要正文: 标题 + 四条结论 + 完整表格。图片、免责声明、
+    "自动重写"那类脚注都留在 docs/daily_summary.md 里, 不往 README 搬 ——
+    同一句话在一个页面上出现两遍就是噪音。
+    """
+    if not INJECT_README or not README.exists():
+        return
+
+    drop_prefix = ("# ", "![每日风险汇总]", "生成时间 ", "本页为技术观察")
+    body = []
+    for ln in md_lines:
+        if ln.startswith(drop_prefix):
+            continue
+        if ln.strip() == "---":          # md 末尾那条分隔线连同页脚一起去掉
+            break
+        # 折叠区取消了, 但标题仍降一级, 免得和 README 自己的 ## 抢目录层级
+        body.append("#" + ln if ln.startswith("## ") else ln)
+    while body and not body[0].strip():
+        body.pop(0)
+    while body and not body[-1].strip():
+        body.pop()
+
+    block = [MARK_BEGIN,
+             f"## 📅 今日风险速览 · {d['date']}",
+             "",
+             *_headline(d),
+             "",
+             *body,
+             MARK_END]
+    text = README.read_text(encoding="utf-8")
+    new = "\n".join(block)
+
+    if MARK_BEGIN in text and MARK_END in text:
+        head, _, rest = text.partition(MARK_BEGIN)
+        _, _, tail = rest.partition(MARK_END)
+        text = head + new + tail
+    else:
+        # 第一次跑: 插到正文第一个 "## " 标题之前(也就是居中头图那块之后)
+        idx = text.find("\n## ")
+        if idx < 0:
+            text = text.rstrip() + "\n\n" + new + "\n"
+            print("  [README] 没找到 '## ' 标题, 汇总块追加到文末")
+        else:
+            text = text[:idx + 1] + new + "\n\n" + text[idx + 1:]
+        print("  [README] 首次写入, 已插入 DAILY_SUMMARY 标记")
+    README.write_text(text, encoding="utf-8")
+    print(f"✅ README: {README}")
 
 
 def render_json(d: dict) -> None:
@@ -838,8 +930,9 @@ def main() -> dict:
     }
 
     render_png(payload, font_name)
-    render_md(payload)
+    md_lines = render_md(payload)
     render_json(payload)
+    inject_readme(payload, md_lines)
     if DATA_HEALTH:
         print("\n数据健康度提示:")
         for h in DATA_HEALTH:
