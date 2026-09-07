@@ -826,7 +826,8 @@ def build_md_lines(d: dict) -> list[str]:
         n = len(TIER_NAMES)
         L += [f"## ④ 板块基金风险汇总（截至 {as_of}）", "",
               "| 类型 / 排行 | " + " | ".join(TIER_LABELS[t] for t in TIER_NAMES) + " |",
-              "|---|" + "---:|" * n]
+              # 居中而不是右对齐: 这几列既放"21 只"也放会折行的基金名, 右贴边不好看
+              "|---|" + ":---:|" * n]
         for g in fgs:
             L.append(f"| **{g['type']}** | "
                      + " | ".join(f"{g['tiers'].get(t, 0)} 只" for t in TIER_NAMES) + " |")
