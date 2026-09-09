@@ -1,0 +1,112 @@
+name: Daily data update
+
+on:
+  schedule:
+    # UTC 时间。北京时间 = UTC + 8
+    # 分钟数故意避开 0/15/30,整点是 Actions 排队高峰,容易延迟甚至跳过
+    - cron: '37 0 * * *'    # 北京 08:37,开盘前:覆盖隔夜黄金 / 美股
+    - cron: '7 9 * * *'     # 北京 17:07,收盘后首跑
+    - cron: '23 15 * * *'   # 北京 23:23,夜间复核
+  workflow_dispatch:        # 允许在 GitHub 网页上手动触发
+
+# 避免手动触发和定时任务同时跑、或者跑的过程中仓库又被别的提交改动,
+# 导致最后 push 的时候 "non-fast-forward" 报错
+concurrency:
+  group: daily-update
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 汇总图片里全是中文。runner 默认没有中文字体,matplotlib 会把汉字画成方块。
+      - name: Install CJK fonts
+        run: sudo apt-get update -qq && sudo apt-get install -y fonts-noto-cjk
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # runner 是 UTC,08:37 那一跑在 UTC 下还是前一天,必须显式用上海时区,
+      # 否则同一天三跑会落到两个不同的缓存 key 上。
+      - name: Resolve Beijing time
+        id: bjt
+        run: |
+          echo "day=$(TZ=Asia/Shanghai date +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          echo "stamp=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
+
+      # 上交所份额只能按日取,5 年 ≈ 1200 次请求。不缓存的话每天重跑一遍,
+      # 必然被限流 —— 这正是 docs/ 里 5xxxxx 全部"无份额数据"的直接原因。
+      # key 按天而不是按 run_id,同一天三跑复用同一份缓存。
+      - name: Restore ETF share cache
+        uses: actions/cache@v4
+        with:
+          path: etf/cache_etf
+          key: etf-cache-${{ steps.bjt.outputs.day }}
+          restore-keys: |
+            etf-cache-
+
+      - name: Run gold slope analyzer
+        working-directory: gold
+        run: python gold_ma_slope_analyzer.py
+        continue-on-error: true   # 单个数据源抽风不该拖垮整条流水线
+
+      - name: Run ETF broad-base dashboard
+        working-directory: etf
+        run: python etf_broadbase_dashboard.py
+        continue-on-error: true
+
+      - name: Run fund indicator scripts
+        working-directory: funds
+        run: |
+          python fetch_fund_nav.py
+          python fund_indicators_matrix.py
+          python fund_score_matrix.py
+          python fund_riskrank_percentile.py
+        continue-on-error: true
+
+      - name: Run stock analysis suite (broad indices only)
+        working-directory: stocks
+        run: python stock_analysis_suite.py
+        continue-on-error: true
+
+      # 必须排在上面四步之后:它读的是它们落下来的 parquet / csv
+      - name: Build daily summary card
+        working-directory: summary
+        run: python daily_summary.py
+        continue-on-error: true
+
+      - name: Collect HTML outputs into docs/
+        run: |
+          mkdir -p docs
+          find . -maxdepth 3 -name "*.html" -not -path "./docs/*" -exec cp {} docs/ \;
+          ls -la docs/
+
+      - name: Sync with remote before committing
+        # 自动暂存生成的文档,拉取最新代码,然后再将文档应用回来
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase --autostash origin/main
+        continue-on-error: true
+
+      - name: Commit and push docs/
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: 自动更新每日数据看板 ${{ steps.bjt.outputs.stamp }}"
+          # README 里的"今日风险速览"那段也是每天重写的, 不加进来就永远停在第一次
+          file_pattern: "docs/** README.md"
