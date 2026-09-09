@@ -34,8 +34,10 @@ jobs:
       # 汇总图片里全是中文。runner 默认没有中文字体,matplotlib 会把汉字画成方块。
       - name: Install CJK fonts
         run: |
-          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update -qq
+          sudo rm -f /etc/apt/sources.list.d/google*.list
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get clean
+          sudo apt-get update -qq || true
           sudo apt-get install -y fonts-noto-cjk
 
       - name: Install dependencies
