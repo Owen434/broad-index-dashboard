@@ -4,7 +4,8 @@ on:
   schedule:
     # UTC 时间。北京时间 = UTC + 8
     # 分钟数故意避开 0/15/30,整点是 Actions 排队高峰,容易延迟甚至跳过
-    - cron: '37 0 * * *'    # 北京 08:37,开盘前:覆盖隔夜黄金 / 美股
+    - cron: '17 1 * * *'    # 北京 09:17,开盘前:覆盖隔夜黄金 / 美股,
+                            # 且在上交所 8:30 左右发布上一交易日 ETF 份额之后
     - cron: '7 9 * * *'     # 北京 17:07,收盘后首跑
     - cron: '23 15 * * *'   # 北京 23:23,夜间复核
   workflow_dispatch:        # 允许在 GitHub 网页上手动触发
@@ -21,6 +22,10 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
+    # runner 默认 UTC。脚本里凡是 now()/today() 的地方都按北京时间走,
+    # 否则 17:07 那一跑会被当成 09:07, 当天数据全被当成"还没收盘"剔掉。
+    env:
+      TZ: Asia/Shanghai
 
     steps:
       - name: Checkout
@@ -55,13 +60,16 @@ jobs:
 
       # 上交所份额只能按日取,5 年 ≈ 1200 次请求。不缓存的话每天重跑一遍,
       # 必然被限流 —— 这正是 docs/ 里 5xxxxx 全部"无份额数据"的直接原因。
-      # key 按天而不是按 run_id,同一天三跑复用同一份缓存。
+      # key 带 run_id: actions/cache 命中完全相同的 key 时不会回写, 按天做 key
+      # 的话同一天第 2、3 跑新取到的份额(比如早上补齐的沪市)永远存不进去。
+      # restore-keys 先找当天最近一跑, 再退到任意一天, 同一天仍然复用。
       - name: Restore ETF share cache
         uses: actions/cache@v4
         with:
           path: etf/cache_etf
-          key: etf-cache-${{ steps.bjt.outputs.day }}
+          key: etf-cache-${{ steps.bjt.outputs.day }}-${{ github.run_id }}
           restore-keys: |
+            etf-cache-${{ steps.bjt.outputs.day }}-
             etf-cache-
 
       - name: Run gold slope analyzer
