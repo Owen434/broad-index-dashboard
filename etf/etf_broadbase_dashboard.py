@@ -90,6 +90,9 @@ PCT_WINDOW = 120           # 分位数滚动窗口(交易日)
 PCT_MIN = 40               # 分位数最小样本
 MAX_WORKERS = 6
 SSE_WORKERS = 4            # 上交所份额按日拉, 并发化(单日返回全市场, 与标的数无关)
+SSE_REFRESH_DAYS = 3       # 最近 N 个交易日的沪市份额每次都重拉, 不信缓存:
+                           # 上交所 T 日份额次日 8:30 前后才分批入库, 早取到的可能是半截
+TZ_CN = "Asia/Shanghai"    # 所有"现在几点"的判断都按北京时间, 不依赖 runner 时区(UTC)
 REQ_SLEEP = 0.20
 RETRY_TIMES = 3
 RETRY_BASE = 1.0           # 退避基数(秒): 1, 2, 4
@@ -245,7 +248,9 @@ def init_window() -> list[str]:
         raise RuntimeError("交易日历获取失败, 检查网络/代理设置")
     d = pd.to_datetime(cal["trade_date"]).sort_values()
 
-    now = pd.Timestamp.now()
+    # GitHub runner 是 UTC: 不带 tz 的 now() 在北京 17:07 会得到 09:07,
+    # 跟 CLOSE_HHMM=1530 一比就把当天剔掉了。这里强制按北京时间判断。
+    now = pd.Timestamp.now(tz=TZ_CN).tz_localize(None)
     cutoff = now.normalize()
     if int(now.strftime("%H%M")) < CLOSE_HHMM:
         cutoff = cutoff - pd.Timedelta(days=1)
@@ -553,37 +558,69 @@ def normalize_scale(df: pd.DataFrame, market: str) -> pd.DataFrame:
     return out.dropna(subset=["日期", "基金份额"])
 
 
-def fetch_sse_one_day(day: str) -> pd.DataFrame:
-    cache = CACHE_DIR / f"sse_{day}.parquet"
-    cached = _read_cache(cache)
-    if cached is not None:
-        return cached
+def _sse_raw(day: str) -> pd.DataFrame:
+    """
+    akshare 的 fund_etf_scale_sse 在上交所返回空 result 时会抛 KeyError
+    (空 DataFrame 没有那几列)。这种情况是"当天数据还没发布", 不是网络故障,
+    转成空表返回: 既不触发 _net 的 3 次退避重试, 也不记进 FAILURES。
+    """
     fn = getattr(ak, "fund_etf_scale_sse", None)
     if fn is None:
         return pd.DataFrame()
-    df = _net(fn, label=f"SSE {day}", date=day)
-    if df is None or df.empty:
+    try:
+        return fn(date=day)
+    except KeyError:
         return pd.DataFrame()
-    df.to_parquet(cache, index=False)
-    time.sleep(0.3)
-    return df
+
+
+def fetch_sse_one_day(day: str, force: bool = False) -> pd.DataFrame:
+    """
+    force=True: 近端交易日, 无论有无缓存都回源重拉; 拉到了就覆盖缓存,
+    拉不到(未发布/失败)再退回旧缓存。
+    force=False: 有缓存直接用(历史日期份额不会再变)。
+    """
+    cache = CACHE_DIR / f"sse_{day}.parquet"
+    cached = _read_cache(cache)
+    if cached is not None and not cached.empty and not force:
+        return cached
+
+    df = _net(_sse_raw, day, label=f"SSE {day}")
+    if df is not None and not df.empty:
+        df.to_parquet(cache, index=False)
+        time.sleep(0.3)
+        return df
+    return cached if cached is not None else pd.DataFrame()
 
 
 def fetch_sse(trade_days: list[str]) -> pd.DataFrame:
     """
-    上交所份额只能按日取(单次返回当日全市场), 两年 ≈ 480 次请求。
-    首跑慢, 之后全在 parquet 缓存里, 增量只补新交易日。
+    上交所份额只能按日取(单次返回当日全市场), 5 年 ≈ 1200 次请求。
+    首跑慢, 之后全在 parquet 缓存里, 增量只补新交易日 + 重拉最近 SSE_REFRESH_DAYS 天。
     """
-    frames = []
+    recent = set(trade_days[-SSE_REFRESH_DAYS:])
+    frames, got_days = [], set()
     with ThreadPoolExecutor(max_workers=SSE_WORKERS) as pool:
-        futures = {pool.submit(fetch_sse_one_day, d): d for d in trade_days}
+        futures = {pool.submit(fetch_sse_one_day, d, d in recent): d for d in trade_days}
         for i, fut in enumerate(as_completed(futures), 1):
             f = fut.result()
             if f is not None and not f.empty:
                 frames.append(f)
+                got_days.add(futures[fut])
             if i % 20 == 0 or i == len(trade_days):
                 print(f"  [SSE] {i}/{len(trade_days)}", end="\r")
     print()
+
+    # 末端缺口单独点名: 这是"正常的发布时差", 跟历史断档分开说, 免得误判成故障
+    tail_miss = []
+    for d in reversed(trade_days):
+        if d in got_days:
+            break
+        tail_miss.append(d)
+    if tail_miss:
+        print(f"  [SSE] 末端 {len(tail_miss)} 个交易日沪市份额未取到: "
+              f"{', '.join(_dash(d) for d in reversed(tail_miss))} "
+              f"(上交所 T 日份额通常次日 8:30 后发布; 若已过该时间仍缺, 查上方 [FAIL] SSE)")
+
     if not frames:
         return pd.DataFrame()
     return normalize_scale(pd.concat(frames, ignore_index=True), "SH")
@@ -766,6 +803,23 @@ def build_group(gname: str, members: list[str], data: dict[str, pd.DataFrame],
     shares = _col("基金份额").ffill(limit=5).sum(axis=1, min_count=1)
     flow = _col("申购赎回").sum(axis=1, min_count=1)
     amount = _col("净申赎金额").sum(axis=1, min_count=1)
+
+    # 末端不完整日置空: 沪深两所份额发布有时差(深市当晚, 沪市次日早上),
+    # 最新一天常常只有深市成员有份额。min_count=1 会把这半截当成"板块合计"
+    # 输出 —— 沪深300 只剩 159919 一只, 数值和方向都可能是错的。
+    # 判定: 当天有行情、却没报份额的成员存在, 即视为不完整。
+    # 只处理末端连续的不完整段, 历史上零星断档沿用原口径(见上方文档字符串)。
+    sh_df, px_df = _col("基金份额"), _col("复权价")
+    has = sh_df.notna().any()             # 从来没有份额的成员(缺份额品种)不参与判定
+    sh_df, px_df = sh_df.loc[:, has], px_df.loc[:, has]
+    if not sh_df.empty:
+        incomplete = (px_df.notna() & sh_df.isna()).any(axis=1)
+        ok = incomplete.index[~incomplete.values]
+        tail = dates > ok.max() if len(ok) else np.ones(len(dates), dtype=bool)
+        if tail.any():
+            shares.loc[tail] = np.nan
+            flow.loc[tail] = np.nan
+            amount.loc[tail] = np.nan
 
     ret = _col("复权价").pct_change(fill_method=None)
     avg = ret.mean(axis=1)
