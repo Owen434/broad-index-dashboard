@@ -77,6 +77,7 @@ ANALYSIS_MAX_BARS = 1200      # 指标只取最近 N 根 K 线, 与 stock_analys
 GOLD_WINDOWS = [5, 20, 30, 60]
 GOLD_PCT_WINDOW = 252         # 斜率分位的回看窗口(交易日)
 ETF_RECENT_DAYS = 5           # ETF 板块除了当日, 再给一个近 N 日累计
+ETF_STALE_DAYS = 3            # 板块最新有效日最多可落后全局最新日几个交易日(含当日)
 FUND_TOP_N = 6                # 图片里最多列几只最热的基金
 FETCH_WORKERS = 6
 
@@ -307,13 +308,26 @@ def build_etf_section() -> list[dict]:
 
     YI = 1e8
     rows = []
+    all_days = g["日期"].drop_duplicates().sort_values()
+    stale_floor = all_days.iloc[-ETF_STALE_DAYS] if len(all_days) >= ETF_STALE_DAYS else all_days.min()
+    lagged = 0
     for name, sub in g.groupby("分组", sort=False):
         sub = sub.sort_values("日期")
         # parquet 里现成的是"绝对值分位", 这里按原值重算一份带方向的
         pct_s = signed_pct_rank(pd.Series(sub["净申赎金额"].values, index=sub["日期"].values))
-        cur = sub[sub["日期"] == last]
+        # 取本板块自己的"最新有效日", 而不是全局最新日: 沪市份额次日早上才发布,
+        # 含沪市成员的板块最新一天会被 4 号脚本置空。退回到上一个有效日,
+        # 只要不超过 ETF_STALE_DAYS 个交易日就照常展示, 并在板块名后标注日期。
+        valid = sub.loc[sub["净申赎金额"].notna(), "日期"]
+        eff = valid.max() if len(valid) else pd.NaT
+        if pd.isna(eff) or eff < stale_floor:
+            eff = last
+        cur = sub[sub["日期"] == eff]
         amount = cur["净申赎金额"].iloc[0] if len(cur) else np.nan
-        pct = pct_s.get(last, np.nan)
+        pct = pct_s.get(eff, np.nan)
+        if eff < last and not pd.isna(amount):
+            name = f"{name}（{eff:%m-%d}）"
+            lagged += 1
         recent = sub.loc[sub["日期"] >= recent_start, "净申赎金额"].sum(min_count=1)
         label, color, plain = flow_signal(pct)
         rows.append({
@@ -326,6 +340,8 @@ def build_etf_section() -> list[dict]:
         })
 
     have = sum(1 for r in rows if r["pct"] is not None)
+    if lagged:
+        DATA_HEALTH.append(f"ETF: {lagged} 个板块沿用上一交易日(沪市份额次日早上才发布), 已在板块名后标注日期")
     if have == 0:
         DATA_HEALTH.append("ETF: 所有板块都没有申赎分位(份额链路没取到数)")
     elif have < len(rows):
