@@ -177,12 +177,12 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | ZigZag 波段看板 | <img src="docs/宽基波段信号量化看板.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
 | | 评分矩阵 | <img src="docs/宽基风险评分矩阵.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_scorematrix.html |
 | | 45只宽基ETF资金流看板 | <img src="docs/ETF资金流向.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
-| | 宽基收益日历 | 红涨绿跌，12宫格挂历 + 星期/月份胜率统计，按分类/年份切换 | https://owen434.github.io/broad-index-dashboard/index_return_calendar.html |
+| | 宽基收益日历 | <img src="docs/index_return_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/index_return_calendar.html |
 | **② 板块基金** | 八大指标矩阵 |  <img src="docs/基金八大指标矩阵.png" width="360">  | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
 | | 风险排名百分位 | <img src="docs/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
-| | 板块基金收益日历 | 同上，标的换成板块/持有基金，类型按钮跟随 CSV 自动生成 | https://owen434.github.io/broad-index-dashboard/holdings_calendar.html |
-| **③ 股指期货持仓** | 中信期货 / 前20会员净持仓 | 上证50/沪深300/中证500/中证1000四个品种，每日净变 + 净持仓走势，文字快报同页展示 | https://owen434.github.io/broad-index-dashboard/cffex_net_position.html |
+| | 板块基金收益日历 | <img src="docs/choldings_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/holdings_calendar.html |
+| **③ 股指期货持仓** |<img src="docs/cffex_net_position.png" width="360"> | https://owen434.github.io/broad-index-dashboard/cffex_net_position.html |
 | **④ 黄金** | 多周期均线与斜率 | <img src="docs/黄金多周期均线及动能斜率分析系统.png" width="360"> | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
 
 （链接对应 `docs/` 目录下 GitHub Actions 每个交易日自动重新生成的 HTML，首次运行前打开会 404。收益日历、股指期货持仓页面手机打开也能正常看：布局会自动收窄到单列，表格支持横向滑动。）
