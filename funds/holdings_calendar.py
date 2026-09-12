@@ -113,8 +113,8 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
   .month-table { width:100%; border-collapse:collapse; table-layout:fixed; }
   .month-table th { font-size:10px; color:#aaa; padding:2px; font-weight:normal; }
   .month-table th.weekend { color:#E5C07B; }
-  .month-table td.day { text-align:center; vertical-align:top; border:1px solid #2a2a2a; height:36px; font-size:10px; color:#ccc; padding:2px; }
-  .month-table td.day.has-val { color:#1b1b1b; }
+  .month-table td.day { text-align:center; vertical-align:top; border:1px solid #2a2a2a; height:36px; font-size:10px; color:#ccc; padding:2px; background:rgba(255,255,255,0.03); }
+  .month-table td.day.has-val { color:#f2f2f2; }
   .month-table td.empty { border:none; }
   .day-num { font-weight:bold; font-size:11px; }
   .day-val { font-size:9px; font-weight:bold; }
@@ -126,6 +126,18 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
   .stats-col table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
   .stats-col th, .stats-col td { border:1px solid #2a2a2a; padding:5px 8px; text-align:center; }
   .stats-col th { background:#252525; color:#61AFEF; }
+  .hidden { display:none !important; }
+  #ranking-title { text-align:center; color:#C678DD; font-size:15px; margin:14px 0 10px 0; }
+  .rank-table-wrap { overflow-x:auto; }
+  .rank-table { border-collapse:collapse; width:100%; font-size:11px; white-space:nowrap; }
+  .rank-table th, .rank-table td { border:1px solid #2a2a2a; padding:5px 7px; text-align:center; }
+  .rank-table th { background:#252525; color:#61AFEF; font-weight:normal; }
+  .rank-month-sub { font-size:9px; color:#999; font-weight:normal; margin-top:2px; line-height:1.4; }
+  .rank-name { text-align:left; color:#C678DD; font-weight:bold; }
+  .rank-rank { font-weight:bold; color:#ccc; }
+  .rank-rank.rank-top { color:#E5C07B; }
+  .rank-na { color:#555; }
+  .rank-empty { text-align:center; color:#888; padding:30px 0; }
 </style>
 </head>
 <body>
@@ -146,22 +158,31 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
   <div>
     <span class="group-label">年份：</span>
     <span id="year-group"></span>
+    <span class="group-label" style="margin-left:14px;">视图：</span>
+    <button class="view-btn active" data-view="calendar">日历视图</button>
+    <button class="view-btn" data-view="ranking">月度排名看板</button>
   </div>
   <button id="btn-screenshot" class="screenshot-btn">📷 保存截图</button>
 </div>
 
 <div id="capture-area">
-  <div id="entity-title"></div>
-  <div class="calendar-grid" id="calendar-grid"></div>
-  <div class="stats-row">
-    <div class="stats-col">
-      <h4>星期统计（当前年份）</h4>
-      <table id="weekday-table"></table>
+  <div id="calendar-view">
+    <div id="entity-title"></div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+    <div class="stats-row">
+      <div class="stats-col">
+        <h4>星期统计（当前年份）</h4>
+        <table id="weekday-table"></table>
+      </div>
+      <div class="stats-col">
+        <h4>月份统计（当前年份）</h4>
+        <table id="month-table"></table>
+      </div>
     </div>
-    <div class="stats-col">
-      <h4>月份统计（当前年份）</h4>
-      <table id="month-table"></table>
-    </div>
+  </div>
+  <div id="ranking-view" class="hidden">
+    <div id="ranking-title"></div>
+    <div id="ranking-board"></div>
   </div>
 </div>
 
@@ -170,13 +191,19 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
 const DATA = __DATA_JSON__;
 let currentEntity = null;
 let currentYear = null;
+let currentCategory = '__ALL__';
+let currentView = 'calendar';
 
 function pctColor(v) {
   if (v === null || v === undefined || isNaN(v)) return 'transparent';
-  const alpha = Math.min(Math.abs(v) / 2.5, 1.0);
-  if (v > 0) return alpha <= 0.6 ? '#FFC7CE' : '#FF7C80';
-  if (v < 0) return alpha <= 0.6 ? '#C6EFCE' : '#74C476';
-  return '#eeeeee';
+  // 深色主题：用半透明红/绿叠加在深色格子上，透明度随涨跌幅度连续变化，
+  // 而不是原来 matplotlib 那套「浅粉/浅绿 底 + 深色文字」的配色——那套是给白底页面设计的，
+  // 直接照搬到深色页面上，大多数日子(涨跌幅较小)会显得发白、和深色主题不搭。
+  const strength = Math.min(Math.abs(v) / 2.5, 1.0);
+  const alpha = (0.16 + strength * 0.58).toFixed(2);
+  if (v > 0) return `rgba(255, 82, 82, ${alpha})`;
+  if (v < 0) return `rgba(58, 191, 122, ${alpha})`;
+  return 'rgba(255,255,255,0.05)';
 }
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -266,7 +293,7 @@ function renderAll() {
   const yearGroup = document.getElementById('year-group');
   yearGroup.innerHTML = years.map(y => `<button class="year-btn ${y === currentYear ? 'active' : ''}" data-year="${y}">${y}</button>`).join('');
   yearGroup.querySelectorAll('.year-btn').forEach(btn => {
-    btn.addEventListener('click', function () { currentYear = this.dataset.year; renderAll(); });
+    btn.addEventListener('click', function () { currentYear = this.dataset.year; renderAll(); if (currentView === 'ranking') renderRanking(); });
   });
 
   document.getElementById('entity-title').textContent = `${entity.name}（${entity.category}） - ${currentYear}年 收益日历`;
@@ -302,10 +329,99 @@ function renderAll() {
 }
 
 function setCategory(cat) {
+  currentCategory = cat;
   document.querySelectorAll('.category-btn').forEach(b => b.classList.toggle('active', b.dataset.category === cat));
   document.querySelectorAll('.entity-btn').forEach(b => b.classList.toggle('hidden', !(cat === '__ALL__' || b.dataset.category === cat)));
   const visible = Array.from(document.querySelectorAll('.entity-btn:not(.hidden)'));
   if (visible.length && !visible.some(b => b.dataset.id === currentEntity)) setEntity(visible[0].dataset.id);
+  if (currentView === 'ranking') renderRanking();
+}
+
+// ==================== 月度收益排名看板 ====================
+// 对应旧版 create_interactive_html.py 里的 generate_fund_monthly_ranking_calendar：
+// 同一类型下所有基金，按最新月份累计收益倒序排名，每个月一列，列头带当月涨跌家数/均值/极差。
+function monthColor(v) {
+  if (v === null || v === undefined || isNaN(v)) return 'transparent';
+  const strength = Math.min(Math.abs(v) / 8.0, 1.0);  // 月度累计涨跌幅波动比日涨跌幅大得多，阈值放大到 8%
+  const alpha = (0.14 + strength * 0.6).toFixed(2);
+  if (v > 0) return `rgba(255, 82, 82, ${alpha})`;
+  if (v < 0) return `rgba(58, 191, 122, ${alpha})`;
+  return 'rgba(255,255,255,0.05)';
+}
+
+function buildRankingBoard(category, year) {
+  const pool = DATA.entities.filter(e => (category === '__ALL__' || e.category === category) && e.years[year]);
+  if (!pool.length) return '<div class="rank-empty">当前类型/年份下没有数据</div>';
+
+  const monthsSet = new Set();
+  pool.forEach(e => Object.keys(e.years[year]).forEach(d => monthsSet.add(parseInt(d.slice(5, 7), 10))));
+  const months = Array.from(monthsSet).sort((a, b) => a - b);
+  if (!months.length) return '<div class="rank-empty">当前类型/年份下没有数据</div>';
+  const latestMonth = months[months.length - 1];
+
+  const rows = pool.map(e => {
+    const daily = e.years[year];
+    const perMonth = {};
+    months.forEach(m => {
+      const prefix = `${year}-${String(m).padStart(2, '0')}-`;
+      const vals = Object.entries(daily).filter(([d]) => d.startsWith(prefix)).map(([, v]) => v);
+      perMonth[m] = vals.length ? (vals.reduce((acc, r) => acc * (1 + r / 100), 1) - 1) * 100 : null;
+    });
+    return { id: e.id, name: e.name, category: e.category, perMonth };
+  });
+
+  rows.sort((a, b) => {
+    const av = a.perMonth[latestMonth], bv = b.perMonth[latestMonth];
+    if (av === null && bv === null) return 0;
+    if (av === null) return 1;
+    if (bv === null) return -1;
+    return bv - av;
+  });
+
+  const monthStats = {};
+  months.forEach(m => {
+    const vals = rows.map(r => r.perMonth[m]).filter(v => v !== null && v !== undefined);
+    const up = vals.filter(v => v > 0).length;
+    const down = vals.filter(v => v < 0).length;
+    const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+    const range = vals.length ? Math.max(...vals) - Math.min(...vals) : 0;
+    monthStats[m] = { up, down, avg, range };
+  });
+
+  const thead = '<tr><th>排名</th><th>基金代码</th><th>基金名称</th><th>类型</th>' +
+    months.map(m => {
+      const st = monthStats[m];
+      return `<th>${m}月<div class="rank-month-sub">↑${st.up} ↓${st.down}<br>均${fmtPct(st.avg)}<br>差${st.range.toFixed(2)}%</div></th>`;
+    }).join('') + '</tr>';
+
+  const tbody = rows.map((r, idx) => {
+    const cells = months.map(m => {
+      const v = r.perMonth[m];
+      if (v === null || v === undefined) return '<td class="rank-na">-</td>';
+      return `<td style="background:${monthColor(v)};">${fmtPct(v)}</td>`;
+    }).join('');
+    return `<tr><td class="rank-rank ${idx < 3 ? 'rank-top' : ''}">${idx + 1}</td><td>${r.id}</td>` +
+           `<td class="rank-name">${r.name}</td><td>${r.category}</td>${cells}</tr>`;
+  }).join('');
+
+  return `<div class="rank-table-wrap"><table class="rank-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
+}
+
+function renderRanking() {
+  const years = Array.from(new Set(DATA.entities.flatMap(e => Object.keys(e.years)))).sort().reverse();
+  if (!currentYear || !years.includes(currentYear)) currentYear = years[0];
+  const label = currentCategory === '__ALL__' ? '全部类型' : currentCategory;
+  document.getElementById('ranking-title').textContent = `${label} - ${currentYear}年 月度收益排名看板`;
+  document.getElementById('ranking-board').innerHTML = buildRankingBoard(currentCategory, currentYear);
+}
+
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  document.getElementById('calendar-view').classList.toggle('hidden', view !== 'calendar');
+  document.getElementById('ranking-view').classList.toggle('hidden', view !== 'ranking');
+  document.getElementById('entity-bar').classList.toggle('hidden', view !== 'calendar');
+  if (view === 'ranking') renderRanking();
 }
 
 function setEntity(id) {
@@ -318,6 +434,7 @@ function setEntity(id) {
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.category-btn').forEach(btn => btn.addEventListener('click', function () { setCategory(this.dataset.category); }));
   document.querySelectorAll('.entity-btn').forEach(btn => btn.addEventListener('click', function () { setEntity(this.dataset.id); }));
+  document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', function () { setView(this.dataset.view); }));
   if (DATA.entities.length) setEntity(DATA.entities[0].id);
 
   const btnScreenshot = document.getElementById('btn-screenshot');
