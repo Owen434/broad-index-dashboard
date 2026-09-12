@@ -181,7 +181,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | **② 板块基金** | 八大指标矩阵 |  <img src="docs/基金八大指标矩阵.png" width="360">  | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
 | | 风险排名百分位 | <img src="docs/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
-| | 板块基金收益日历 | <img src="docs/holdings_calendar" width="360"> | https://owen434.github.io/broad-index-dashboard/holdings_calendar.html |
+| | 板块基金收益日历 | <img src="docs/holdings_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/holdings_calendar.html |
 | **③ 股指期货持仓** |中信期货 / 前20会员净持仓|<img src="docs/cffex_net_position.png" width="360"> | https://owen434.github.io/broad-index-dashboard/cffex_net_position.html |
 | **④ 黄金** | 多周期均线与斜率 | <img src="docs/黄金多周期均线及动能斜率分析系统.png" width="360"> | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
 
