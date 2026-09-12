@@ -89,11 +89,17 @@ jobs:
           python fund_indicators_matrix.py
           python fund_score_matrix.py
           python fund_riskrank_percentile.py
+          python holdings_calendar.py
         continue-on-error: true
 
       - name: Run stock analysis suite (broad indices only)
         working-directory: stocks
         run: python stock_analysis_suite.py
+        continue-on-error: true
+
+      - name: Run index return calendar
+        working-directory: stocks
+        run: python index_return_calendar.py
         continue-on-error: true
 
       # 必须排在上面四步之后:它读的是它们落下来的 parquet / csv
