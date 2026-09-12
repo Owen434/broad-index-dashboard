@@ -72,6 +72,19 @@ jobs:
             etf-cache-${{ steps.bjt.outputs.day }}-
             etf-cache-
 
+      # 中金所持仓排名同理按日取, 4个合约 x 全部交易日。跟 ETF 份额缓存同一套 key 策略:
+      # 缓存命中就只增量抓当天, 缓存第一次没命中(仓库刚接入这个脚本时)才会从
+      # cffex_net_position.py 里 --start 默认的 20240101 全量回填一次, 耗时明显更长,
+      # 之后每天都是增量, 恢复正常。
+      - name: Restore CFFEX rank cache
+        uses: actions/cache@v4
+        with:
+          path: futures/output_cffex/cffex_rank_raw.parquet
+          key: cffex-cache-${{ steps.bjt.outputs.day }}-${{ github.run_id }}
+          restore-keys: |
+            cffex-cache-${{ steps.bjt.outputs.day }}-
+            cffex-cache-
+
       - name: Run gold slope analyzer
         working-directory: gold
         run: python gold_ma_slope_analyzer.py
@@ -100,6 +113,11 @@ jobs:
       - name: Run index return calendar
         working-directory: stocks
         run: python index_return_calendar.py
+        continue-on-error: true
+
+      - name: Run CFFEX net position report
+        working-directory: futures
+        run: python cffex_net_position.py
         continue-on-error: true
 
       # 必须排在上面四步之后:它读的是它们落下来的 parquet / csv
