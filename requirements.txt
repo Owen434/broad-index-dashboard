@@ -5,3 +5,4 @@ plotly
 openpyxl
 pyarrow
 matplotlib
+requests
