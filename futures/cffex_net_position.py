@@ -28,6 +28,13 @@ cffex_net_position.py
        接入 daily_update.yml 后靠 actions/cache 把 output_cffex/cffex_rank_raw.parquet
        在每天的 CI 任务间持久化下来，之后每天只需增量抓当天的排名表，
        不会每天都从 2024 年初重新拉一遍。
+    3. 首次回填原本是单线程、每天 sleep 0.3s 的串行抓取，几百个交易日要跑
+       十几二十分钟；改成 FETCH_WORKERS 个线程小并发抓（见下方常量），
+       通常几分钟内跑完。之后每天的增量更新本来就只有 1 天的量，
+       串行/并发耗时差别不大。
+    4. 原版抓完全部交易日才落一次盘，跑到一半被取消/报错就前功尽弃、下次
+       从头再来；现在边抓边按 CHECKPOINT_EVERY 分批写入缓存，中断了也只丢
+       最近一小段，重跑会自动跳过已经落盘的交易日、接着抓。
     这个净持仓口径和仓库首页说的"护盘资金"是同一件事的另一个观察角度：
     ETF资金流看的是场内份额申赎，这里看的是股指期货多空持仓——两者经常互相印证。
 """
@@ -40,6 +47,7 @@ import argparse
 import datetime as dt
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import pandas as pd
@@ -77,6 +85,17 @@ SESSION.headers.update({
                   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
     "Referer": "http://www.cffex.com.cn/ccpm/",
 })
+
+# requests.Session 本身不是线程安全的连接池管理者，但底层 urllib3 的连接池是；
+# 多线程共用同一个 Session 做只读 GET 是常见且安全的用法。
+# 首次回填(--start 20240101起)是 4合约 x 全部交易日，原版单线程+每天sleep(0.3)
+# 全串行，几百个交易日要跑十几二十分钟。改成小并发后通常几分钟内跑完；
+# 之后每天的增量更新本来就只有 1 天 x 4 合约，并发与否感知不大。
+# 中金所是政府网站，没有公开的限流阈值，5 个并发是比较保守的经验值——
+# 如果看到下面大量 "fetch_var_direct 失败" 或 "fetch_var_akshare 失败"，
+# 调小这个数值或加大 FETCH_STAGGER 再试。
+FETCH_WORKERS = 5
+FETCH_STAGGER = 0.2  # 每提交 FETCH_WORKERS 个任务，错峰等一下，避免瞬间打出一大波并发请求
 
 
 # ----------------------------------------------------------------- 抓取
@@ -143,22 +162,76 @@ def trade_dates(start: str, end: str) -> list[str]:
     return [d.strftime("%Y%m%d") for d in s]
 
 
+CHECKPOINT_EVERY = 200  # 每完成约 200 个(日期,合约)任务(约50个交易日)就落盘一次缓存
+
+
 def update_cache(raw: pd.DataFrame, start: str, end: str) -> pd.DataFrame:
     have = set(raw["date"]) if len(raw) else set()
     todo = [d for d in trade_dates(start, end) if d not in have]
     print(f"待抓取 {len(todo)} 个交易日")
-    new = []
-    for i, d in enumerate(todo, 1):
-        frames = [f for f in (fetch_var(d, v) for v in VARS) if len(f)]
-        got = ",".join(f["var"].iloc[0] for f in frames) or "无数据(未发布?)"
-        print(f"  [{i}/{len(todo)}] {d}: {got}")
-        if frames:
-            new.append(pd.concat(frames, ignore_index=True))
-        time.sleep(0.3)
-    if new:
+    if not todo:
+        return raw
+
+    # 拍平成 (日期, 合约) 任务, 用小线程池并发抓, 而不是原来的"每天串行抓4个合约+sleep 0.3s"。
+    tasks = [(d, v) for d in todo for v in VARS]
+    results = {}
+    pending = {d: len(VARS) for d in todo}  # 每个交易日还差几个合约的结果
+    done = 0
+    since_checkpoint = 0
+    empty_days = []
+
+    def flush_ready_days():
+        """把已经凑齐4个合约结果的交易日写入缓存并落盘。
+        首次回填几百个交易日、几千次请求，跑到一半被手动取消或者中途报错都很正常；
+        原来的写法是全部抓完才落一次盘，一旦中途被打断，这一轮抓到的全部作废，
+        下次还是从头开始。改成边抓边按完成情况分批落盘后，中断了也只丢最近这一小段，
+        重跑时 `have = set(raw["date"])` 会自动跳过已经落盘的交易日，接着抓剩下的。"""
+        nonlocal raw
+        ready = [d for d in list(pending) if pending[d] == 0]
+        if not ready:
+            return
+        new = []
+        for d in ready:
+            frames = [f for f in (results.get((d, v), pd.DataFrame()) for v in VARS) if len(f)]
+            if frames:
+                new.append(pd.concat(frames, ignore_index=True))
+            else:
+                empty_days.append(d)
+            del pending[d]
+        if not new:
+            return
         raw = pd.concat(([raw] if len(raw) else []) + new, ignore_index=True)
         raw = raw.drop_duplicates(["date", "var", "contract", "rank"], keep="last")
         raw.to_parquet(CACHE, index=False)
+
+    with ThreadPoolExecutor(max_workers=FETCH_WORKERS) as ex:
+        futures = {}
+        for i, (d, v) in enumerate(tasks):
+            if i and i % FETCH_WORKERS == 0:
+                time.sleep(FETCH_STAGGER)
+            futures[ex.submit(fetch_var, d, v)] = (d, v)
+        for fut in as_completed(futures):
+            d, v = futures[fut]
+            try:
+                results[(d, v)] = fut.result()
+            except Exception as e:  # noqa: BLE001
+                results[(d, v)] = pd.DataFrame()
+                print(f"    {d} {v} 抓取异常: {e}")
+            pending[d] -= 1
+            done += 1
+            since_checkpoint += 1
+            if done % 40 == 0 or done == len(tasks):
+                print(f"  进度: [{done}/{len(tasks)}]", end="\r")
+            if since_checkpoint >= CHECKPOINT_EVERY:
+                flush_ready_days()
+                since_checkpoint = 0
+    print()
+    flush_ready_days()  # 收尾：把最后不满一个 checkpoint 的也落盘
+
+    if empty_days:
+        shown = ", ".join(empty_days[:10]) + (" ..." if len(empty_days) > 10 else "")
+        print(f"  ⚠️ {len(empty_days)} 个交易日四个合约都没抓到数据(未发布/接口异常): {shown}")
+
     return raw
 
 
