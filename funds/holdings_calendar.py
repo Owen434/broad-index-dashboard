@@ -81,63 +81,63 @@ def build_entity(code, name, ftype, fund_df):
 
 # ==================== 交互式 HTML 渲染（模板与 stocks/index_return_calendar.py 保持一致） ====================
 
-_HTML_TEMPLATE = r"""<!DOCTYPE html>
+HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__PAGE_TITLE__</title>
 <style>
-  body { background:#f6f7f9; color:#fff; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; margin:0; padding:16px; }
-  h2 { text-align:center; color:#E5C07B; margin:4px 0 4px 0; font-size:20px; }
-  .subtitle { text-align:center; color:#888; font-size:12px; margin-bottom:14px; }
-  .group-label { color:#aaa; margin-right:8px; font-size:12px; }
+  body { background:#f6f7f9; color:#1f2937; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; margin:0; padding:16px; }
+  h2 { text-align:center; color:#1f2937; margin:4px 0 4px 0; font-size:20px; }
+  .subtitle { text-align:center; color:#6b7280; font-size:12px; margin-bottom:14px; }
+  .group-label { color:#4b5563; margin-right:8px; font-size:12px; font-weight:bold; }
   .btn-group { margin:8px 0; text-align:center; }
   .btn-group.indicator-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; text-align:left; }
   .btn-group button, #year-group button {
-    background:#333; color:#ccc; border:1px solid #555; padding:6px 14px; margin:0 4px 8px 4px;
+    background:#fff; color:#374151; border:1px solid #d1d5db; padding:6px 14px; margin:0 4px 8px 4px;
     border-radius:4px; cursor:pointer; font-size:12px; transition:background-color .2s,color .2s;
   }
-  .btn-group button.active, #year-group button.active { background:#61AFEF; color:#fff; border-color:#61AFEF; }
-  .btn-group button:hover { background:#444; }
+  .btn-group button.active, #year-group button.active { background:#3b82f6; color:#fff; border-color:#3b82f6; }
+  .btn-group button:hover:not(.active) { background:#f3f4f6; }
   .btn-group button.hidden { display:none; }
-  .screenshot-btn { background:#2a2a2a; color:#E5C07B; border:1px solid #E5C07B; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:12px; }
-  .screenshot-btn:hover { background:#E5C07B; color:#1b1b1b; }
+  .screenshot-btn { background:#fff; color:#059669; border:1px solid #059669; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:12px; }
+  .screenshot-btn:hover { background:#059669; color:#fff; }
   .screenshot-btn:disabled { opacity:.6; cursor:default; }
-  #entity-title { text-align:center; color:#C678DD; font-size:15px; margin:14px 0 6px 0; }
+  #entity-title { text-align:center; color:#4338ca; font-size:15px; margin:14px 0 6px 0; font-weight:bold; }
   .calendar-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
   @media (max-width:900px) { .calendar-grid { grid-template-columns:repeat(2,1fr); } }
   @media (max-width:480px) { .calendar-grid { grid-template-columns:1fr; } .btn-group button { padding:5px 10px; font-size:11px; } }
-  .month-card { background:#1e1e1e; border:1px solid #333; border-radius:8px; padding:8px; }
-  .month-header { text-align:center; background:#4F81BD; color:#fff; font-weight:bold; padding:4px; border-radius:4px; margin-bottom:4px; font-size:13px; }
+  .month-card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .month-header { text-align:center; background:#f3f4f6; color:#1f2937; font-weight:bold; padding:4px; border-radius:4px; margin-bottom:4px; font-size:13px; border:1px solid #e5e7eb; }
   .month-table { width:100%; border-collapse:collapse; table-layout:fixed; }
-  .month-table th { font-size:10px; color:#aaa; padding:2px; font-weight:normal; }
-  .month-table th.weekend { color:#E5C07B; }
-  .month-table td.day { text-align:center; vertical-align:top; border:1px solid #2a2a2a; height:36px; font-size:10px; color:#ccc; padding:2px; background:rgba(255,255,255,0.03); }
-  .month-table td.day.has-val { color:#f2f2f2; }
-  .month-table td.empty { border:none; }
+  .month-table th { font-size:10px; color:#6b7280; padding:2px; font-weight:bold; }
+  .month-table th.weekend { color:#ef4444; }
+  .month-table td.day { text-align:center; vertical-align:top; border:1px solid #f3f4f6; height:36px; font-size:10px; color:#4b5563; padding:2px; background:#fafafa; }
+  .month-table td.day.has-val { color:#111827; }
+  .month-table td.empty { border:none; background:transparent; }
   .day-num { font-weight:bold; font-size:11px; }
   .day-val { font-size:9px; font-weight:bold; }
-  .month-stat { text-align:center; font-size:11px; margin-top:4px; font-weight:bold; color:#ccc; }
-  .month-stat.sub { color:#999; font-weight:normal; }
+  .month-stat { text-align:center; font-size:11px; margin-top:4px; font-weight:bold; color:#374151; }
+  .month-stat.sub { color:#6b7280; font-weight:normal; }
   .stats-row { display:flex; flex-wrap:wrap; gap:16px; margin-top:22px; }
   .stats-col { flex:1; min-width:280px; overflow-x:auto; }
-  .stats-col h4 { color:#61AFEF; font-size:13px; margin:0 0 6px 0; }
+  .stats-col h4 { color:#2563eb; font-size:13px; margin:0 0 6px 0; }
   .stats-col table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
-  .stats-col th, .stats-col td { border:1px solid #2a2a2a; padding:5px 8px; text-align:center; }
-  .stats-col th { background:#252525; color:#61AFEF; }
+  .stats-col th, .stats-col td { border:1px solid #e5e7eb; padding:5px 8px; text-align:center; }
+  .stats-col th { background:#f9fafb; color:#1f2937; font-weight:bold; }
   .hidden { display:none !important; }
-  #ranking-title { text-align:center; color:#C678DD; font-size:15px; margin:14px 0 10px 0; }
+  #ranking-title { text-align:center; color:#4338ca; font-size:15px; margin:14px 0 10px 0; font-weight:bold; }
   .rank-table-wrap { overflow-x:auto; }
   .rank-table { border-collapse:collapse; width:100%; font-size:11px; white-space:nowrap; }
-  .rank-table th, .rank-table td { border:1px solid #2a2a2a; padding:5px 7px; text-align:center; }
-  .rank-table th { background:#252525; color:#61AFEF; font-weight:normal; }
-  .rank-month-sub { font-size:9px; color:#999; font-weight:normal; margin-top:2px; line-height:1.4; }
-  .rank-name { text-align:left; color:#C678DD; font-weight:bold; }
-  .rank-rank { font-weight:bold; color:#ccc; }
-  .rank-rank.rank-top { color:#E5C07B; }
-  .rank-na { color:#555; }
-  .rank-empty { text-align:center; color:#888; padding:30px 0; }
+  .rank-table th, .rank-table td { border:1px solid #e5e7eb; padding:5px 7px; text-align:center; }
+  .rank-table th { background:#f9fafb; color:#1f2937; font-weight:bold; }
+  .rank-month-sub { font-size:9px; color:#6b7280; font-weight:normal; margin-top:2px; line-height:1.4; }
+  .rank-name { text-align:left; color:#4338ca; font-weight:bold; }
+  .rank-rank { font-weight:bold; color:#6b7280; }
+  .rank-rank.rank-top { color:#d97706; }
+  .rank-na { color:#9ca3af; }
+  .rank-empty { text-align:center; color:#6b7280; padding:30px 0; }
 </style>
 </head>
 <body>
@@ -196,14 +196,11 @@ let currentView = 'calendar';
 
 function pctColor(v) {
   if (v === null || v === undefined || isNaN(v)) return 'transparent';
-  // 深色主题：用半透明红/绿叠加在深色格子上，透明度随涨跌幅度连续变化，
-  // 而不是原来 matplotlib 那套「浅粉/浅绿 底 + 深色文字」的配色——那套是给白底页面设计的，
-  // 直接照搬到深色页面上，大多数日子(涨跌幅较小)会显得发白、和深色主题不搭。
   const strength = Math.min(Math.abs(v) / 2.5, 1.0);
-  const alpha = (0.16 + strength * 0.58).toFixed(2);
-  if (v > 0) return `rgba(255, 82, 82, ${alpha})`;
-  if (v < 0) return `rgba(58, 191, 122, ${alpha})`;
-  return 'rgba(255,255,255,0.05)';
+  const alpha = (0.15 + strength * 0.65).toFixed(2);
+  if (v > 0) return `rgba(239, 68, 68, ${alpha})`;
+  if (v < 0) return `rgba(34, 197, 94, ${alpha})`;
+  return '#fafafa';
 }
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -256,7 +253,7 @@ function buildMonthCard(year, month, daily) {
     const cum = (rets.reduce((acc, r) => acc * (1 + r / 100), 1) - 1) * 100;
     const avgUp = up.length ? up.reduce((a, b) => a + b, 0) / up.length : 0;
     const avgDown = down.length ? down.reduce((a, b) => a + b, 0) / down.length : 0;
-    const color = cum > 0 ? '#FF7C80' : (cum < 0 ? '#74C476' : '#999');
+    const color = cum > 0 ? '#dc2626' : (cum < 0 ? '#16a34a' : '#6b7280');
     statHtml = `<div class="month-stat" style="color:${color}">累计:${fmtPct(cum)} | 上涨${up.length}天 | 下跌${down.length}天</div>
                 <div class="month-stat sub">平均涨幅${fmtPct(avgUp)} | 平均跌幅${fmtPct(avgDown)}</div>`;
   }
@@ -278,7 +275,7 @@ function buildStatsRows(entries) {
     const down = vals.filter(v => v < 0).length;
     const upProb = total ? (up / total * 100).toFixed(1) + '%' : '0.0%';
     const avg = total ? vals.reduce((a, b) => a + b, 0) / total : 0;
-    const avgColor = avg > 0 ? '#FF7C80' : (avg < 0 ? '#74C476' : '#ccc');
+    const avgColor = avg > 0 ? '#dc2626' : (avg < 0 ? '#16a34a' : '#374151');
     return `<tr><td>${label}</td><td>${total}</td><td>${up}</td><td>${down}</td><td>${upProb}</td>
              <td style="color:${avgColor};font-weight:bold;">${total ? fmtPct(avg) : '0.00%'}</td></tr>`;
   }).join('');
@@ -337,16 +334,13 @@ function setCategory(cat) {
   if (currentView === 'ranking') renderRanking();
 }
 
-// ==================== 月度收益排名看板 ====================
-// 对应旧版 create_interactive_html.py 里的 generate_fund_monthly_ranking_calendar：
-// 同一类型下所有基金，按最新月份累计收益倒序排名，每个月一列，列头带当月涨跌家数/均值/极差。
 function monthColor(v) {
   if (v === null || v === undefined || isNaN(v)) return 'transparent';
-  const strength = Math.min(Math.abs(v) / 8.0, 1.0);  // 月度累计涨跌幅波动比日涨跌幅大得多，阈值放大到 8%
-  const alpha = (0.14 + strength * 0.6).toFixed(2);
-  if (v > 0) return `rgba(255, 82, 82, ${alpha})`;
-  if (v < 0) return `rgba(58, 191, 122, ${alpha})`;
-  return 'rgba(255,255,255,0.05)';
+  const strength = Math.min(Math.abs(v) / 8.0, 1.0); 
+  const alpha = (0.15 + strength * 0.65).toFixed(2);
+  if (v > 0) return `rgba(239, 68, 68, ${alpha})`;
+  if (v < 0) return `rgba(34, 197, 94, ${alpha})`;
+  return '#fafafa';
 }
 
 function buildRankingBoard(category, year) {
@@ -443,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof html2canvas === 'undefined') { alert('截图组件加载失败，请检查网络连接后重试'); return; }
     btnScreenshot.disabled = true;
     btnScreenshot.textContent = '⏳ 正在生成截图...';
-    html2canvas(target, { backgroundColor: '#161616', scale: window.devicePixelRatio > 1 ? 2 : 1, useCORS: true }).then(canvas => {
+    html2canvas(target, { backgroundColor: '#f6f7f9', scale: window.devicePixelRatio > 1 ? 2 : 1, useCORS: true }).then(canvas => {
       const link = document.createElement('a');
       const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
       link.download = 'return_calendar_' + ts + '.png';
