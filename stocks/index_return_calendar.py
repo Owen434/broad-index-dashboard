@@ -107,8 +107,8 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
   .month-table { width:100%; border-collapse:collapse; table-layout:fixed; }
   .month-table th { font-size:10px; color:#aaa; padding:2px; font-weight:normal; }
   .month-table th.weekend { color:#E5C07B; }
-  .month-table td.day { text-align:center; vertical-align:top; border:1px solid #2a2a2a; height:36px; font-size:10px; color:#ccc; padding:2px; }
-  .month-table td.day.has-val { color:#1b1b1b; }
+  .month-table td.day { text-align:center; vertical-align:top; border:1px solid #2a2a2a; height:36px; font-size:10px; color:#ccc; padding:2px; background:rgba(255,255,255,0.03); }
+  .month-table td.day.has-val { color:#f2f2f2; }
   .month-table td.empty { border:none; }
   .day-num { font-weight:bold; font-size:11px; }
   .day-val { font-size:9px; font-weight:bold; }
@@ -167,10 +167,14 @@ let currentYear = null;
 
 function pctColor(v) {
   if (v === null || v === undefined || isNaN(v)) return 'transparent';
-  const alpha = Math.min(Math.abs(v) / 2.5, 1.0);
-  if (v > 0) return alpha <= 0.6 ? '#FFC7CE' : '#FF7C80';
-  if (v < 0) return alpha <= 0.6 ? '#C6EFCE' : '#74C476';
-  return '#eeeeee';
+  // 深色主题：用半透明红/绿叠加在深色格子上，透明度随涨跌幅度连续变化，
+  // 而不是原来 matplotlib 那套「浅粉/浅绿 底 + 深色文字」的配色——那套是给白底页面设计的，
+  // 直接照搬到深色页面上，大多数日子(涨跌幅较小)会显得发白、和深色主题不搭。
+  const strength = Math.min(Math.abs(v) / 2.5, 1.0);
+  const alpha = (0.16 + strength * 0.58).toFixed(2);
+  if (v > 0) return `rgba(255, 82, 82, ${alpha})`;
+  if (v < 0) return `rgba(58, 191, 122, ${alpha})`;
+  return 'rgba(255,255,255,0.05)';
 }
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
