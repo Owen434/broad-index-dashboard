@@ -88,7 +88,7 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__PAGE_TITLE__</title>
 <style>
-  body { background:#161616; color:#fff; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; margin:0; padding:16px; }
+  body { background:#f6f7f9; color:#fff; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; margin:0; padding:16px; }
   h2 { text-align:center; color:#E5C07B; margin:4px 0 4px 0; font-size:20px; }
   .subtitle { text-align:center; color:#888; font-size:12px; margin-bottom:14px; }
   .group-label { color:#aaa; margin-right:8px; font-size:12px; }
