@@ -478,7 +478,7 @@ def render_calendar_dashboard(entities, page_title, header_title, subtitle, outp
         entity_buttons += (f'<button class="entity-btn" data-id="{_esc_attr(e["id"])}" '
                            f'data-category="{_esc_attr(e["category"])}">{label}</button>')
 
-    html = _HTML_TEMPLATE
+    html = HTML_TEMPLATE
     html = html.replace('__PAGE_TITLE__', page_title)
     html = html.replace('__HEADER_TITLE__', header_title)
     html = html.replace('__SUBTITLE__', subtitle)
