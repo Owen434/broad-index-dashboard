@@ -3,10 +3,6 @@ name: Daily data update
 on:
   schedule:
     # UTC 时间。北京时间 = UTC + 8
-    # 分钟数故意避开 0/15/30,整点是 Actions 排队高峰,容易延迟甚至跳过
-    - cron: '17 1 * * *'    # 北京 09:17,开盘前:覆盖隔夜黄金 / 美股,
-                            # 且在上交所 8:30 左右发布上一交易日 ETF 份额之后
-    - cron: '7 9 * * *'     # 北京 17:07,收盘后首跑
     - cron: '23 15 * * *'   # 北京 23:23,夜间复核
   workflow_dispatch:        # 允许在 GitHub 网页上手动触发
 
