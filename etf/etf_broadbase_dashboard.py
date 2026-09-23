@@ -28,6 +28,9 @@ v4 相对 v3 的修改(纯前端, 数据链路未动):
    近20日/分位); 第二行是随区间联动的 9 项 —— 区间净申赎、区间净申赎份额、
    日均净申赎、区间份额变化(含百分比)、区间涨跌、净流入天数占比、单日最大
    流入/流出(带日期)、区间平均分位。
+4. 新增每日申赎明细表: 可查看当前标的的区间历史, 或按指定日期横向比较所有
+   合并标的; 包含净申赎金额、占前日总份额比例、净申购/净赎回 ETF 数、份额变化
+   和历史分位, 支持分页与 CSV 导出。
 
 渲染方式的变化(重要):
    v2 用 fig.write_html 把 8 只 ETF × 12 条 trace 全塞进图里, 靠 updatemenus
@@ -855,8 +858,15 @@ def build_payload(data: dict[str, pd.DataFrame],
     items: dict[str, dict] = {}
 
     def _pack(key: str, name: str, group: str, kind: str,
-              df: pd.DataFrame, note: str) -> None:
+              df: pd.DataFrame, note: str,
+              buy_count: Optional[pd.Series] = None,
+              sell_count: Optional[pd.Series] = None) -> None:
         d = df.set_index("日期").reindex(dates)
+        flow = d["申购赎回"]
+        if buy_count is None:
+            buy_count = flow.gt(0).where(flow.notna())
+        if sell_count is None:
+            sell_count = flow.lt(0).where(flow.notna())
         items[key] = {
             "name": name, "group": group, "kind": kind, "note": note,
             "price": _ser(d["复权价"], nd=4),
@@ -864,6 +874,8 @@ def build_payload(data: dict[str, pd.DataFrame],
             "flow": _ser(d["申购赎回"], scale=YI, nd=4),
             "amount": _ser(d["净申赎金额"], scale=YI, nd=4),
             "pct": _ser(d["净申赎绝对值分位"], nd=3),
+            "buyCount": [None if pd.isna(v) else int(v) for v in buy_count.reindex(dates)],
+            "sellCount": [None if pd.isna(v) else int(v) for v in sell_count.reindex(dates)],
         }
 
     for code, df in data.items():
@@ -880,8 +892,18 @@ def build_payload(data: dict[str, pd.DataFrame],
 
     for gname, df in groups.items():
         n = int(df["_成员数"].iloc[0]) if "_成员数" in df.columns else 0
+        member_flows = pd.DataFrame({
+            code: data[code].set_index("日期")["申购赎回"].reindex(dates)
+            for code, (_, group) in ETF_UNIVERSE.items()
+            if group == gname and code in data
+        })
+        buy_count = member_flows.gt(0).where(member_flows.notna()).sum(axis=1, min_count=1)
+        sell_count = member_flows.lt(0).where(member_flows.notna()).sum(axis=1, min_count=1)
+        group_flow = df.set_index("日期")["申购赎回"].reindex(dates)
+        buy_count = buy_count.where(group_flow.notna())
+        sell_count = sell_count.where(group_flow.notna())
         _pack(f"G:{gname}", f"{gname} · 合并{n}只", gname, "group", df,
-              "同组成员按日相加, 价格为等权归一化")
+              "同组成员按日相加, 价格为等权归一化", buy_count, sell_count)
 
     return {
         "dates": date_str,
@@ -958,6 +980,20 @@ __PLOTLY__
   #note{color:var(--muted);font-size:12px;margin:10px 0 10px}
   #shotTip{color:var(--muted);font-size:12px}
   #chart{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px}
+  .tablePanel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:8px}
+  .tableBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .tableBar select,.tableBar input{min-width:150px}
+  .tableHint{color:var(--muted);font-size:12px;padding:9px 14px 0}
+  .tableScroll{overflow:auto;max-height:540px}
+  table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+  th,td{padding:9px 12px;border-bottom:1px solid #edf0f3;text-align:right;font-variant-numeric:tabular-nums}
+  th{position:sticky;top:0;background:#f8f9fb;color:#586575;font-size:12px;z-index:1}
+  th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+  td.target{font-weight:600}
+  td.empty{text-align:center;color:var(--muted);padding:24px}
+  .tableFoot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;color:var(--muted);font-size:12px}
+  .pageCtl{display:flex;align-items:center;gap:8px}
+  .pageCtl .btn{padding:5px 10px}
   footer{color:var(--muted);font-size:11px;margin-top:14px;line-height:1.7}
   @media (max-width:720px){ select{min-width:200px} .wrap{padding:12px 8px 30px} }
 </style>
@@ -1011,6 +1047,43 @@ __PLOTLY__
   <div id="note"></div>
   <div id="chart"></div>
 
+  <div class="sect">每日申赎明细</div>
+  <div class="tablePanel">
+    <div class="tableBar">
+      <div class="grp">
+        <span class="lab">表格视图</span>
+        <select id="flowTableMode" aria-label="表格视图">
+          <option value="item">当前标的历史</option>
+          <option value="date">同日全部合并标的</option>
+        </select>
+      </div>
+      <div class="grp" id="tableDateGrp" style="display:none">
+        <span class="lab">交易日</span>
+        <input type="date" id="tableDate" aria-label="表格交易日">
+      </div>
+      <button class="btn" id="btnCsv">导出当前表格 CSV</button>
+    </div>
+    <div class="tableHint" id="tableHint"></div>
+    <div class="tableScroll">
+      <table id="flowTable">
+        <thead><tr>
+          <th>日期</th><th>标的 / 合并标的</th><th>当日净申赎(亿元)</th>
+          <th>净申赎/前日份额</th><th>净申购 ETF 数</th><th>净赎回 ETF 数</th>
+          <th>净申赎份额(亿份)</th><th>历史分位</th>
+        </tr></thead>
+        <tbody id="flowTableBody"></tbody>
+      </table>
+    </div>
+    <div class="tableFoot">
+      <span id="tableSummary"></span>
+      <div class="pageCtl" id="tablePaging">
+        <button class="btn" id="tablePrev">上一页</button>
+        <span id="tablePage"></span>
+        <button class="btn" id="tableNext">下一页</button>
+      </div>
+    </div>
+  </div>
+
   <footer>
     分位 = 当日 |净申赎金额| 在过去 __PCTWIN__ 个交易日中的位置(剔除当日自身), 样本不足 __PCTMIN__ 天不出值;
     上方 80% 虚线以上为异常放量申赎, 20% 虚线以下为清淡。<br>
@@ -1018,6 +1091,7 @@ __PLOTLY__
     "选定区间"一行的指标只统计区间内有效交易日: 区间净申赎 = 逐日净申赎金额求和(折算日/断档日不计入),
     区间份额变化 = 区间末有效份额 - 区间首有效份额, 两者会因为剔除折算日而对不上, 属预期。<br>
     区间可用快捷项或日历自定义, 在图上框选缩放同样会回写到日历并刷新区间指标; 双击图表还原到当前日历区间。
+    表格占比 = 当日净申赎份额 ÷ 前一交易日总份额; 历史分位仍为净申赎金额绝对值在滚动窗口中的位置。合并标的申购/赎回 ETF 数按成员当日份额变化方向统计。
   </footer>
 </div>
 
@@ -1320,7 +1394,116 @@ function render(){
   Plotly.react(GD, traces(item), layout(item, xr),
                {responsive:true, displaylogo:false,
                 modeBarButtonsToRemove:['lasso2d','select2d','autoScale2d']});
+  renderFlowTable(item);
 }
+
+/* ---------- 每日申赎表 ---------- */
+let TABLE_PAGE = 0;
+const TABLE_PAGE_SIZE = 30;
+let TABLE_ROWS = [];
+
+function flowRatio(item, i){
+  if (i <= 0 || item.flow[i] === null || item.flow[i] === undefined) return null;
+  const prev = item.shares[i - 1];
+  return (prev === null || prev === undefined || !prev) ? null : item.flow[i] / prev * 100;
+}
+
+function flowTableRow(item, i, name){
+  const amount = item.amount[i], flow = item.flow[i], ratio = flowRatio(item, i);
+  const pct = item.pct[i], buys = item.buyCount[i], sells = item.sellCount[i];
+  const signed = v => v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + fmt(v, 2);
+  const ratioText = ratio === null ? '—' : (ratio > 0 ? '+' : '') + fmt(ratio, 3) + '%';
+  return {date:X[i], name, amount, flow, ratio, pct, buys, sells,
+    html:`<tr><td>${X[i]}</td><td class="target">${name}</td>`+
+      `<td class="${sign(amount)}">${amount === null ? '—' : signed(amount)}</td>`+
+      `<td class="${sign(ratio)}">${ratioText}</td>`+
+      `<td>${buys === null || buys === undefined ? '—' : buys}</td>`+
+      `<td>${sells === null || sells === undefined ? '—' : sells}</td>`+
+      `<td class="${sign(flow)}">${signed(flow)}</td>`+
+      `<td>${pct === null || pct === undefined ? '—' : (pct * 100).toFixed(0) + '%'}</td></tr>`};
+}
+
+function renderFlowTable(item){
+  const mode = document.getElementById('flowTableMode').value;
+  const dateGrp = document.getElementById('tableDateGrp');
+  const body = document.getElementById('flowTableBody');
+  const hint = document.getElementById('tableHint');
+  const summary = document.getElementById('tableSummary');
+  const paging = document.getElementById('tablePaging');
+  const input = document.getElementById('tableDate');
+  input.min = X[0]; input.max = X[X.length - 1];
+  const xr = activeRange(item);
+  const i0 = idxOf(xr[0], 1), i1 = idxOf(xr[1], -1);
+  let rows = [];
+
+  if (mode === 'date'){
+    dateGrp.style.display = '';
+    paging.style.display = 'none';
+    let latestWithFlow = X.length - 1;
+    for (let i = X.length - 1; i >= 0; i--){
+      if (DATA.groupOrder.some(k => DATA.items[k].flow[i] !== null && DATA.items[k].flow[i] !== undefined)){
+        latestWithFlow = i; break;
+      }
+    }
+    const wanted = input.value || X[latestWithFlow];
+    const dayIndex = Math.max(0, idxOf(wanted, -1));
+    input.value = X[dayIndex];
+    DATA.groupOrder.forEach(k => {
+      const g = DATA.items[k];
+      rows.push(flowTableRow(g, dayIndex, g.group));
+    });
+    hint.textContent = `同一交易日横向比较所有合并标的 · ${X[dayIndex]} · 正值为净申购，负值为净赎回`;
+    summary.textContent = `${rows.length} 个合并标的`;
+  } else {
+    dateGrp.style.display = 'none';
+    paging.style.display = '';
+    for (let i = i1; i >= i0; i--) rows.push(flowTableRow(item, i, item.name));
+    hint.textContent = `当前标的：${item.name} · ${X[i0]} 至 ${X[i1]} · 每页 ${TABLE_PAGE_SIZE} 个交易日`;
+  }
+
+  TABLE_ROWS = rows;
+  if (mode === 'item'){
+    const pages = Math.max(1, Math.ceil(rows.length / TABLE_PAGE_SIZE));
+    TABLE_PAGE = Math.min(TABLE_PAGE, pages - 1);
+    const start = TABLE_PAGE * TABLE_PAGE_SIZE;
+    const shown = rows.slice(start, start + TABLE_PAGE_SIZE);
+    body.innerHTML = shown.length ? shown.map(r => r.html).join('')
+      : '<tr><td class="empty" colspan="8">当前区间没有可显示的数据</td></tr>';
+    summary.textContent = `${rows.length ? start + 1 : 0}–${Math.min(start + TABLE_PAGE_SIZE, rows.length)} / ${rows.length} 个交易日`;
+    document.getElementById('tablePage').textContent = `${TABLE_PAGE + 1} / ${pages}`;
+    document.getElementById('tablePrev').disabled = TABLE_PAGE <= 0;
+    document.getElementById('tableNext').disabled = TABLE_PAGE >= pages - 1;
+    TABLE_ROWS = shown;
+  } else {
+    body.innerHTML = rows.length ? rows.map(r => r.html).join('')
+      : '<tr><td class="empty" colspan="8">没有可显示的数据</td></tr>';
+  }
+}
+
+document.getElementById('flowTableMode').addEventListener('change', () => {
+  TABLE_PAGE = 0; renderFlowTable(DATA.items[KEY]);
+});
+document.getElementById('tableDate').addEventListener('change', () => renderFlowTable(DATA.items[KEY]));
+document.getElementById('tablePrev').addEventListener('click', () => {
+  if (TABLE_PAGE > 0){ TABLE_PAGE--; renderFlowTable(DATA.items[KEY]); }
+});
+document.getElementById('tableNext').addEventListener('click', () => {
+  TABLE_PAGE++; renderFlowTable(DATA.items[KEY]);
+});
+document.getElementById('btnCsv').addEventListener('click', () => {
+  const header = ['日期','合并标的','当日净申赎(亿元)','净申赎/前日份额(%)','净申购ETF数','净赎回ETF数','净申赎份额(亿份)','历史分位'];
+  const fields = ['date','name','amount','ratio','buys','sells','flow','pct'];
+  const csvCell = v => {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'number') return String(v);
+    return '"' + String(v).replaceAll('"', '""') + '"';
+  };
+  const csv = '\uFEFF' + [header, ...TABLE_ROWS.map(r => fields.map(k => r[k]))]
+    .map(row => row.map(csvCell).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  const a = document.createElement('a'); a.href = url; a.download = 'ETF每日申赎明细.csv'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+});
 
 /* 手动框选缩放后, y 轴按新窗口重新定标 */
 function onRelayout(ev){
@@ -1339,6 +1522,7 @@ function onRelayout(ev){
   document.getElementById('presetSel').value = 'custom';
   syncPickers([X[i0], X[i1]]);
   renderRangeStats(DATA.items[KEY], i0, i1);
+  renderFlowTable(DATA.items[KEY]);
 
   const up = {};
   const set = (k, v) => { if (v) up[k] = v; };
