@@ -185,8 +185,8 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
 | | 风险排名百分位 | <img src="docs/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
 | | 板块基金收益日历 | <img src="docs/holdings_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/holdings_calendar.html |
-| | 基金相关性与聚类 | 按"类型"切换的网络图 + 跨类型排行 | https://owen434.github.io/broad-index-dashboard/fund_correlation_report.html |
-| | 基金异常分析 | 8 种方法的异常阈值与近期异常 | https://owen434.github.io/broad-index-dashboard/fund_anomaly_analysis.html |
+| | 基金相关性与聚类 | <img src="docs/基金分组聚类与相关分析.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_correlation_report.html |
+| | 基金异常分析 | <img src="docs/收益率异常分析.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_anomaly_analysis.html |
 | **③ 股指期货持仓** |中信期货 / 前20会员净持仓|<img src="docs/cffex_net_position.png" width="360"> | https://owen434.github.io/broad-index-dashboard/cffex_net_position.html |
 | **④ 黄金** | 多周期均线与斜率 | <img src="docs/黄金多周期均线及动能斜率分析系统.png" width="360"> | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
 
