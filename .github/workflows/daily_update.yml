@@ -81,6 +81,18 @@ jobs:
             cffex-cache-${{ steps.bjt.outputs.day }}-
             cffex-cache-
 
+      # 基金相关性 / 异常分析要拿 16 个大盘指数的日线做对照。指数日线缓存在 funds/index_cache,
+      # 脚本里“缓存最新日期 >= 今天-7天”就直接复用, 否则才联网抓; 不缓存的话每天要重抓 16 个指数。
+      # key 策略同上: 带 run_id 才能回写, restore-keys 退回最近一次。
+      - name: Restore fund index cache
+        uses: actions/cache@v4
+        with:
+          path: funds/index_cache
+          key: fund-index-cache-${{ steps.bjt.outputs.day }}-${{ github.run_id }}
+          restore-keys: |
+            fund-index-cache-${{ steps.bjt.outputs.day }}-
+            fund-index-cache-
+
       - name: Run gold slope analyzer
         working-directory: gold
         run: python gold_ma_slope_analyzer.py
@@ -99,6 +111,19 @@ jobs:
           python fund_score_matrix.py
           python fund_riskrank_percentile.py
           python holdings_calendar.py
+        continue-on-error: true
+
+      # 必须排在上面 "Run fund indicator scripts" 之后: 它们读的是 fetch_fund_nav.py 落下来的
+      # funds/fund_nav_history.csv, 分组依据是 funds_universe_example.csv 的"类型"列。
+      # 两步各自独立 continue-on-error, 互不拖累 (异常分析会 import 相关性脚本里的指数抓取函数)。
+      - name: Run fund correlation report
+        working-directory: funds
+        run: python fund_correlation_report.py
+        continue-on-error: true
+
+      - name: Run fund anomaly analysis
+        working-directory: funds
+        run: python fund_anomaly_analysis.py
         continue-on-error: true
 
       - name: Run stock analysis suite (broad indices only)
