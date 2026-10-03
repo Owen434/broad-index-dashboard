@@ -164,6 +164,8 @@ stocks/   宽基指数看板（K线形态 + 八大指标矩阵 + ZigZag波段看
 funds/    板块基金指标矩阵 / ZigZag信号 / 评分矩阵 / 风险排名百分位 / 收益日历
           含 fetch_fund_nav.py（净值历史抓取，其余脚本运行前先跑这个）
           含 zigzag_signal_analyzer.py（指标 + 评分 + 绘图内核，被 stocks/ 与 holdings_calendar.py 复用）
+          含 fund_correlation_report.py（按"类型"分组的聚类 / 相关性网络图，叠加 16 个宽基指数）
+          含 fund_anomaly_analysis.py（日收益率异常分析：8 种判定方法 + 下一交易日异常区间；复用上一个脚本的指数抓取）
 etf/      45只宽基ETF的申赎资金流看板
 gold/     COMEX黄金多周期均线与斜率分析
 futures/  中金所股指期货会员净持仓（中信期货 / 前20会员，四个宽基品种）
@@ -183,6 +185,8 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
 | | 风险排名百分位 | <img src="docs/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
 | | 板块基金收益日历 | <img src="docs/holdings_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/holdings_calendar.html |
+| | 基金相关性与聚类 | 按"类型"切换的网络图 + 跨类型排行 | https://owen434.github.io/broad-index-dashboard/fund_correlation_report.html |
+| | 基金异常分析 | 8 种方法的异常阈值与近期异常 | https://owen434.github.io/broad-index-dashboard/fund_anomaly_analysis.html |
 | **③ 股指期货持仓** |中信期货 / 前20会员净持仓|<img src="docs/cffex_net_position.png" width="360"> | https://owen434.github.io/broad-index-dashboard/cffex_net_position.html |
 | **④ 黄金** | 多周期均线与斜率 | <img src="docs/黄金多周期均线及动能斜率分析系统.png" width="360"> | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
 
@@ -205,6 +209,7 @@ pip install -r requirements.txt
 cd gold && python gold_ma_slope_analyzer.py
 cd ../etf && python etf_broadbase_dashboard.py
 cd ../funds && python fetch_fund_nav.py && python fund_indicators_matrix.py && python fund_score_matrix.py && python fund_riskrank_percentile.py && python holdings_calendar.py
+python fund_correlation_report.py && python fund_anomaly_analysis.py   # 读 fetch_fund_nav.py 生成的 fund_nav_history.csv，需要先跑过它
 cd ../stocks && python stock_analysis_suite.py && python index_return_calendar.py
 cd ../futures && python cffex_net_position.py --start 20240101   # 首次回填历史，之后不加参数增量更新即可
 ```
@@ -213,6 +218,12 @@ cd ../futures && python cffex_net_position.py --start 20240101   # 首次回填�
 
 ## 已知限制
 
+- `fund_correlation_report.py` / `fund_anomaly_analysis.py` 默认读 `fund_nav_history.csv`（收益率列 `日增长率`，
+  也兼容 `增长率`）和 `funds_universe_example.csv`；分组完全由 CSV 的 `类型` 列决定，
+  类型不足两个时"跨类型"部分为空。两者还会抓 16 个宽基指数做对照，抓不到的指数会列在页面的"未纳入"里，
+  不影响基金本身；指数日线缓存在 `funds/index_cache/`（Actions 里用 actions/cache 持久化）。
+- 异常分析只做判定、不修改任何数据；接口返回收盘价为 0 的指数（例如韩国综合指数最近一天）会被记作 -100%，
+  并标为"疑似数据错误"，不计入正常异常统计。
 - 数据源基于 AKShare 抓取国内财经网站接口，部分环境（尤其是境外网络）偶发限流或超时。
 - 指标矩阵类的宽表格（`fund_indicators_matrix.html`、`stock_8indicators_matrix.html` 等）
   仍是桌面端宽屏设计，手机上需要横向滑动查看；收益日历和股指期货持仓这两个页面

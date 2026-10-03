@@ -6,3 +6,5 @@ openpyxl
 pyarrow
 matplotlib
 requests
+scipy
+scikit-learn
