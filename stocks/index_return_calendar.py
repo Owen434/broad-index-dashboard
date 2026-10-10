@@ -197,8 +197,8 @@ function pctColor(v) {
   return '#fafafa';
 }
 
-const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const WEEK_HEADERS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const WEEK_HEADERS = ['周日','周一','周二','周三','周四','周五','周六'];
 
 function monthMatrix(year, month) {
   const first = new Date(year, month - 1, 1);
@@ -253,7 +253,7 @@ function buildMonthCard(year, month, daily) {
   }
 
   return `<div class="month-card">
-    <div class="month-header">${MONTH_NAMES[month - 1]} ${year}</div>
+    <div class="month-header">${year}年${month}月</div>
     <table class="month-table">
       <thead><tr>${WEEK_HEADERS.map((h, i) => `<th class="${i === 0 || i === 6 ? 'weekend' : ''}">${h}</th>`).join('')}</tr></thead>
       <tbody>${rows}</tbody>
