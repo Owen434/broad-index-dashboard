@@ -126,6 +126,18 @@ jobs:
         run: python fund_anomaly_analysis.py
         continue-on-error: true
 
+      # 回撤 + 过热信号回测：读取完整宽基目录、基金清单和最新基金净值，
+      # 输出单文件交互看板；脚本内部会对拆分/份额折算/分红做复权。
+      - name: Run drawdown backtest dashboard
+        working-directory: drawdown
+        run: >-
+          python drawdown_backtest.py
+          --funds-csv ../funds/funds_universe_example.csv
+          --nav-csv ../funds/fund_nav_history.csv
+          --out drawdown_dashboard.html
+          --plotly-js cdn
+        continue-on-error: true
+
       - name: Run stock analysis suite (broad indices only)
         working-directory: stocks
         run: python stock_analysis_suite.py
