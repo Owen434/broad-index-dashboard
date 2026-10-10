@@ -191,7 +191,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | 板块基金收益日历 | <img src="docs/holdings_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/holdings_calendar.html |
 | | 基金相关性与聚类 | <img src="docs/基金分组聚类与相关性分析.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_correlation_report.html |
 | | 基金异常分析 | <img src="docs/收益率异常分析.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_anomaly_analysis.html |
-| **③ 回撤与信号回测** | 宽基指数 + 基金回撤/过热信号回测 | — | https://owen434.github.io/broad-index-dashboard/drawdown_dashboard.html |
+| **③ 回撤与信号回测** | <img src="docs/回撤与信号回测.png" width="360"> | — | https://owen434.github.io/broad-index-dashboard/drawdown_dashboard.html |
 | **④ 股指期货持仓** |中信期货 / 前20会员净持仓|<img src="docs/cffex_net_position.png" width="360"> | https://owen434.github.io/broad-index-dashboard/cffex_net_position.html |
 | **⑤ 黄金** | 多周期均线与斜率 | <img src="docs/黄金多周期均线及动能斜率分析系统.png" width="360"> | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
 
