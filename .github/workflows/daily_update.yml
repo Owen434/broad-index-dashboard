@@ -59,14 +59,7 @@ jobs:
       # key 带 run_id: actions/cache 命中完全相同的 key 时不会回写, 按天做 key
       # 的话同一天第 2、3 跑新取到的份额(比如早上补齐的沪市)永远存不进去。
       # restore-keys 先找当天最近一跑, 再退到任意一天, 同一天仍然复用。
-      - name: Restore ETF share cache
-        uses: actions/cache@v4
-        with:
-          path: etf/cache_etf
-          key: etf-cache-${{ steps.bjt.outputs.day }}-${{ github.run_id }}
-          restore-keys: |
-            etf-cache-${{ steps.bjt.outputs.day }}-
-            etf-cache-
+
 
       # 中金所持仓排名同理按日取, 4个合约 x 全部交易日。跟 ETF 份额缓存同一套 key 策略:
       # 缓存命中就只增量抓当天, 缓存第一次没命中(仓库刚接入这个脚本时)才会从
