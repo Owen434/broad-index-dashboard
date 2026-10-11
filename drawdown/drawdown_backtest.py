@@ -436,6 +436,29 @@ function renderSummary(){
     tr.onclick=function(){cur=tr.dataset.n;$('pick').value=cur;render();};});
 }
 
+
+function renderDrawdownRanking(){
+  const rows=[];
+  filteredNames().forEach(function(n){
+    const t=DATA[n],i0=lowerBound(t.d,start),i1=upperIdx(t.d,end);
+    if(i1-i0>=1)rows.push({name:n,i1:i1,s:ddStats(t,i0,i1)});
+  });
+  rows.sort(function(a,b){
+    if(a.s.cur!==b.s.cur)return a.s.cur-b.s.cur;
+    return a.name.localeCompare(b.name);
+  });
+  let h='<table><tr><th>排名</th><th>标的</th><th>区间末日</th><th>当前回撤</th><th>历史深度百分位</th><th>区间最大回撤</th><th>水下天数</th></tr>';
+  rows.forEach(function(x,k){
+    h+='<tr class="clk'+(x.name===cur?' pick':'')+'" data-n="'+x.name+'"><td>'+String(k+1)+'</td><td>'+x.name+'</td><td>'+DATA[x.name].d[x.i1]+'</td>'+ 
+      '<td class="dn">'+fp(x.s.cur)+'</td><td>'+x.s.pct.toFixed(1)+'%</td><td>'+fp(x.s.mdd)+'</td><td>'+x.s.uw+'</td></tr>';
+  });
+  if(!rows.length)h+='<tr><td colspan="7" style="text-align:left;color:#888">所选区间内没有足够的历史数据</td></tr>';
+  $('ddrank').innerHTML=h+'</table>';
+  document.querySelectorAll('#ddrank tr.clk').forEach(function(tr){
+    tr.onclick=function(){cur=tr.dataset.n;$('pick').value=cur;render();};
+  });
+}
+
 function renderTarget(){
   const t=DATA[cur],i0=lowerBound(t.d,start),i1=upperIdx(t.d,end);
   const msg=$('msg');
@@ -511,7 +534,7 @@ function renderTarget(){
   });
   $('eps').innerHTML=eps.length?e+'</table>':'<p class="note">区间内无回撤记录</p>';
 }
-function render(){syncSelectors();renderSummary();renderTarget();}
+function render(){syncSelectors();renderSummary();renderDrawdownRanking();renderTarget();}
 
 window.addEventListener('DOMContentLoaded',function(){
   $('section').onchange=function(){section=this.value;typeName='全部';render();};
@@ -554,6 +577,8 @@ __PLOTLY__
 <div class="card"><h2>汇总（点击行切换标的）</h2><div class="scroll" id="summary"></div></div>
 <div class="card"><div class="cards" id="cards"></div><p class="note" id="adj"></p></div>
 <div class="card"><div id="chart1"></div></div>
+<div class="card"><h2>回撤排名与历史百分位</h2><div class="scroll" id="ddrank"></div>
+<p class="note">按区间末日的当前回撤从深到浅排名；历史深度百分位基于所选区间内每日回撤序列计算，数值越高表示当前回撤越接近该区间的极端水平。点击行可切换标的。</p></div>
 <div class="card"><h2>过热信号回测</h2><div class="scroll" id="stats"></div>
 <div id="chart2"></div>
 <p class="note">"最大浮亏"＝入场后持有期内相对入场价的最低点；箱线图为区间内各等级当日之后 20 日收益（全部天数，含重叠，仅看形状）。以上均为历史统计，不构成投资建议。</p></div>
