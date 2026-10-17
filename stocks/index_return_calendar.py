@@ -120,6 +120,10 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
   .stats-col table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
   .stats-col th, .stats-col td { border:1px solid #e5e7eb; padding:5px 8px; text-align:center; }
   .stats-col th { background:#f9fafb; color:#1f2937; font-weight:bold; }
+  .ret-dist-title { margin-top:18px !important; }
+  #ret-dist { width:100%; }
+  #ret-dist svg { display:block; width:100%; }
+  .ret-dist-cap { color:#6b7280; font-size:11px; margin:0 0 4px 0; }
   .hidden { display:none !important; }
   #ranking-title { text-align:center; color:#4338ca; font-size:15px; margin:14px 0 10px 0; font-weight:bold; }
   .rank-table-wrap { overflow-x:auto; }
@@ -167,6 +171,8 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
       <div class="stats-col">
         <h4>星期统计（当前年份）</h4>
         <table id="weekday-table"></table>
+        <h4 class="ret-dist-title">涨幅分布（当前年份）</h4>
+        <div id="ret-dist"></div>
       </div>
       <div class="stats-col">
         <h4>月份统计（当前年份）</h4>
@@ -275,6 +281,82 @@ function buildStatsRows(entries) {
   }).join('');
 }
 
+function renderReturnDist(vals) {
+  const box = document.getElementById('ret-dist');
+  if (!box) return;
+  window._lastRetVals = vals;
+  if (!vals || !vals.length) { box.innerHTML = '<div class="rank-empty">暂无数据</div>'; return; }
+
+  // 自适应箱宽：取能让箱数 <= 20 的最小步长
+  const lo0 = Math.min(...vals), hi0 = Math.max(...vals);
+  const steps = [0.05, 0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10];
+  let step = steps[steps.length - 1];
+  for (const s of steps) {
+    const n = Math.floor(hi0 / s + 1e-9) - Math.floor(lo0 / s + 1e-9) + 1;
+    if (n <= 20) { step = s; break; }
+  }
+  const iLo = Math.floor(lo0 / step + 1e-9), iHi = Math.floor(hi0 / step + 1e-9);
+  const nb = iHi - iLo + 1;
+  const counts = new Array(nb).fill(0);
+  vals.forEach(v => { counts[Math.floor(v / step + 1e-9) - iLo] += 1; });
+
+  const maxC = Math.max(...counts);
+  const tickStep = maxC <= 10 ? 2 : maxC <= 25 ? 5 : maxC <= 50 ? 10 : 20;
+  const yMax = Math.ceil(maxC * 1.1 / tickStep) * tickStep;
+
+  const W = Math.max(box.clientWidth || 560, 300), H = 280;
+  const m = { l: 40, r: 12, t: 22, b: 44 };
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const bw = pw / nb;
+  const dec = step < 0.1 ? 2 : step < 1 ? (step === 0.25 ? 2 : 1) : 0;
+  const fmtEdge = i => (i * step).toFixed(dec);
+  const yOf = c => m.t + ph - c / yMax * ph;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif">`;
+  // 横向网格 + y 轴刻度
+  for (let t = 0; t <= yMax; t += tickStep) {
+    const y = yOf(t);
+    svg += `<line x1="${m.l}" y1="${y}" x2="${W - m.r}" y2="${y}" stroke="#e5e7eb" stroke-dasharray="3,3"/>`;
+    svg += `<text x="${m.l - 6}" y="${y + 3}" font-size="10" fill="#4b5563" text-anchor="end">${t}</text>`;
+  }
+  // 柱子：涨红跌蓝（箱下界 >= 0 为涨）
+  counts.forEach((c, k) => {
+    const idx = iLo + k;
+    const x = m.l + k * bw + bw * 0.1;
+    const w = bw * 0.8;
+    const color = idx >= 0 ? '#ff6b6b' : '#66b3ff';
+    if (c > 0) {
+      const y = yOf(c);
+      svg += `<rect x="${x}" y="${y}" width="${w}" height="${m.t + ph - y}" fill="${color}"><title>${fmtEdge(idx)}% ~ ${fmtEdge(idx + 1)}%：${c} 天</title></rect>`;
+      svg += `<text x="${x + w / 2}" y="${y - 4}" font-size="10" fill="#1f2937" text-anchor="middle">${c}</text>`;
+    }
+  });
+  // x 轴边界刻度（箱太窄时隔一个标一个）
+  const skip = bw < 34 ? Math.ceil(34 / bw) : 1;
+  for (let k = 0; k <= nb; k++) {
+    const idx = iLo + k;
+    const x = m.l + k * bw;
+    svg += `<line x1="${x}" y1="${m.t + ph}" x2="${x}" y2="${m.t + ph + 4}" stroke="#6b7280"/>`;
+    if (k % skip === 0) svg += `<text x="${x}" y="${m.t + ph + 16}" font-size="10" fill="#4b5563" text-anchor="middle">${fmtEdge(idx)}</text>`;
+  }
+  // 0 轴
+  if (iLo <= 0 && iHi + 1 >= 0) {
+    const x0 = m.l + (0 - iLo) * bw;
+    svg += `<line x1="${x0}" y1="${m.t}" x2="${x0}" y2="${m.t + ph}" stroke="#9ca3af" stroke-dasharray="4,3"/>`;
+  }
+  // 坐标轴
+  svg += `<line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${m.t + ph}" stroke="#111827"/>`;
+  svg += `<line x1="${m.l}" y1="${m.t + ph}" x2="${W - m.r}" y2="${m.t + ph}" stroke="#111827"/>`;
+  svg += `<text x="${m.l + pw / 2}" y="${H - 6}" font-size="11" fill="#1f2937" text-anchor="middle">日涨跌幅（%，每格 ${step}%）</text>`;
+  svg += `<text transform="translate(11 ${m.t + ph / 2}) rotate(-90)" font-size="11" fill="#1f2937" text-anchor="middle">出现天数</text>`;
+  svg += `</svg>`;
+
+  const up = vals.filter(v => v > 0).length, down = vals.filter(v => v < 0).length;
+  box.innerHTML = `<div class="ret-dist-cap">样本 ${vals.length} 天｜上涨 ${up} 天｜下跌 ${down} 天｜最大涨幅 ${fmtPct(hi0)}｜最大跌幅 ${fmtPct(lo0)}</div>` + svg;
+}
+
+window.addEventListener('resize', () => { if (window._lastRetVals) renderReturnDist(window._lastRetVals); });
+
 function renderAll() {
   const entity = DATA.entities.find(e => e.id === currentEntity);
   if (!entity) return;
@@ -317,6 +399,8 @@ function renderAll() {
   document.getElementById('month-table').innerHTML =
     '<thead><tr><th>月份</th><th>交易天数</th><th>上涨天数</th><th>下跌天数</th><th>上涨概率</th><th>平均涨跌幅</th></tr></thead><tbody>' +
     buildStatsRows(monthEntries) + '</tbody>';
+
+  renderReturnDist(Object.values(daily));
 }
 
 function setCategory(cat) {
