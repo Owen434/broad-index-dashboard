@@ -35,7 +35,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CORE_CANDIDATES = ['etf_broadbase_dashboard.py', '4_etf_broadbase_dashboard.py']  # 找不到再用通配
 DATA_FILE = 'etf_flow.parquet'          # 与 ETF 脚本的 OUT_DATA 保持一致
 OUTPUT_FILE = 'etf_net_flow_calendar.html'
-YEARS_BACK = 2                          # 展示今年 + 去年
+YEARS_BACK = 3                         
 
 # 属于「宽基」的分组（与 ETF_UNIVERSE 里的分组名一致），其余归为「行业主题」
 BROAD_GROUPS = {
