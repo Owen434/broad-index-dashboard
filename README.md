@@ -149,7 +149,7 @@
 <tr><td>📐 <b>指标算法统一口径</b></td><td>MACD / RSI / BIAS / KDJ / CCI / SAR / BOLL / BW% 八大指标 + ZigZag 波浪辨识 + 过热评分，所有脚本共用同一套内核（<code>zigzag_signal_analyzer.py</code>），换脚本看数据口径不会变。</td></tr>
 <tr><td>📉 <b>回撤与过热信号回测</b></td><td>统一纳入项目维护的16个宽基指数和完整基金清单，按“宽基指数 / 基金 → 类型 → 标的”筛选，统计区间收益、最大回撤、当前回撤、水下天数，以及进入不同风险等级后的5/20/60日收益和最大浮亏；基金净值先处理拆分、份额折算和分红除权。</td></tr>
 <tr><td>🖱️ <b>交互式而不是静态图</b></td><td>K线形态、指标矩阵、评分看板都能缩放、切换时间范围、导出截图，不是一张扁平的 PNG。</td></tr>
-<tr><td>📅 <b>收益日历，一眼看连涨连跌</b></td><td>宽基指数和板块/持有基金各有一份交互式收益日历：红涨绿跌铺成12宫格挂历，按分类/年份切换标的，下方配套星期、月份胜率统计表；再切一个"月度排名看板"视图，同类型标的按最新月份收益倒排、逐月对比。原来是逐个标的、逐年导出高清 PNG（一次跑下来几十上百 MB），现在无论多少标的都只是一个几十~上百 KB 的 HTML，仓库体积不会因为每天自动提交而失控。</td></tr>
+<tr><td>📅 <b>收益与资金流日历，一眼看连涨连跌</b></td><td>宽基指数和板块/持有基金各有一份交互式收益日历；ETF另有一份净申赎金额日历。日历把数据铺成12宫格挂历，按分类/年份切换标的，下方配套统计表；收益日历还提供“月度排名看板”视图，同类型标的按最新月份收益倒排、逐月对比。原来是逐个标的、逐年导出高清 PNG（一次跑下来几十上百 MB），现在无论多少标的都只是一个几十~上百 KB 的 HTML，仓库体积不会因为每天自动提交而失控。</td></tr>
 <tr><td>📦 <b>单文件 HTML，离线可开</b></td><td>Plotly.js 按需内嵌或走本地目录引用，生成的 HTML 拷走就能用，不依赖联网。</td></tr>
 <tr><td>🔄 <b>每日自动更新</b></td><td>GitHub Actions 定时跑一遍，最新数据自动发布到本仓库的 GitHub Pages，不用自己维护服务器。</td></tr>
 </table>
@@ -170,7 +170,8 @@ funds/    板块基金指标矩阵 / ZigZag信号 / 评分矩阵 / 风险排名�
 drawdown/ 回撤与过热信号回测看板
           自动加载 stocks/ 中维护的 16 个宽基指数和 funds/funds_universe_example.csv 中的全部基金
           HTML 按“板块 → 类型 → 标的”筛选，并处理基金净值拆分、份额折算和分红除权
-etf/      45只宽基ETF的申赎资金流看板
+etf/      45只宽基ETF的申赎资金流看板 + 净申赎金额日历
+          etf_net_flow_calendar.py 复用 etf_broadbase_dashboard.py 生成的 etf_flow.parquet，不重复抓取
 gold/     COMEX黄金多周期均线与斜率分析
 futures/  中金所股指期货会员净持仓（中信期货 / 前20会员，四个宽基品种）
           含 cffex_net_position.py（抓取+计算+出图三合一，output_cffex/ 下存缓存和历史文件）
@@ -184,6 +185,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | ZigZag 波段看板 | <img src="docs/宽基波段信号量化看板.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
 | | 评分矩阵 | <img src="docs/宽基风险评分矩阵.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_scorematrix.html |
 | | 45只宽基ETF资金流看板 | <img src="docs/ETF资金流向.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
+| | ETF净申赎金额日历 | — | https://owen434.github.io/broad-index-dashboard/etf_net_flow_calendar.html |
 | | 宽基收益日历 | <img src="docs/index_return_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/index_return_calendar.html |
 | **② 板块基金** | 八大指标矩阵 |  <img src="docs/基金八大指标矩阵.png" width="360">  | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
@@ -213,6 +215,9 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 pip install -r requirements.txt
 cd gold && python gold_ma_slope_analyzer.py
 cd ../etf && python etf_broadbase_dashboard.py
+python etf_net_flow_calendar.py       # 复用上一步生成的 etf_flow.parquet
+# 首次没有 parquet，或希望重新抓取 ETF 数据时：
+python etf_net_flow_calendar.py --refresh
 cd ../funds && python fetch_fund_nav.py && python fund_indicators_matrix.py && python fund_score_matrix.py && python fund_riskrank_percentile.py && python holdings_calendar.py
 python fund_correlation_report.py && python fund_anomaly_analysis.py   # 读 fetch_fund_nav.py 生成的 fund_nav_history.csv，需要先跑过它
 cd ../stocks && python stock_analysis_suite.py && python index_return_calendar.py
@@ -243,6 +248,9 @@ cd ../futures && python cffex_net_position.py --start 20240101   # 首次回填�
   不影响日历本身的浏览和切换。
 - 收益日历目前只展示近两个自然年（今年+去年），如果需要更长历史，
   改 `YEARS_BACK` 常量即可，代价是 HTML 文件会等比例变大。
+- `etf/etf_net_flow_calendar.py` 默认读取 `etf_flow.parquet`，该文件由
+  `etf_broadbase_dashboard.py` 生成；如果文件不存在，脚本会自动回退到重新运行 ETF
+  采集。Actions 中已将两个步骤串联，日历不会额外重复抓取。
 - `futures/cffex_net_position.py` 抓的是中金所官网直连数据（非 AKShare 接口），
   首次运行会从 2024-01-01 全量回填、请求量较大（4个合约 × 全部交易日，几百次请求），
   用 `FETCH_WORKERS` 个线程小并发抓，通常几分钟内跑完；接入 `daily_update.yml` 后
