@@ -185,7 +185,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | ZigZag 波段看板 | <img src="docs/宽基波段信号量化看板.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_zigzag_signal_analyzer.html |
 | | 评分矩阵 | <img src="docs/宽基风险评分矩阵.png" width="360"> | https://owen434.github.io/broad-index-dashboard/stock_scorematrix.html |
 | | 45只宽基ETF资金流看板 | <img src="docs/ETF资金流向.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
-| | ETF净申赎金额日历 | — | https://owen434.github.io/broad-index-dashboard/etf_net_flow_calendar.html |
+| | ETF净申赎金额日历 | <img src="docs/ETF净申赎金额日历.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_net_flow_calendar.html |
 | | 宽基收益日历 | <img src="docs/index_return_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/index_return_calendar.html |
 | **② 板块基金** | 八大指标矩阵 |  <img src="docs/基金八大指标矩阵.png" width="360">  | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
