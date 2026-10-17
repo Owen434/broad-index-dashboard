@@ -103,6 +103,12 @@ jobs:
         run: python etf_broadbase_dashboard.py
         continue-on-error: true
 
+      # 净申赎日历直接读取上一步生成的 etf_flow.parquet，避免重复抓取数据。
+      - name: Run ETF net-flow calendar
+        working-directory: etf
+        run: python etf_net_flow_calendar.py
+        continue-on-error: true
+
       - name: Run fund indicator scripts
         working-directory: funds
         run: |
