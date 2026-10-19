@@ -110,6 +110,12 @@ _HTML_TEMPLATE = r"""<!DOCTYPE html>
   .month-table td.day { text-align:center; vertical-align:top; border:1px solid #f3f4f6; height:36px; font-size:10px; color:#4b5563; padding:2px; background:#fafafa; }
   .month-table td.day.has-val { color:#111827; }
   .month-table td.empty { border:none; background:transparent; }
+  .streak-tag { font-size:8px; white-space:nowrap; }
+  .streak-selected { outline:2px solid #4338ca; outline-offset:-2px; }
+  #streak-details { margin-top:10px; }
+  .streak-controls { font-size:12px; margin:12px 0 6px; }
+  .streak-controls input { width:52px; margin:0 4px; }
+  .streak-controls select { margin-right:8px; }
   .day-num { font-weight:bold; font-size:11px; }
   .day-val { font-size:9px; font-weight:bold; }
   .month-stat { text-align:center; font-size:11px; margin-top:4px; font-weight:bold; color:#374151; }
@@ -225,7 +231,7 @@ function monthMatrix(year, month) {
 
 function fmtPct(v) { return (v >= 0 ? '+' : '') + v.toFixed(2) + '%'; }
 
-function buildMonthCard(year, month, daily) {
+function buildMonthCard(year, month, daily, streakByDate = new Map()) {
   const weeks = monthMatrix(year, month);
   const rets = [];
   let rows = '';
@@ -239,7 +245,10 @@ function buildMonthCard(year, month, daily) {
         row += `<td class="day"><div class="day-num">${day}</div></td>`;
       } else {
         rets.push(v);
-        row += `<td class="day has-val" style="background:${pctColor(v)};"><div class="day-num">${day}</div><div class="day-val">${fmtPct(v)}</div></td>`;
+        const streak = streakByDate.get(key);
+        const tag = streak ? `<div class="streak-tag">${streak.direction > 0 ? '涨' : '跌'}${streak.dates.indexOf(key) + 1}/${streak.length}</div>` : '';
+        const tip = streak ? `${streak.start} 至 ${streak.end}，连${streak.direction > 0 ? '涨' : '跌'}${streak.length}天，累计${fmtPct(streak.cumulative)}` : '';
+        row += `<td class="day has-val" data-date="${key}" title="${tip}" style="background:${pctColor(v)};"><div class="day-num">${day}</div><div class="day-val">${fmtPct(v)}</div>${tag}</td>`;
       }
     });
     row += '</tr>';
@@ -284,40 +293,112 @@ function buildStatsRows(entries) {
 // 按日期排序后，以相邻交易记录构成连续段；平盘中断，休市日不打断。
 // 每段只计一次，包含年内首尾截断的段，长度只统计当前年份内的交易日。
 function buildStreakDistribution(daily) {
-  const counts = new Map();
-  let direction = 0, length = 0;
+  const counts = new Map(), runs = [];
+  let direction = 0, dates = [], product = 1;
   let upRuns = 0, downRuns = 0, maxUp = 0, maxDown = 0;
   let sampleDays = 0, flatDays = 0;
-  function flush() {
+  function flush(ended = true) {
+    const length = dates.length;
     if (!length) return;
-    const key = direction * length;
-    counts.set(key, (counts.get(key) || 0) + 1);
+    counts.set(direction * length, (counts.get(direction * length) || 0) + 1);
+    runs.push({ direction, length, dates, start: dates[0], end: dates[length - 1],
+      cumulative: (product - 1) * 100, ended });
     if (direction > 0) { upRuns++; maxUp = Math.max(maxUp, length); }
     else { downRuns++; maxDown = Math.max(maxDown, length); }
-    direction = 0;
-    length = 0;
+    direction = 0; dates = []; product = 1;
   }
-  Object.entries(daily).sort(([a], [b]) => a.localeCompare(b)).forEach(([, value]) => {
-    if (!Number.isFinite(value)) { flush(); return; }
+  Object.entries(daily).sort(([a], [b]) => a.localeCompare(b)).forEach(([date, value]) => {
+    // 缺失记录不能证明前一段已结束；平盘或反向交易日才能证明。
+    if (!Number.isFinite(value)) { flush(false); return; }
     sampleDays++;
     const sign = Math.sign(value);
     if (!sign) { flatDays++; flush(); return; }
     if (sign !== direction) { flush(); direction = sign; }
-    length++;
+    dates.push(date);
+    product *= 1 + value / 100;
   });
-  flush();
-  return { counts, upRuns, downRuns, maxUp, maxDown, sampleDays, flatDays };
+  flush(false);
+  return { counts, runs, upRuns, downRuns, maxUp, maxDown, sampleDays, flatDays };
+}
+
+// 每段到达 known 天时记一次条件事件；无法判断结果的尾段不进分母。
+function streakProbability(runs, direction, known, target) {
+  const eligible = runs.filter(r => r.direction === direction && r.length >= known &&
+    (r.ended || r.length >= target));
+  const success = eligible.filter(r => r.length >= target).length;
+  return { total: eligible.length, success,
+    probability: eligible.length ? success / eligible.length * 100 : null };
+}
+
+function renderStreakDetails(runs, selectedDays = null) {
+  const details = document.getElementById('streak-details');
+  const chosen = runs.filter(r => selectedDays === null ? r.length >= 2 : r.direction * r.length === selectedDays);
+  const selectedDates = new Set(selectedDays === null ? [] : chosen.flatMap(r => r.dates));
+  document.querySelectorAll('#calendar-grid [data-date]').forEach(cell =>
+    cell.classList.toggle('streak-selected', selectedDates.has(cell.dataset.date)));
+  const title = selectedDays === null ? '连涨／连跌出现位置（至少2天）' :
+    `连${selectedDays > 0 ? '涨' : '跌'}${Math.abs(selectedDays)}天的出现位置`;
+  details.innerHTML = `<h4>${title}</h4><div class="ret-dist-cap">点击分布柱筛选并高亮对应日期；点击下方按钮恢复全部。</div>` +
+    '<button type="button" id="streak-reset">显示全部连涨／连跌段</button>' +
+    '<table><thead><tr><th>方向</th><th>起止日期</th><th>交易天数</th><th>累计涨跌幅</th></tr></thead><tbody>' +
+    chosen.map(r => `<tr title="交易日期：${r.dates.join('、')}"><td>连${r.direction > 0 ? '涨' : '跌'}</td><td>${r.start} ～ ${r.end}</td><td>${r.length}</td><td>${fmtPct(r.cumulative)}</td></tr>`).join('') +
+    (chosen.length ? '' : '<tr><td colspan="4">暂无对应记录</td></tr>') + '</tbody></table>';
+  document.getElementById('streak-reset').onclick = () => renderStreakDetails(runs);
+}
+
+function renderStreakExtras(runs) {
+  const box = document.getElementById('ret-dist');
+  const average = items => items.length ? fmtPct(items.reduce((sum, r) => sum + r.cumulative, 0) / items.length) : '暂无样本';
+  const lengths = [...new Set(runs.map(r => r.length))].sort((a, b) => a - b);
+  box.insertAdjacentHTML('beforeend', '<h4 class="ret-dist-title">平均连涨／连跌幅度</h4>' +
+    '<div class="ret-dist-cap">每段先复利累计，再按段等权平均；与分布图一致，包含单日段和年内首尾截断段。</div>' +
+    '<table><thead><tr><th>连续天数</th><th>连涨段数</th><th>平均累计涨幅</th><th>连跌段数</th><th>平均累计跌幅</th></tr></thead><tbody>' +
+    [null, ...lengths].map(n => {
+      const up = runs.filter(r => r.direction > 0 && (n === null || r.length === n));
+      const down = runs.filter(r => r.direction < 0 && (n === null || r.length === n));
+      return `<tr><td>${n === null ? '全部段' : n + '天'}</td><td>${up.length}</td><td>${average(up)}</td><td>${down.length}</td><td>${average(down)}</td></tr>`;
+    }).join('') + '</tbody></table>' +
+    '<h4 class="ret-dist-title">条件概率（当前年份）</h4>' +
+    '<div class="streak-controls"><select id="streak-direction"><option value="-1">连跌</option><option value="1">连涨</option></select>' +
+    '已连续<input id="streak-known" type="number" min="1" step="1" value="3">天，目标累计连续<input id="streak-target" type="number" min="4" step="1" value="4">天</div>' +
+    '<div id="streak-probability" class="ret-dist-cap"></div>' +
+    '<div class="ret-dist-cap">每段到达已知天数时计一次；平盘或反向即失败；未观察到结果的尾段不计入分母。仅用当前年份数据，年初截断段按年内天数计算。</div>' +
+    '<div id="streak-details"></div>');
+  const controls = ['streak-direction', 'streak-known', 'streak-target'].map(id => document.getElementById(id));
+  function updateProbability() {
+    const direction = Number(controls[0].value), known = Number(controls[1].value), target = Number(controls[2].value);
+    const output = document.getElementById('streak-probability');
+    controls[2].min = Number.isInteger(known) && known > 0 ? known + 1 : 2;
+    if (!Number.isSafeInteger(known) || !Number.isSafeInteger(target) || known < 1 || target <= known) {
+      output.textContent = '请输入正整数，目标累计天数须大于已连续天数。'; return;
+    }
+    function describe(k, t) {
+      const p = streakProbability(runs, direction, k, t), word = direction > 0 ? '涨' : '跌';
+      return `已${word}${k}天，再${word}${t - k}天（累计${t}天）：` +
+        (p.probability === null ? '暂无可判断样本' : `${p.probability.toFixed(2)}%（${p.success}/${p.total}段）`);
+    }
+    output.textContent = describe(known, target);
+    if (known === 3 && target === 4) output.textContent += '；' + describe(3, 7);
+  }
+  controls.forEach(control => control.addEventListener('input', updateProbability));
+  updateProbability();
+  box.querySelectorAll('[data-streak-days]').forEach(bar => {
+    const select = () => renderStreakDetails(runs, Number(bar.dataset.streakDays));
+    bar.addEventListener('click', select);
+    bar.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); } });
+  });
+  renderStreakDetails(runs);
 }
 
 function renderStreakDist(daily) {
   const box = document.getElementById('ret-dist');
   if (!box) return;
   window._lastStreakDaily = daily;
-  const { counts, upRuns, downRuns, maxUp, maxDown, sampleDays, flatDays } = buildStreakDistribution(daily);
+  const { counts, runs, upRuns, downRuns, maxUp, maxDown, sampleDays, flatDays } = buildStreakDistribution(daily);
   if (!sampleDays) { box.innerHTML = '<div class="rank-empty">暂无数据</div>'; return; }
   const caption = `<div class="ret-dist-cap">样本 ${sampleDays} 个交易日｜连涨 ${upRuns} 段｜连跌 ${downRuns} 段｜最长连涨 ${maxUp} 天｜最长连跌 ${maxDown} 天｜平盘 ${flatDays} 天</div>` +
     '<div class="ret-dist-cap">每段计一次，含单日段和年内首尾段；仅统计本年交易日，平盘中断，休市不打断。</div>';
-  if (!counts.size) { box.innerHTML = caption + '<div class="rank-empty">本年均为平盘，无连涨／连跌段</div>'; return; }
+  if (!counts.size) { box.innerHTML = caption + '<div class="rank-empty">本年均为平盘，无连涨／连跌段</div>'; renderStreakExtras(runs); return; }
 
   // 一根柱对应一个整数天数，负数为连跌，正数为连涨，不含 0。
   const bins = [];
@@ -346,7 +427,7 @@ function renderStreakDist(daily) {
     const label = `连${days > 0 ? '涨' : '跌'} ${Math.abs(days)} 天：${c} 次`;
     if (c > 0) {
       const y = yOf(c);
-      svg += `<rect x="${x}" y="${y}" width="${w}" height="${m.t + ph - y}" fill="${days > 0 ? '#ff6b6b' : '#66b3ff'}"><title>${label}</title></rect>`;
+      svg += `<rect data-streak-days="${days}" tabindex="0" role="button" aria-label="${label}，查看出现日期" style="cursor:pointer" x="${x}" y="${y}" width="${w}" height="${m.t + ph - y}" fill="${days > 0 ? '#ff6b6b' : '#66b3ff'}"><title>${label}</title></rect>`;
       svg += `<text x="${cx}" y="${y - 4}" font-size="10" fill="#1f2937" text-anchor="middle">${c}</text>`;
     }
     svg += `<line x1="${cx}" y1="${m.t + ph}" x2="${cx}" y2="${m.t + ph + 4}" stroke="#6b7280"/>`;
@@ -362,6 +443,7 @@ function renderStreakDist(daily) {
   svg += `<text transform="translate(11 ${m.t + ph / 2}) rotate(-90)" font-size="11" fill="#1f2937" text-anchor="middle">出现次数</text>`;
   svg += '</svg>';
   box.innerHTML = caption + svg;
+  renderStreakExtras(runs);
 }
 
 window.addEventListener('resize', () => { if (window._lastStreakDaily) renderStreakDist(window._lastStreakDaily); });
@@ -381,8 +463,10 @@ function renderAll() {
   document.getElementById('entity-title').textContent = `${entity.name}（${entity.category}） - ${currentYear}年 收益日历`;
 
   const daily = entity.years[currentYear];
+  const streakByDate = new Map();
+  buildStreakDistribution(daily).runs.filter(r => r.length >= 2).forEach(r => r.dates.forEach(d => streakByDate.set(d, r)));
   let calHtml = '';
-  for (let m = 1; m <= 12; m++) calHtml += buildMonthCard(parseInt(currentYear, 10), m, daily);
+  for (let m = 1; m <= 12; m++) calHtml += buildMonthCard(parseInt(currentYear, 10), m, daily, streakByDate);
   document.getElementById('calendar-grid').innerHTML = calHtml;
 
   const wdNames = { 1: '星期一', 2: '星期二', 3: '星期三', 4: '星期四', 5: '星期五' };
