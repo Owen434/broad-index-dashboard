@@ -88,7 +88,7 @@ OUT_DATA = Path("etf_flow.parquet")
 
 EMBED_PLOTLY_JS = True     # True=内联 plotly.min.js(约3.5MB, 离线可开); False=CDN
 SPLIT_THRESHOLD = 0.5      # 单日份额变动超此比例 -> 判定为份额折算, 净申赎置空
-MAX_GAP_DAYS = 7           # 份额序列断档超过该自然日数, 份额变动置空
+MAX_GAP_TDAYS = 5          # 份额序列断档超过该交易日数, 份额变动置空(按交易日而非自然日, 长假不误伤)
 PCT_WINDOW = 120           # 分位数滚动窗口(交易日)
 PCT_MIN = 40               # 分位数最小样本
 MAX_WORKERS = 6
@@ -767,13 +767,17 @@ def build_one(code: str, shares_all: pd.DataFrame, nav_all: pd.DataFrame) -> pd.
     df["复权价"], df["复权方式"] = build_adjusted_price(df["收盘价"], df["日增长率"])
 
     # ---- 份额变动 / 申赎
-    df["申购赎回"] = df["基金份额"].diff()
-    df["前日份额"] = df["基金份额"].shift(1)
-    df["变动比例"] = df["申购赎回"] / df["前日份额"]
+    # 与"上一个有份额的交易日"做差(而不是紧邻上一行): 某天份额缺失不会连带清空次日;
+    # 断档按交易日个数(df 每行即一个交易日)判断, 国庆/春节等长假后的首个交易日间隔只有 1。
+    prev_sh = df["基金份额"].ffill().shift(1)
+    df["前日份额"] = prev_sh
+    df["申购赎回"] = df["基金份额"] - prev_sh
+    df["变动比例"] = df["申购赎回"] / prev_sh
 
-    obs = df["日期"].where(df["基金份额"].notna())
-    gap = obs.ffill().diff().dt.days
-    df.loc[gap > MAX_GAP_DAYS, ["申购赎回", "变动比例"]] = np.nan
+    row_no = pd.Series(np.arange(len(df), dtype=float), index=df.index)
+    prev_pos = row_no.where(df["基金份额"].notna()).ffill().shift(1)
+    gap_td = row_no - prev_pos
+    df.loc[gap_td > MAX_GAP_TDAYS, ["申购赎回", "变动比例"]] = np.nan
 
     df["疑似折算"] = df["变动比例"].abs() > SPLIT_THRESHOLD
     df.loc[df["疑似折算"], "申购赎回"] = np.nan
@@ -1087,7 +1091,7 @@ __PLOTLY__
   <footer>
     分位 = 当日 |净申赎金额| 在过去 __PCTWIN__ 个交易日中的位置(剔除当日自身), 样本不足 __PCTMIN__ 天不出值;
     上方 80% 虚线以上为异常放量申赎, 20% 虚线以下为清淡。<br>
-    单日份额变动超过 __SPLIT__% 判定为份额折算并置空; 份额序列断档超过 __GAP__ 个自然日的首个数据点也置空, 避免把补报当成申赎。<br>
+    单日份额变动超过 __SPLIT__% 判定为份额折算并置空; 份额序列断档超过 __GAP__ 个交易日的首个数据点也置空, 避免把补报当成申赎。<br>
     "选定区间"一行的指标只统计区间内有效交易日: 区间净申赎 = 逐日净申赎金额求和(折算日/断档日不计入),
     区间份额变化 = 区间末有效份额 - 区间首有效份额, 两者会因为剔除折算日而对不上, 属预期。<br>
     区间可用快捷项或日历自定义, 在图上框选缩放同样会回写到日历并刷新区间指标; 双击图表还原到当前日历区间。
@@ -1769,7 +1773,7 @@ def write_html(payload: dict) -> None:
             .replace("__PCTWIN__", str(PCT_WINDOW))
             .replace("__PCTMIN__", str(PCT_MIN))
             .replace("__SPLIT__", str(int(SPLIT_THRESHOLD * 100)))
-            .replace("__GAP__", str(MAX_GAP_DAYS)))
+            .replace("__GAP__", str(MAX_GAP_TDAYS)))
     OUT_HTML.write_text(html, encoding="utf-8")
     size_mb = OUT_HTML.stat().st_size / 1024 / 1024
     mode = "内联plotly.js(离线可开)" if EMBED_PLOTLY_JS else "CDN(需外网)"
