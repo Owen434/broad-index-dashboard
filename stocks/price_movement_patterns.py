@@ -10,6 +10,7 @@
 
 import os
 import time
+import threading
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -51,6 +52,32 @@ SIGNAL_RECENT_DAYS = 500
 #   'v1' = 看涨+向上缺口+量价看多 / 看跌+向下缺口+量价看空（原始口径）
 #   'v2' = 向上缺口+量价看多 / 向下缺口+量价看空（剔除未通过稳定性检验的形态项）
 SIGNAL_SCHEME = 'v1'
+
+# ----------------------------- 0.0.1 CI 环境下的 V8 安全取数 -----------------------------
+# akshare 的部分新浪系接口(stock_zh_index_daily / index_us_stock_sina / stock_hk_index_daily_sina
+# / index_global_hist_sina / stock_zh_a_daily ...)内部用 py_mini_racer(V8) 解码。
+# 多线程并发或在不同线程里反复初始化 V8，会触发
+#   [FATAL] partition_address_space.cc: Check failed: !IsConfigurablePoolInitialized()
+# 整个 Python 进程直接中止(退出码 133)，try/except 抓不到。
+#
+# 做法：GitHub Actions 会自动设置环境变量 CI=true。CI 下把所有 akshare 取数调用
+# 统一派发到「同一个专用线程」上串行执行，无论调用方有多少线程，V8 都只在这一个线程里初始化。
+# 本地(没有 CI 变量)不受影响，仍然是原来的多线程并发。
+_IN_CI = bool(os.environ.get("CI"))
+_FETCH_EXEC = None
+_FETCH_EXEC_LOCK = threading.Lock()
+
+
+def _ak_call(func, *args, **kwargs):
+    """调用 akshare 取数函数；CI 下统一排到同一个专用线程上串行执行。"""
+    if not _IN_CI:
+        return func(*args, **kwargs)
+    global _FETCH_EXEC
+    if _FETCH_EXEC is None:
+        with _FETCH_EXEC_LOCK:
+            if _FETCH_EXEC is None:
+                _FETCH_EXEC = ThreadPoolExecutor(max_workers=1, thread_name_prefix="ak-fetch")
+    return _FETCH_EXEC.submit(func, *args, **kwargs).result()
 
 # ----------------------------- 0.A 股票池 / 板块配置 -----------------------------
 BOARD_CSV = "ztjj_board_stocks.csv"     # 国内股票池：板块名称/板块类别/股票代码/股票名称/基金持有比例(%)
@@ -192,21 +219,21 @@ def get_stock_data(code: str, name: str = "") -> pd.DataFrame:
         if code in BROAD_INDICES:
             name, api_type, symbol = BROAD_INDICES[code][:3]
             if api_type == "zh":
-                df = ak.stock_zh_index_daily(symbol=symbol)
+                df = _ak_call(ak.stock_zh_index_daily, symbol=symbol)
             elif api_type == "us":
-                df = ak.index_us_stock_sina(symbol=symbol)
+                df = _ak_call(ak.index_us_stock_sina, symbol=symbol)
             elif api_type == "hk":
-                df = ak.stock_hk_index_daily_sina(symbol=symbol)
+                df = _ak_call(ak.stock_hk_index_daily_sina, symbol=symbol)
             elif api_type == "global":
                 # 使用修正后的稳定接口
-                df = ak.index_global_hist_sina(symbol=symbol)
+                df = _ak_call(ak.index_global_hist_sina, symbol=symbol)
             else:
                 return pd.DataFrame()
         elif code.startswith(("sh", "sz", "bj")):
             # 个股数据接口[cite: 3]
-            df = ak.stock_zh_a_daily(symbol=code, adjust="qfq")
+            df = _ak_call(ak.stock_zh_a_daily, symbol=code, adjust="qfq")
         else:
-            df = ak.stock_us_daily(symbol=code, adjust="")
+            df = _ak_call(ak.stock_us_daily, symbol=code, adjust="")
             
         if df is None or df.empty:
             return pd.DataFrame()
