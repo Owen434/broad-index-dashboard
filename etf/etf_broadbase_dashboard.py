@@ -162,6 +162,13 @@ ETF_UNIVERSE: dict[str, tuple[str, str]] = {
     "515210": ("国泰中证钢铁ETF", "钢铁")
 }
 
+# 宽基热力表("最近一个月 · 各类宽基ETF日度净流入")里展示哪些分组, 以 ETF_UNIVERSE 的分组名为准。
+# "单只 ETF" 视图下展示这些分组内的全部 ETF, "同类合并" 视图下每个分组一列。
+BROAD_GROUPS = [
+    "沪深300", "上证50", "上证180", "中证500", "中证800", "中证1000",
+    "创业板", "科创50", "深证100", "MSCI中国A50", "中证A500",
+]
+
 EM_LSJZ_URL = "https://api.fund.eastmoney.com/f10/lsjz"
 EM_HEADERS = {
     "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -914,6 +921,8 @@ def build_payload(data: dict[str, pd.DataFrame],
         "items": items,
         "etfOrder": [c for c in ETF_UNIVERSE if c in data],
         "groupOrder": [f"G:{g}" for g in groups],
+        "broadGroups": [f"G:{g}" for g in BROAD_GROUPS if f"G:{g}" in items],
+        "broadEtfs": [c for c, (_, g) in ETF_UNIVERSE.items() if c in data and g in BROAD_GROUPS],
         "start": date_str[0] if date_str else "",
         "end": date_str[-1] if date_str else "",
     }
@@ -998,6 +1007,19 @@ __PLOTLY__
   .tableFoot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;color:var(--muted);font-size:12px}
   .pageCtl{display:flex;align-items:center;gap:8px}
   .pageCtl .btn{padding:5px 10px}
+  /* ---------- 宽基ETF日度净流入热力表 ---------- */
+  .bcPanel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 12px 14px;margin-top:12px}
+  .bcTitle{font-size:13px;font-weight:650;color:var(--ink);padding:0 2px 10px}
+  .bcScroll{overflow-x:auto}
+  .bcTable{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap}
+  .bcTable th,.bcTable td{padding:7px 12px;text-align:right;font-variant-numeric:tabular-nums;
+                          border-right:1px solid #fff;border-bottom:1px solid #fff}
+  .bcTable th{position:static;background:#fff;color:#586575;font-size:12px;font-weight:600;
+              white-space:normal;line-height:1.25;min-width:78px;border-bottom:1px solid var(--line)}
+  .bcTable th:first-child,.bcTable td:first-child{text-align:left;position:sticky;left:0;z-index:2;background:#fff;min-width:96px}
+  .bcTable th:nth-child(2),.bcTable td:nth-child(2){text-align:right}
+  .bcTable .bcCode{font-weight:400;color:var(--muted);font-size:11px}
+  .bcTable td.bcNa{color:var(--muted)}
   footer{color:var(--muted);font-size:11px;margin-top:14px;line-height:1.7}
   @media (max-width:720px){ select{min-width:200px} .wrap{padding:12px 8px 30px} }
 </style>
@@ -1050,6 +1072,11 @@ __PLOTLY__
   <div class="stats" id="rstats"></div>
   <div id="note"></div>
   <div id="chart"></div>
+
+  <div class="bcPanel" id="broadPanel">
+    <div class="bcTitle" id="bcTitle"></div>
+    <div class="bcScroll"><table class="bcTable" id="bcTable"></table></div>
+  </div>
 
   <div class="sect">每日申赎明细</div>
   <div class="tablePanel">
@@ -1401,6 +1428,80 @@ function render(){
   renderFlowTable(item);
 }
 
+/* ---------- 宽基ETF日度净流入热力表 ----------
+   随"视图"按钮联动: 同类合并 -> 每个宽基分组一列; 单只 ETF -> 每只宽基 ETF 一列。
+   固定取最近 BC_DAYS 个有数据的交易日(≈一个月), 列按窗口内合计净流入从大到小排;
+   红=净申购 / 绿=净赎回, 颜色深浅按"当列"窗口内最大绝对值归一。 */
+const BC_DAYS = 20;
+const bcOk = v => v !== null && v !== undefined && !isNaN(v);
+
+function bcShade(v, m){
+  if (!bcOk(v) || !m || v === 0) return '';
+  const t = Math.min(1, Math.abs(v) / m);
+  const c = v > 0 ? [233, 120, 120] : [125, 196, 150];
+  const mix = k => Math.round(255 + (c[k] - 255) * t);
+  return 'background:rgb(' + mix(0) + ',' + mix(1) + ',' + mix(2) + ')';
+}
+
+function bcFmt(v, nd){
+  if (!bcOk(v)) return '—';
+  const r = Number(v.toFixed(nd));
+  if (r === 0) return fmt(0, nd);
+  return (r > 0 ? '+' : '') + fmt(r, nd);
+}
+
+function renderBroadTable(){
+  const isG = MODE === 'group';
+  const keys = (isG ? DATA.broadGroups : DATA.broadEtfs) || [];
+  const tb = document.getElementById('bcTable');
+  document.getElementById('bcTitle').textContent =
+    '最近一个月 · ' + (isG ? '各类宽基ETF' : '各只宽基ETF') +
+    '日度净流入（亿元，红=净申购 / 绿=净赎回，颜色深浅按当列相对大小）';
+
+  let end = -1;
+  for (let i = X.length - 1; i >= 0 && end < 0; i--)
+    if (keys.some(k => bcOk(DATA.items[k].amount[i]))) end = i;
+  if (end < 0){
+    tb.innerHTML = '<tbody><tr><td class="bcNa" style="text-align:center;padding:24px">没有可显示的数据</td></tr></tbody>';
+    return;
+  }
+  const i0 = Math.max(0, end - BC_DAYS + 1);
+  const idx = [];
+  for (let i = end; i >= i0; i--) idx.push(i);
+
+  let cols = keys.map(k => {
+    const it = DATA.items[k];
+    let sum = 0, n = 0;
+    idx.forEach(i => { const v = it.amount[i]; if (bcOk(v)){ sum += v; n++; } });
+    return {k, it, sum: n ? sum : -Infinity};
+  });
+  cols.sort((a, b) => b.sum - a.sum);
+
+  const total = idx.map(i => {
+    let s = 0, n = 0;
+    cols.forEach(c => { const v = c.it.amount[i]; if (bcOk(v)){ s += v; n++; } });
+    return n ? s : null;
+  });
+  const maxAbs = arr => arr.reduce((m, v) => bcOk(v) ? Math.max(m, Math.abs(v)) : m, 0);
+  const mTotal = maxAbs(total);
+  const mCol = cols.map(c => maxAbs(idx.map(i => c.it.amount[i])));
+
+  const head = '<thead><tr><th>日期</th><th>合计</th>' + cols.map(c => {
+    const label = isG ? c.it.group : c.it.name.replace(/^\d+\s*/, '');
+    return '<th title="' + c.it.name + '">' + label +
+           (isG ? '' : '<br><span class="bcCode">' + c.k + '</span>') + '</th>';
+  }).join('') + '</tr></thead>';
+
+  const cellHtml = (v, m, nd) => bcOk(v)
+    ? '<td style="' + bcShade(v, m) + '">' + bcFmt(v, nd) + '</td>'
+    : '<td class="bcNa">—</td>';
+  const body = '<tbody>' + idx.map((i, r) =>
+    '<tr><td>' + X[i] + '</td>' + cellHtml(total[r], mTotal, 1) +
+    cols.map((c, j) => cellHtml(c.it.amount[i], mCol[j], 2)).join('') + '</tr>'
+  ).join('') + '</tbody>';
+  tb.innerHTML = head + body;
+}
+
 /* ---------- 每日申赎表 ---------- */
 let TABLE_PAGE = 0;
 const TABLE_PAGE_SIZE = 30;
@@ -1581,7 +1682,7 @@ document.getElementById('modeSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   MODE = b.dataset.mode;
   [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x === b));
-  fillSelect(); render();
+  fillSelect(); render(); renderBroadTable();
 });
 
 document.getElementById('presetSel').addEventListener('change', e => {
@@ -1745,6 +1846,7 @@ document.getElementById('btnCopy').addEventListener('click', e => {
 
 fillSelect();
 render();
+renderBroadTable();
 GD.on('plotly_relayout', onRelayout);
 </script>
 </body>
