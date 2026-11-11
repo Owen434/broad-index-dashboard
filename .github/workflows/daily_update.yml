@@ -37,42 +37,30 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-
+          
       - name: Install CJK fonts
         shell: bash
         run: |
           set -euo pipefail
-
-          # 最多尝试 5 次更新软件源
+      
           for attempt in 1 2 3 4 5; do
-            echo "APT update attempt ${attempt}/5"
-
-            if sudo apt-get \
-              -o Acquire::Retries=3 \
-              -o Acquire::http::Timeout=30 \
-              -o Acquire::https::Timeout=30 \
-              update; then
-              echo "APT update succeeded"
+            echo "Attempt ${attempt}/5"
+            if sudo apt-get -o Acquire::Retries=3 \
+                 -o Acquire::http::Timeout=30 \
+                 -o Acquire::https::Timeout=30 \
+                 update \
+               && sudo apt-get -o Acquire::Retries=3 \
+                 install -y --no-install-recommends fonts-noto-cjk; then
               break
             fi
-
-            if [ "$attempt" -eq 5 ]; then
-              echo "APT update failed after 5 attempts"
-              exit 1
-            fi
-
+            [ "$attempt" -eq 5 ] && { echo "failed after 5 attempts"; exit 1; }
             sleep $((attempt * 10))
           done
-
-          # 安装中文字体
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
-
-          # 刷新字体缓存
+      
           sudo fc-cache -f
-
-          # 检查字体是否安装成功
           fc-list | grep -i "Noto Sans CJK" | head
+
+
 
 
       - name: Install dependencies
