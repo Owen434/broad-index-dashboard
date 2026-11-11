@@ -37,31 +37,63 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
-      - name: Install CJK fonts
+
+      # ========== 中文字体：缓存字体文件，命中后不再使用 apt ==========
+      - name: Cache CJK fonts
+        id: font-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/fonts
+          key: cjk-fonts-noto-v1
+
+      - name: Install CJK fonts (only on cache miss)
+        if: steps.font-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
-      
-          for attempt in 1 2 3 4 5; do
-            echo "Attempt ${attempt}/5"
-            if sudo apt-get -o Acquire::Retries=3 \
+
+          # update + install 放在同一个重试单元里，任何一步失败都会整体重试
+          for attempt in 1 2 3; do
+            echo "Font install attempt ${attempt}/5"
+
+            if sudo apt-get \
+                 -o Acquire::Retries=3 \
                  -o Acquire::http::Timeout=30 \
                  -o Acquire::https::Timeout=30 \
                  update \
-               && sudo apt-get -o Acquire::Retries=3 \
+               && sudo apt-get \
+                 -o Acquire::Retries=3 \
+                 -o Acquire::http::Timeout=30 \
+                 -o Acquire::https::Timeout=30 \
                  install -y --no-install-recommends fonts-noto-cjk; then
+              echo "Font install succeeded"
               break
             fi
-            [ "$attempt" -eq 5 ] && { echo "failed after 5 attempts"; exit 1; }
+
+            if [ "$attempt" -eq 5 ]; then
+              echo "Font install failed after 5 attempts"
+              exit 1
+            fi
+
             sleep $((attempt * 10))
           done
-      
-          sudo fc-cache -f
+
+          # 把字体复制到用户目录，供 actions/cache 保存
+          mkdir -p ~/.local/share/fonts
+          cp /usr/share/fonts/opentype/noto/*.ttc ~/.local/share/fonts/
+          ls -la ~/.local/share/fonts/
+
+      - name: Refresh font cache
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # 确认字体文件确实存在
+          ls ~/.local/share/fonts/*.ttc
+
+          fc-cache -f
           fc-list | grep -i "Noto Sans CJK" | head
-
-
-
+      # ================================================================
 
       - name: Install dependencies
         run: |
