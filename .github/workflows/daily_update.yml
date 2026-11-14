@@ -131,15 +131,12 @@ jobs:
             fund-index-cache-${{ steps.bjt.outputs.day }}-
             fund-index-cache-
 
-      # 所有脚本都会执行。
-      # 单个脚本失败后自动重试 3 次，然后继续执行后续脚本。
-      # 最后只要有一个脚本失败，整个工作流就会失败。
+      # 不重试，任一脚本报错 → 立即终止，后续脚本不再执行，整个工作流失败。
+      # 失败后请在 Actions 页面手动点击 Re-run 重试。
       - name: Run all data scripts
         shell: bash
         run: |
-          set +e
-
-          failed=0
+          set -euo pipefail
 
           run_python() {
             local workdir="$1"
@@ -149,29 +146,7 @@ jobs:
             echo "========================================"
             echo "Running ${workdir}/${script}"
 
-            for attempt in 1 2 3; do
-              echo "Attempt ${attempt}/3"
-
-              (
-                cd "$workdir" &&
-                python "$script" "$@"
-              )
-
-              if [ $? -eq 0 ]; then
-                echo "${workdir}/${script} succeeded"
-                return 0
-              fi
-
-              echo "${workdir}/${script} failed on attempt ${attempt}"
-
-              if [ "$attempt" -lt 3 ]; then
-                sleep $((attempt * 10))
-              fi
-            done
-
-            echo "${workdir}/${script} failed after 3 attempts"
-            failed=1
-            return 1
+            (cd "$workdir" && python "$script" "$@")
           }
 
           run_python gold gold_ma_slope_analyzer.py
@@ -203,11 +178,6 @@ jobs:
           run_python futures cffex_net_position.py
 
           run_python summary daily_summary.py
-
-          if [ "$failed" -ne 0 ]; then
-            echo "At least one data script failed."
-            exit 1
-          fi
 
           echo "All data scripts completed successfully."
 
