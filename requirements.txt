@@ -1,4 +1,4 @@
-akshare
+akshare==1.20.43
 pandas
 numpy
 plotly
