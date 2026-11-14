@@ -25,10 +25,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 先同步远程分支，再开始生成文件
       - name: Sync with remote before generating
         run: |
-          set -e
+          set -euo pipefail
 
           git fetch origin main
           git reset --hard origin/main
@@ -38,7 +37,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      # ========== 中文字体：缓存字体文件，命中后不再使用 apt ==========
       - name: Cache CJK fonts
         id: font-cache
         uses: actions/cache@v4
@@ -46,14 +44,13 @@ jobs:
           path: ~/.local/share/fonts
           key: cjk-fonts-noto-v1
 
-      - name: Install CJK fonts (only on cache miss)
+      - name: Install CJK fonts
         if: steps.font-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
 
-          # update + install 放在同一个重试单元里，任何一步失败都会整体重试
-          for attempt in 1 2 3; do
+          for attempt in 1 2 3 4 5; do
             echo "Font install attempt ${attempt}/5"
 
             if sudo apt-get \
@@ -78,7 +75,6 @@ jobs:
             sleep $((attempt * 10))
           done
 
-          # 把字体复制到用户目录，供 actions/cache 保存
           mkdir -p ~/.local/share/fonts
           cp /usr/share/fonts/opentype/noto/*.ttc ~/.local/share/fonts/
           ls -la ~/.local/share/fonts/
@@ -88,21 +84,23 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 确认字体文件确实存在
           ls ~/.local/share/fonts/*.ttc
 
           fc-cache -f
           fc-list | grep -i "Noto Sans CJK" | head
-      # ================================================================
 
       - name: Install dependencies
         run: |
+          set -euo pipefail
+
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Resolve Beijing time
         id: bjt
         run: |
+          set -euo pipefail
+
           echo "day=$(TZ=Asia/Shanghai date +%Y%m%d)" >> "$GITHUB_OUTPUT"
           echo "stamp=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
 
@@ -133,74 +131,89 @@ jobs:
             fund-index-cache-${{ steps.bjt.outputs.day }}-
             fund-index-cache-
 
-      - name: Run gold slope analyzer
-        working-directory: gold
-        run: python gold_ma_slope_analyzer.py
-        continue-on-error: true
-
-      - name: Run ETF broad-base dashboard
-        working-directory: etf
-        run: python etf_broadbase_dashboard.py
-        continue-on-error: true
-
-      - name: Run ETF net-flow calendar
-        working-directory: etf
-        run: python etf_net_flow_calendar.py
-        continue-on-error: true
-
-      - name: Run fund indicator scripts
-        working-directory: funds
+      # 所有脚本都会执行。
+      # 单个脚本失败后自动重试 3 次，然后继续执行后续脚本。
+      # 最后只要有一个脚本失败，整个工作流就会失败。
+      - name: Run all data scripts
+        shell: bash
         run: |
-          python fetch_fund_nav.py
-          python fund_indicators_matrix.py
-          python fund_score_matrix.py
-          python fund_riskrank_percentile.py
-          python holdings_calendar.py
-        continue-on-error: true
+          set +e
 
-      - name: Run fund correlation report
-        working-directory: funds
-        run: python fund_correlation_report.py
-        continue-on-error: true
+          failed=0
 
-      - name: Run fund anomaly analysis
-        working-directory: funds
-        run: python fund_anomaly_analysis.py
-        continue-on-error: true
+          run_python() {
+            local workdir="$1"
+            local script="$2"
+            shift 2
 
-      - name: Run drawdown backtest dashboard
-        working-directory: drawdown
-        run: >-
-          python drawdown_backtest.py
-          --funds-csv ../funds/funds_universe_example.csv
-          --nav-csv ../funds/fund_nav_history.csv
-          --out drawdown_dashboard.html
-          --plotly-js cdn
-        continue-on-error: true
+            echo "========================================"
+            echo "Running ${workdir}/${script}"
 
-      - name: Run stock analysis suite
-        working-directory: stocks
-        run: python stock_analysis_suite.py
-        continue-on-error: true
+            for attempt in 1 2 3; do
+              echo "Attempt ${attempt}/3"
 
-      - name: Run index return calendar
-        working-directory: stocks
-        run: python index_return_calendar.py
-        continue-on-error: true
+              (
+                cd "$workdir" &&
+                python "$script" "$@"
+              )
 
-      - name: Run CFFEX net position report
-        working-directory: futures
-        run: python cffex_net_position.py
-        continue-on-error: true
+              if [ $? -eq 0 ]; then
+                echo "${workdir}/${script} succeeded"
+                return 0
+              fi
 
-      - name: Build daily summary card
-        working-directory: summary
-        run: python daily_summary.py
-        continue-on-error: true
+              echo "${workdir}/${script} failed on attempt ${attempt}"
+
+              if [ "$attempt" -lt 3 ]; then
+                sleep $((attempt * 10))
+              fi
+            done
+
+            echo "${workdir}/${script} failed after 3 attempts"
+            failed=1
+            return 1
+          }
+
+          run_python gold gold_ma_slope_analyzer.py
+
+          run_python etf etf_broadbase_dashboard.py
+
+          run_python etf etf_net_flow_calendar.py
+
+          run_python funds fetch_fund_nav.py
+          run_python funds fund_indicators_matrix.py
+          run_python funds fund_score_matrix.py
+          run_python funds fund_riskrank_percentile.py
+          run_python funds holdings_calendar.py
+
+          run_python funds fund_correlation_report.py
+
+          run_python funds fund_anomaly_analysis.py
+
+          run_python drawdown drawdown_backtest.py \
+            --funds-csv ../funds/funds_universe_example.csv \
+            --nav-csv ../funds/fund_nav_history.csv \
+            --out drawdown_dashboard.html \
+            --plotly-js cdn
+
+          run_python stocks stock_analysis_suite.py
+
+          run_python stocks index_return_calendar.py
+
+          run_python futures cffex_net_position.py
+
+          run_python summary daily_summary.py
+
+          if [ "$failed" -ne 0 ]; then
+            echo "At least one data script failed."
+            exit 1
+          fi
+
+          echo "All data scripts completed successfully."
 
       - name: Collect HTML outputs into docs
         run: |
-          set -e
+          set -euo pipefail
 
           mkdir -p docs
 
@@ -212,10 +225,9 @@ jobs:
 
           ls -la docs/
 
-      # 备份本次生成的文件
       - name: Backup generated files
         run: |
-          set -e
+          set -euo pipefail
 
           rm -rf /tmp/generated_docs
           mkdir -p /tmp/generated_docs
@@ -228,10 +240,9 @@ jobs:
 
           cp README.md /tmp/generated_README.md
 
-      # 同步远程分支，避免 rebase --autostash 产生冲突
       - name: Sync remote safely
         run: |
-          set -e
+          set -euo pipefail
 
           git fetch origin main
           git reset --hard origin/main
