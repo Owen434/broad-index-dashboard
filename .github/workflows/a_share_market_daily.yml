@@ -1,0 +1,98 @@
+name: A-share market daily update
+
+on:
+  schedule:
+    # UTC 15:40 = 北京时间 23:40
+    - cron: "40 15 * * *"
+
+  workflow_dispatch:
+
+concurrency:
+  # 与原 daily_update.yml 使用相同的并发组，避免两个工作流同时提交 docs
+  group: docs-update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update-a-share-market:
+    runs-on: ubuntu-latest
+
+    env:
+      TZ: Asia/Shanghai
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Resolve Beijing dates
+        id: dates
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "start=$(TZ=Asia/Shanghai date -d '3 years ago' '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+          echo "end=$(TZ=Asia/Shanghai date '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+          echo "day=$(TZ=Asia/Shanghai date '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore A-share price cache
+        uses: actions/cache@v4
+        with:
+          path: stocks/.cache/a_share
+          key: a-share-cache-v1-${{ runner.os }}-${{ steps.dates.outputs.day }}
+          restore-keys: |
+            a-share-cache-v1-${{ runner.os }}-
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run full A-share market analysis
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cd stocks
+
+          python a_share_market_dashboard.py \
+            --start-date "${{ steps.dates.outputs.start }}" \
+            --end-date "${{ steps.dates.outputs.end }}" \
+            --cache-dir ".cache/a_share" \
+            --output-dir "a_share_dashboard" \
+            --workers 8 \
+            --retry 2 \
+            --no-score
+
+      - name: Publish HTML to docs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p docs
+
+          cp stocks/a_share_dashboard/a_share_market_dashboard.html \
+             docs/a_share_market_dashboard.html
+
+          echo "Published files:"
+          ls -lh docs/a_share_market_dashboard.html
+
+      - name: Commit and push A-share dashboard
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update A-share market dashboard ${{ steps.dates.outputs.day }}"
+          file_pattern: "docs/a_share_market_dashboard.html README.md"
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_author: Owen434 <128884918+Owen434@users.noreply.github.com>
