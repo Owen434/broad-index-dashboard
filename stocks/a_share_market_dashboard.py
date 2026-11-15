@@ -9,6 +9,9 @@
 3. 生成全市场收益分析 HTML，不输出评分看板；
 4. 不生成任何单只股票的 K 线 HTML。
 
+建议运行：
+    python 4.a_share_market_dashboard.py
+
 常用参数：
     --workers 8              抓取并发数
     --force-refresh          忽略价格缓存，重新抓取
@@ -202,21 +205,37 @@ def _normalize_universe(raw: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def _load_universe_file(path: Path) -> Optional[pd.DataFrame]:
+    """读取股票池文件；接口失败时允许使用旧缓存或静态种子文件。"""
+    if not path.exists():
+        return None
+    try:
+        df = _read_csv(path)
+        if {"code", "name", "symbol"}.issubset(df.columns) and not df.empty:
+            return df
+    except Exception as exc:
+        print(f"⚠️ 股票池文件读取失败：{path}，{exc}")
+    return None
+
+
 def load_universe(cfg: Config) -> pd.DataFrame:
     path = cfg.cache_dir / UNIVERSE_CACHE_NAME
+    stale_cache: Optional[pd.DataFrame] = None
+
+    # 缓存不过期时直接使用；即使过期，也保留它作为接口失败时的降级数据。
     if path.exists() and not cfg.force_refresh:
-        age_days = (time.time() - path.stat().st_mtime) / 86400.0
-        if age_days <= UNIVERSE_CACHE_DAYS:
-            try:
-                cached = _read_csv(path)
-                if {"code", "name", "symbol"}.issubset(cached.columns) and not cached.empty:
-                    return cached
-            except Exception as exc:
-                print(f"⚠️ 股票池缓存读取失败，将重新获取：{exc}")
+        cached = _load_universe_file(path)
+        if cached is not None:
+            stale_cache = cached
+            age_days = (time.time() - path.stat().st_mtime) / 86400.0
+            if age_days <= UNIVERSE_CACHE_DAYS:
+                return cached
 
     ak = _import_akshare()
     raw = None
     errors = []
+
+    # 每个接口只尝试一次，避免在限流期间快速重复请求。
     for method in ("stock_info_a_code_name", "stock_zh_a_spot_em"):
         try:
             fn = getattr(ak, method)
@@ -225,12 +244,34 @@ def load_universe(cfg: Config) -> pd.DataFrame:
                 break
         except Exception as exc:  # pragma: no cover - 由实时接口决定
             errors.append(f"{method}: {exc}")
+
     universe = _normalize_universe(raw)
-    if universe.empty:
-        raise RuntimeError("无法获取 A 股股票池。" + ("；".join(errors) if errors else ""))
-    _atomic_to_csv(universe, path, encoding="utf-8-sig")
-    print(f">>> A 股股票池：{len(universe)} 只，已缓存到 {path}")
-    return universe
+    if not universe.empty:
+        _atomic_to_csv(universe, path, encoding="utf-8-sig")
+        print(f">>> A 股股票池：{len(universe)} 只，已缓存到 {path}")
+        return universe
+
+    # 接口限流或暂时不可用时，优先使用旧缓存。
+    if stale_cache is not None and not stale_cache.empty:
+        print("⚠️ 股票池接口暂时不可用，使用已有股票池缓存。")
+        return stale_cache
+
+    # 首次运行没有缓存时，使用随代码提交的静态种子文件。
+    seed_candidates = (
+        Path(__file__).resolve().parent / "a_share_universe_seed.csv",
+        Path.cwd() / "a_share_universe_seed.csv",
+    )
+    for seed_path in seed_candidates:
+        seed = _load_universe_file(seed_path)
+        if seed is not None and not seed.empty:
+            print(f"⚠️ 股票池接口暂时不可用，使用静态种子文件：{seed_path}")
+            _atomic_to_csv(seed, path, encoding="utf-8-sig")
+            return seed
+
+    raise RuntimeError(
+        "无法获取 A 股股票池，且没有可用的缓存或静态种子文件。"
+        + ("；".join(errors) if errors else "")
+    )
 
 
 def _normalize_price_frame(raw: pd.DataFrame) -> pd.DataFrame:
@@ -319,7 +360,8 @@ def load_or_fetch_price(code: str, name: str, cfg: Config) -> Tuple[str, str, pd
         except Exception as exc:  # pragma: no cover - 由实时接口决定
             last_error = str(exc)
             if attempt < cfg.retry:
-                time.sleep(1.5 * (attempt + 1))
+                # GitHub Actions 的共享 IP 可能被行情接口限流，避免快速重试。
+                time.sleep(10 * (2 ** attempt))
     return code, name, pd.DataFrame(columns=["Date", "Close"]), last_error or "未知错误"
 
 
