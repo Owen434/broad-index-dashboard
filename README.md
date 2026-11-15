@@ -8,6 +8,7 @@
 不需要装浏览器插件，也不用起本地服务器——每个交易日凌晨还会自动重新生成一份最新的。
 
 [![Daily data update](https://github.com/Owen434/broad-index-dashboard/actions/workflows/daily_update.yml/badge.svg)](https://github.com/Owen434/broad-index-dashboard/actions/workflows/daily_update.yml)
+[![A-share market daily update](https://github.com/Owen434/broad-index-dashboard/actions/workflows/a_share_market_daily.yml/badge.svg)](https://github.com/Owen434/broad-index-dashboard/actions/workflows/a_share_market_daily.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](requirements.txt)
 [![Powered by AKShare](https://img.shields.io/badge/data-AKShare-orange.svg)](https://akshare.akfamily.xyz/)
 [![Powered by Plotly](https://img.shields.io/badge/charts-Plotly-3f4f75.svg)](https://plotly.com/python/)
@@ -161,6 +162,8 @@
 
 ```
 stocks/   宽基指数看板（K线形态 + 八大指标矩阵 + ZigZag波段看板 + 评分矩阵 + 收益日历，五合一）
+          含 a_share_market_dashboard.py（全市场股票日度宽度、收益分布、分位数日历和年度排名）
+          stocks/.cache/a_share/ 为 Actions 行情缓存，stocks/a_share_dashboard/ 为本地中间输出，均不提交
           含 price_movement_patterns.py（取数 + K线形态识别内核，也被 index_return_calendar.py 复用取数逻辑）
 funds/    板块基金指标矩阵 / ZigZag信号 / 评分矩阵 / 风险排名百分位 / 收益日历
           含 fetch_fund_nav.py（净值历史抓取，其余脚本运行前先跑这个）
@@ -187,6 +190,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | 45只宽基ETF资金流看板 | <img src="docs/ETF资金流向.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_flow_dashboard.html |
 | | ETF净申赎金额日历 | <img src="docs/ETF净申赎金额日历.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_net_flow_calendar.html |
 | | 宽基收益日历 | <img src="docs/index_return_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/index_return_calendar.html |
+| | 全市场股票收益分析 | 交互式 HTML | `docs/a_share_market_dashboard.html` |
 | **② 板块基金** | 八大指标矩阵 |  <img src="docs/基金八大指标矩阵.png" width="360">  | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
 | | 风险排名百分位 | <img src="docs/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
@@ -221,11 +225,35 @@ python etf_net_flow_calendar.py --refresh
 cd ../funds && python fetch_fund_nav.py && python fund_indicators_matrix.py && python fund_score_matrix.py && python fund_riskrank_percentile.py && python holdings_calendar.py
 python fund_correlation_report.py && python fund_anomaly_analysis.py   # 读 fetch_fund_nav.py 生成的 fund_nav_history.csv，需要先跑过它
 cd ../stocks && python stock_analysis_suite.py && python index_return_calendar.py
+# 全市场股票收益分析（近三年，使用本地缓存）
+python a_share_market_dashboard.py \
+  --start-date 2023-01-01 \
+  --end-date 2026-11-15 \
+  --cache-dir .cache/a_share \
+  --output-dir a_share_dashboard \
+  --workers 8 \
+  --retry 2 \
+  --no-score
 cd ../drawdown && python drawdown_backtest.py --funds-csv ../funds/funds_universe_example.csv --nav-csv ../funds/fund_nav_history.csv --out drawdown_dashboard.html --plotly-js cdn
 cd ../futures && python cffex_net_position.py --start 20240101   # 首次回填历史，之后不加参数增量更新即可
 ```
 
 跑完直接双击打开对应目录下生成的 `.html` 文件即可。
+
+## 全市场股票分析
+
+`stocks/a_share_market_dashboard.py` 面向 A 股全市场股票，默认统计近三年的：
+
+- 每日上涨、下跌家数和上涨/下跌比例；
+- 全市场股票日收益率横截面分布；
+- P5、P25、中位数、P75、P95 等分位数；
+- 年度收益统计和年度涨跌幅排名；
+- 每日收益分位数日历。
+
+GitHub Actions 每天自动运行一次，并将最终页面写入 `docs/a_share_market_dashboard.html`。
+股票池和个股行情缓存保存在 `stocks/.cache/a_share/`，不会提交到仓库。缓存恢复后，脚本只会重新获取缺失或过期的数据。
+
+全市场股票工作流位于 `.github/workflows/a_share_market_daily.yml`。它与原有工作流共用 `docs-update` 并发组，避免多个工作流同时提交 `docs/`。
 
 ## 已知限制
 
