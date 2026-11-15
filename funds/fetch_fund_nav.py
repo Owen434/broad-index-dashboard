@@ -27,7 +27,9 @@ funds_universe_example.csv 里如果混了场内 ETF 代码，个别可能抓不
 脚本会打印失败列表并跳过，不影响其余基金正常生成。
 """
 
+import json
 import os
+import re
 import sys
 import time
 from datetime import datetime, timedelta
@@ -35,6 +37,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import akshare as ak
 import pandas as pd
+import requests
 
 # ==================== 配置 ====================
 NAV_FILE     = "fund_nav_history.csv"
@@ -221,31 +224,66 @@ def refresh_basic_info(codes, cache):
 
 # ============ 净值抓取 ============
 
-def fetch_nav(code, name):
-    with ThreadPoolExecutor(max_workers=2) as ex:
-        f1 = ex.submit(safe_call, ak.fund_open_fund_info_em, code, indicator="单位净值走势")
-        f2 = ex.submit(safe_call, ak.fund_open_fund_info_em, code, indicator="累计净值走势")
-        df_unit, df_acc = f1.result(), f2.result()
+PZ_URL = "https://fund.eastmoney.com/pingzhongdata/{code}.js"
+PZ_HEADERS = {
+    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"),
+    "Referer": "https://fund.eastmoney.com/",
+}
+_RE_UNIT = re.compile(r"var\s+Data_netWorthTrend\s*=\s*(\[.*?\])\s*;", re.S)
+_RE_ACC  = re.compile(r"var\s+Data_ACWorthTrend\s*=\s*(\[.*?\])\s*;", re.S)
 
-    if df_unit is None or df_unit.empty:
+
+def _fetch_pingzhong(code):
+    """请求一次 pingzhongdata js，用正则 + json 解析，完全不经过 V8。
+
+    原先的 ak.fund_open_fund_info_em 内部每次调用都会 py_mini_racer.MiniRacer()，
+    多线程并发初始化 V8 会触发 partition_address_space 的 FATAL 并直接 core dump
+    （try/except 也拦不住）。这里自己解析，顺便把 单位净值/累计净值 两次请求合并成一次。
+    """
+    r = requests.get(PZ_URL.format(code=code), headers=PZ_HEADERS, timeout=15)
+    r.raise_for_status()
+    text = r.text
+    m_u, m_a = _RE_UNIT.search(text), _RE_ACC.search(text)
+    if not m_u:
+        return None, None
+    unit = json.loads(m_u.group(1))
+    acc = json.loads(m_a.group(1)) if m_a else []
+    return unit, acc
+
+
+def _to_date(ms_series):
+    return (pd.to_datetime(ms_series, unit="ms", utc=True)
+              .dt.tz_convert("Asia/Shanghai").dt.tz_localize(None).dt.normalize())
+
+
+def fetch_nav(code, name):
+    unit, acc = safe_call(_fetch_pingzhong, code) or (None, None)
+    if not unit:
         return None
 
-    # 注意：这里故意不把"日增长率"改名——zigzag_signal_analyzer.py 的
-    # build_adjusted_nav 优先级2（日增长率校验，最可靠）就是靠精确匹配这个列名
-    # 来启用的；一旦改了名字，所有基金都会被迫落到优先级3（跳空+累计净值兜底，
-    # 可靠性低很多），表现为几乎每只基金都报"由累计净值推出XXX次分红（年均过高）"，
-    # 进而把正常的日常波动误判成分红/拆分事件，复权结果因此不稳定。
-    df_unit = df_unit.rename(columns={"净值日期": "日期"})
-    if df_acc is not None and not df_acc.empty:
-        df_acc = df_acc.rename(columns={"净值日期": "日期"})
-        df = pd.merge(df_unit, df_acc[['日期', '累计净值']], on="日期", how="left")
+    # 注意：这里故意保留"日增长率"列名——zigzag_signal_analyzer.py 的
+    # build_adjusted_nav 优先级2（日增长率校验，最可靠）靠精确匹配这个列名启用；
+    # 改名会让所有基金退到优先级3（跳空+累计净值兜底），把正常波动误判成分红/拆分。
+    df = pd.DataFrame(unit).rename(
+        columns={"x": "日期", "y": "单位净值", "equityReturn": "日增长率"})
+    if "日增长率" not in df.columns:
+        df["日增长率"] = pd.NA
+    df["日期"] = _to_date(df["日期"])
+    df["单位净值"] = pd.to_numeric(df["单位净值"], errors="coerce")
+    df["日增长率"] = pd.to_numeric(df["日增长率"], errors="coerce")
+    df = df[["日期", "单位净值", "日增长率"]]
+
+    if acc:
+        df_acc = pd.DataFrame(acc, columns=["日期", "累计净值"])
+        df_acc["日期"] = _to_date(df_acc["日期"])
+        df_acc["累计净值"] = pd.to_numeric(df_acc["累计净值"], errors="coerce")
+        df = pd.merge(df, df_acc.drop_duplicates("日期"), on="日期", how="left")
     else:
-        df = df_unit.copy()
         df["累计净值"] = pd.NA
 
-    df["日期"] = pd.to_datetime(df["日期"])
     df = df.sort_values("日期")
-    df["增长值"] = pd.to_numeric(df["单位净值"], errors="coerce").diff()
+    df["增长值"] = df["单位净值"].diff()
     df["基金代码"] = code
     df["基金名称"] = name
     return df[["基金代码", "基金名称", "日期", "单位净值", "累计净值", "增长值", "日增长率"]]
