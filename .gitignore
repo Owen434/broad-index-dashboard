@@ -4,3 +4,11 @@ __pycache__/
 stock_charts_output/
 *.xlsx
 .DS_Store
+
+# A 股全市场脚本的运行缓存和中间文件
+stocks/.cache/
+stocks/a_share_dashboard/
+
+# 防止误提交本地生成文件
+stocks/*.csv
+stocks/*.csv.gz
