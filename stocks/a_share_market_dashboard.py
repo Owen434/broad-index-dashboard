@@ -9,15 +9,13 @@
 3. 生成全市场收益分析 HTML，不输出评分看板；
 4. 不生成任何单只股票的 K 线 HTML。
 
-建议运行：
-    python 4.a_share_market_dashboard.py
 
 常用参数：
     --workers 8              抓取并发数
     --force-refresh          忽略价格缓存，重新抓取
     --max-stocks 100         试运行前 100 只；0 表示全部
     --no-score               只生成收益汇总，不计算评分看板
-    --output-dir 4.a_share_dashboard
+    --output-dir a_share_dashboard
 
 说明：
 - 行情接口优先使用当前版本的 ak.stock_zh_a_daily_sina(..., adjust="qfq")；
@@ -32,6 +30,7 @@
 from __future__ import annotations
 
 import argparse
+import gc
 import html
 import importlib.util
 import itertools
@@ -58,8 +57,8 @@ DEFAULT_CACHE_DIR = ".cache/a_share"
 UNIVERSE_CACHE_NAME = "a_share_universe.csv"
 UNIVERSE_CACHE_DAYS = 7
 PRICE_CACHE_STALE_DAYS = 3
-DEFAULT_WORKERS = 8
-DEFAULT_RETRY = 2
+DEFAULT_WORKERS = 2
+DEFAULT_RETRY = 1
 DEFAULT_SCORE_HISTORY_DAYS = 250
 
 CORE_CANDIDATES = (
@@ -349,7 +348,9 @@ def load_or_fetch_price(code: str, name: str, cfg: Config) -> Tuple[str, str, pd
 
     ak = _import_akshare()
     last_error = None
-    for attempt in range(cfg.retry + 1):
+    # 即使外部工作流传入较大的数值，也限制重试次数，避免限流期间反复请求。
+    retry_limit = min(max(int(cfg.retry), 0), 1)
+    for attempt in range(retry_limit + 1):
         try:
             raw = _fetch_daily_price(ak, code, cfg.start_date, cfg.end_date)
             frame = _normalize_price_frame(raw)
@@ -359,7 +360,7 @@ def load_or_fetch_price(code: str, name: str, cfg: Config) -> Tuple[str, str, pd
             return code, name, frame, None
         except Exception as exc:  # pragma: no cover - 由实时接口决定
             last_error = str(exc)
-            if attempt < cfg.retry:
+            if attempt < retry_limit:
                 # GitHub Actions 的共享 IP 可能被行情接口限流，避免快速重试。
                 time.sleep(10 * (2 ** attempt))
     return code, name, pd.DataFrame(columns=["Date", "Close"]), last_error or "未知错误"
@@ -1046,22 +1047,36 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
                     "bpairs": [("全部A股", "全市场")], "ind": sf,
                 })
 
-    # 网络抓取在后台线程执行；每次完成即处理，避免同时保留全部行情 DataFrame。
-    with ThreadPoolExecutor(max_workers=max(1, cfg.workers)) as pool:
-        futures = [pool.submit(load_or_fetch_price, code, name, cfg) for code, name in tasks]
-        for fut in as_completed(futures):
-            try:
-                code, name, frame, err = fut.result()
-            except Exception as exc:
-                # 单个线程异常不应中断全市场汇总；Future 本身没有携带任务元组，
-                # 这里仅记录异常，其他股票继续完成。
-                print(f"⚠️ 某个行情任务异常，已跳过：{exc}")
-                done += 1
-                failed += 1
-                continue
-            process(code, name, frame, err)
-            if done % 100 == 0 or done == len(tasks):
-                print(f"    —— 进度 {done}/{len(tasks)}，失败 {failed}，缓存/取数完成")
+    # 网络抓取使用分批 Future，避免一次性创建 5000+ 个任务并长期保留结果。
+    # GitHub Actions 内存较小，且 AKShare 的底层网络/解析库不适合高并发长时间运行。
+    workers = max(1, min(int(cfg.workers), 2))
+    batch_size = max(workers * 4, 16)
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for batch_start in range(0, len(tasks), batch_size):
+            batch = tasks[batch_start:batch_start + batch_size]
+            futures = [pool.submit(load_or_fetch_price, code, name, cfg)
+                       for code, name in batch]
+
+            for fut in as_completed(futures):
+                try:
+                    code, name, frame, err = fut.result()
+                except Exception as exc:
+                    # 单个线程异常不应中断全市场汇总。
+                    print(f"⚠️ 某个行情任务异常，已跳过：{exc}")
+                    done += 1
+                    failed += 1
+                    continue
+
+                process(code, name, frame, err)
+                # 尽快释放当前行情 DataFrame，降低长期运行时的内存峰值。
+                del frame
+
+                if done % 100 == 0 or done == len(tasks):
+                    print(f"    —— 进度 {done}/{len(tasks)}，失败 {failed}，缓存/取数完成")
+
+            # 当前批次的 Future 不再需要，主动释放引用并回收内存。
+            del futures
+            gc.collect()
 
     daily = _daily_frame(daily_acc)
     annual = _aggregate_period_records(annual_records, "period")
