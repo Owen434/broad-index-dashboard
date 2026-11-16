@@ -888,8 +888,9 @@ function renderCalendar(){
   html+=`<div class="month-card"><div class="month-header">${month}月</div><table class="month-table"><thead><tr>${headers.map((h,i)=>`<th class="${i===0||i===6?'weekend':''}">${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table><div class="month-stat">${vals.length?`交易日 ${vals.length} 天 · 上涨 ${up} 天 · 下跌 ${down} 天 · 累计涨幅 <strong>${fmtCell(cumulative)}</strong>`:'暂无数据'}</div></div>`;
  }
  $('calendarGrid').innerHTML=html;
- let table='<tr><th>月份</th><th>交易日</th><th>均值</th><th>中位数</th><th>P5</th><th>P25</th><th>P75</th><th>P95</th></tr>';
- for(let m=1;m<=12;m++){const a=rows.filter(d=>Number(d.date.slice(5,7))===m);const f=k=>{const v=a.map(d=>Number(d[k])).filter(Number.isFinite);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null;};table+=`<tr><td>${m}月</td><td>${a.length}</td><td>${fmtCell(f('avg_return'))}</td><td>${fmtCell(f('median_return'))}</td><td>${fmtCell(f('q5_return'))}</td><td>${fmtCell(f('q25_return'))}</td><td>${fmtCell(f('q75_return'))}</td><td>${fmtCell(f('q95_return'))}</td></tr>`;} $('calendarTable').innerHTML=table;
+ let table='<tr><th>月份</th><th>股票样本</th><th>均值</th><th>中位数</th><th>P5</th><th>P25</th><th>P75</th><th>P95</th></tr>';
+ const monthlyRows=(DATA.monthly||[]).filter(d=>Number(d.year)===year);
+ for(let m=1;m<=12;m++){const d=monthlyRows.find(x=>Number(x.month_num)===m);table+=`<tr><td>${m}月</td><td>${d?fmtNum(d.stock_count):'--'}</td><td>${d?fmtPct(d.avg_return):'--'}</td><td>${d?fmtPct(d.median_return):'--'}</td><td>${d?fmtPct(d.q5_return):'--'}</td><td>${d?fmtPct(d.q25_return):'--'}</td><td>${d?fmtPct(d.q75_return):'--'}</td><td>${d?fmtPct(d.q95_return):'--'}</td></tr>`;} $('calendarTable').innerHTML=table;
 }
 function renderAnnual(){
  const rows=DATA.annual||[];
