@@ -20,7 +20,7 @@
 说明：
 - 行情接口优先使用当前版本的 ak.stock_zh_a_daily_sina(..., adjust="qfq")；
   对旧版 AKShare 再回退到 ak.stock_zh_a_daily。
-- 缓存文件按股票代码拆分为 csv.gz，单只股票失败不会影响其他股票。
+- 缓存文件按股票代码拆分为 csv.gz；刷新失败时优先沿用旧缓存，避免整只股票历史数据丢失。
 - 年度/月度“累计涨幅”优先取上一期最后一个有效收盘价到本期末的收益；
   上市首期若无上期收盘价，则取上市后首个有效收盘价到本期末，
   汇总中的“等权平均”是股票收益的算术平均；“市场指数收益”是每日等权收益复合。
@@ -57,6 +57,10 @@ DEFAULT_CACHE_DIR = ".cache/a_share"
 UNIVERSE_CACHE_NAME = "a_share_universe.csv"
 UNIVERSE_CACHE_DAYS = 7
 PRICE_CACHE_STALE_DAYS = 3
+# 全历史日期统一按股票池规模校验样本覆盖率；页面仅列示最近 10 个被排除日期。
+MIN_DAILY_COVERAGE_RATIO = 0.80
+RECENT_DAILY_COMPLETENESS_DAYS = 10
+MARKET_CLOSE_HOUR = 16
 DEFAULT_WORKERS = 2
 DEFAULT_RETRY = 1
 DEFAULT_SCORE_HISTORY_DAYS = 250
@@ -97,6 +101,69 @@ def _import_akshare():
             "未安装 akshare。请先执行：pip install akshare pandas numpy plotly"
         ) from exc
     return ak
+
+
+def _resolve_completed_end_date(requested_end: pd.Timestamp) -> pd.Timestamp:
+    """
+    将结束日期限制为最近一个已完成的 A 股交易日。
+
+    优先使用上证指数日线日期作为市场交易日参考：
+    - 16:00 前运行时，排除当天，防止把盘中日线缓存为最终日线；
+    - 16:00 后运行时，使用接口实际返回的最近交易日；
+    - 指数接口不可用时，盘中运行退回前一个工作日，盘后保留请求日期。
+    """
+    requested = pd.Timestamp(requested_end).normalize()
+    now_cn = pd.Timestamp.now(tz="Asia/Shanghai")
+    today_cn = now_cn.tz_localize(None).normalize()
+    target = min(requested, today_cn)
+
+    if target < today_cn:
+        return target
+
+    try:
+        ak = _import_akshare()
+        fetcher = getattr(ak, "stock_zh_index_daily_tx", None)
+        if fetcher is not None:
+            raw = fetcher(
+                symbol="sh000001",
+                start_date=(today_cn - pd.Timedelta(days=20)).strftime("%Y%m%d"),
+                end_date=target.strftime("%Y%m%d"),
+            )
+        else:
+            fetcher = getattr(ak, "stock_zh_index_daily_em", None)
+            raw = (
+                fetcher(
+                    symbol="sh000001",
+                    startdate=(today_cn - pd.Timedelta(days=20)).strftime("%Y%m%d"),
+                    enddate=target.strftime("%Y%m%d"),
+                )
+                if fetcher is not None else None
+            )
+
+        if raw is not None and not raw.empty:
+            date_col = next(
+                (c for c in raw.columns if str(c).strip().lower() in {"date", "日期", "交易日期"}),
+                None,
+            )
+            if date_col is not None:
+                dates = pd.to_datetime(raw[date_col], errors="coerce").dropna()
+                dates = dates[dates <= target]
+                if now_cn.hour < MARKET_CLOSE_HOUR:
+                    dates = dates[dates.dt.normalize() < today_cn]
+                if not dates.empty:
+                    return pd.Timestamp(dates.max()).normalize()
+    except Exception as exc:
+        print(f"⚠️ 获取上证指数交易日期失败，将使用保守日期回退：{exc}")
+
+    if now_cn.hour < MARKET_CLOSE_HOUR:
+        fallback = today_cn - pd.offsets.BDay(1)
+        print(
+            f"⚠️ 当前为北京时间 {now_cn:%H:%M}，尚未收盘；"
+            f"无法确认交易日历，结束日期暂回退至 {fallback:%Y-%m-%d}"
+        )
+        return pd.Timestamp(fallback).normalize()
+
+    return target
 
 
 def _safe_code(value: Any) -> str:
@@ -297,6 +364,20 @@ def _normalize_price_frame(raw: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values("Date").reset_index(drop=True)
 
 
+def _merge_price_frames(existing: Optional[pd.DataFrame],
+                        incoming: pd.DataFrame) -> pd.DataFrame:
+    """合并新旧行情，避免接口只返回部分数据时覆盖原有完整历史缓存。"""
+    frames = []
+    if existing is not None and not existing.empty:
+        frames.append(_normalize_price_frame(existing))
+    if incoming is not None and not incoming.empty:
+        frames.append(_normalize_price_frame(incoming))
+    if not frames:
+        return pd.DataFrame(columns=["Date", "Close"])
+    merged = pd.concat(frames, ignore_index=True)
+    return _normalize_price_frame(merged)
+
+
 def _price_cache_path(cfg: Config, code: str) -> Path:
     return cfg.cache_dir / "prices" / f"{_safe_code(code)}.csv.gz"
 
@@ -337,33 +418,61 @@ def _fetch_daily_price(ak: Any, symbol: str,
 
 def load_or_fetch_price(code: str, name: str, cfg: Config) -> Tuple[str, str, pd.DataFrame, Optional[str]]:
     path = _price_cache_path(cfg, code)
-    expected_latest = min(cfg.end_date.normalize(), pd.Timestamp.today().normalize()) - pd.offsets.BDay(PRICE_CACHE_STALE_DAYS)
-    if path.exists() and not cfg.force_refresh and _cache_is_fresh(path, expected_latest):
+    expected_latest = (
+        min(cfg.end_date.normalize(), pd.Timestamp.now(tz="Asia/Shanghai").tz_localize(None).normalize())
+        - pd.offsets.BDay(PRICE_CACHE_STALE_DAYS)
+    )
+
+    # 无论缓存是否过期，都先读入旧缓存。刷新失败时必须保留它，不能让整只股票的历史数据消失。
+    cached_frame: Optional[pd.DataFrame] = None
+    if path.exists():
         try:
-            cached = pd.read_csv(path, compression="infer")
-            frame = _normalize_price_frame(cached)
-            return code, name, frame, None
+            cached_raw = pd.read_csv(path, compression="infer")
+            cached_frame = _normalize_price_frame(cached_raw)
+            if cached_frame.empty:
+                cached_frame = None
         except Exception as exc:
-            print(f"⚠️ {code} 缓存损坏，重新抓取：{exc}")
+            print(f"⚠️ {code} 缓存读取失败，将尝试重新抓取：{exc}")
+            cached_frame = None
+
+    if (
+        cached_frame is not None
+        and not cfg.force_refresh
+        and _cache_is_fresh(path, expected_latest)
+    ):
+        return code, name, cached_frame, None
 
     ak = _import_akshare()
     last_error = None
-    # 即使外部工作流传入较大的数值，也限制重试次数，避免限流期间反复请求。
     retry_limit = min(max(int(cfg.retry), 0), 1)
     for attempt in range(retry_limit + 1):
         try:
             raw = _fetch_daily_price(ak, code, cfg.start_date, cfg.end_date)
-            frame = _normalize_price_frame(raw)
-            if frame.empty:
+            fetched_frame = _normalize_price_frame(raw)
+            if fetched_frame.empty:
                 raise ValueError("接口返回空数据")
-            _atomic_to_csv(frame, path, index=False, compression="gzip", encoding="utf-8")
-            return code, name, frame, None
+
+            # 新接口响应可能不完整；按日期合并，保留旧缓存中未被本次响应覆盖的历史记录。
+            merged_frame = _merge_price_frames(cached_frame, fetched_frame)
+            _atomic_to_csv(
+                merged_frame, path, index=False, compression="gzip", encoding="utf-8"
+            )
+            return code, name, merged_frame, None
         except Exception as exc:  # pragma: no cover - 由实时接口决定
             last_error = str(exc)
             if attempt < retry_limit:
-                # GitHub Actions 的共享 IP 可能被行情接口限流，避免快速重试。
                 time.sleep(10 * (2 ** attempt))
-    return code, name, pd.DataFrame(columns=["Date", "Close"]), last_error or "未知错误"
+
+    # 刷新失败时继续使用旧缓存，保证单只股票的历史数据不会从全市场统计中消失。
+    if cached_frame is not None and not cached_frame.empty:
+        return code, name, cached_frame, f"刷新失败，沿用旧缓存：{last_error or '未知错误'}"
+
+    return (
+        code,
+        name,
+        pd.DataFrame(columns=["Date", "Close"]),
+        last_error or "未知错误",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -489,13 +598,23 @@ def _aggregate_monthly_records(records: List[Dict[str, Any]]) -> pd.DataFrame:
     return out.merge(ytd, on="period", how="left")
 
 
-def _daily_frame(acc: Dict[pd.Timestamp, Dict[str, Any]]) -> pd.DataFrame:
+def _daily_frame(
+    acc: Dict[pd.Timestamp, Dict[str, Any]],
+    expected_stock_count: int = 0,
+) -> pd.DataFrame:
     rows = []
-    for dt, item in sorted(acc.items()):
+    ordered_items = sorted(acc.items())
+    min_sample_count = (
+        max(1, int(math.ceil(expected_stock_count * MIN_DAILY_COVERAGE_RATIO)))
+        if expected_stock_count > 0 else 1
+    )
+
+    for dt, item in ordered_items:
         values = np.asarray(item["returns"], dtype=float)
         if values.size:
-            q5, q25, median, q75, q95 = np.quantile(values, [0.05, 0.25, 0.50, 0.75, 0.95])
-            # 每个交易日根据当日实际最大/最小涨跌幅生成分箱，避免横轴固定为 -30%~30%。
+            q5, q25, median, q75, q95 = np.quantile(
+                values, [0.05, 0.25, 0.50, 0.75, 0.95]
+            )
             vmin, vmax = float(np.min(values)), float(np.max(values))
             if np.isclose(vmin, vmax):
                 span = max(0.005, abs(vmin) * 0.08)
@@ -505,9 +624,18 @@ def _daily_frame(acc: Dict[pd.Timestamp, Dict[str, Any]]) -> pd.DataFrame:
             hist = np.histogram(values, bins=edges)[0].astype(int).tolist()
         else:
             q5 = q25 = median = q75 = q95 = np.nan
+            edges = np.array([], dtype=float)
             hist = [0] * (len(_HIST_EDGES) - 1)
+
         count = int(item["count"])
         up, down, flat = int(item["up"]), int(item["down"]), int(item["flat"])
+        coverage = (
+            min(1.0, count / expected_stock_count)
+            if expected_stock_count > 0 else np.nan
+        )
+        # 对全历史日期统一校验，防止缓存抓取失败后只剩少数股票仍被当成完整市场数据。
+        is_complete = count >= min_sample_count
+
         rows.append({
             "date": dt.strftime("%Y-%m-%d"),
             "avg_return": float(item["sum_return"] / count) if count else np.nan,
@@ -517,18 +645,24 @@ def _daily_frame(acc: Dict[pd.Timestamp, Dict[str, Any]]) -> pd.DataFrame:
             "q75_return": float(q75),
             "q95_return": float(q95),
             "up": up, "down": down, "flat": flat, "total": count,
+            "coverage_ratio": float(coverage) if np.isfinite(coverage) else np.nan,
+            "is_complete": bool(is_complete),
             "up_ratio": up / count if count else np.nan,
             "down_ratio": down / count if count else np.nan,
             "flat_ratio": flat / count if count else np.nan,
             "hist_edges": edges.tolist() if values.size else [],
             "hist_counts": hist,
         })
+
     out = pd.DataFrame(rows)
     if out.empty:
         return out
     out["avg_return"] = pd.to_numeric(out["avg_return"], errors="coerce")
-    out["cumulative"] = (1.0 + out["avg_return"].fillna(0.0)).cumprod() - 1.0
+    # 样本不足的近期日期不参与累计收益复合，避免少数股票扭曲全市场序列。
+    valid_daily_returns = out["avg_return"].where(out["is_complete"], np.nan)
+    out["cumulative"] = (1.0 + valid_daily_returns.fillna(0.0)).cumprod() - 1.0
     return out
+
 
 def _build_rankings(period_rows: List[Dict[str, Any]], top_n: int = 20) -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
     if not period_rows:
@@ -795,13 +929,14 @@ function applyTheme(name){
  ['dailyChart','distributionChart'].forEach(id=>{const el=$(id);if(el&&el.data)Plotly.relayout(el,{paper_bgcolor:t.plot,plot_bgcolor:t.plot,'font.color':t.text,'xaxis.gridcolor':t.grid,'yaxis.gridcolor':t.grid});});
  if(mode==='range'){renderDailyChart(inRange());renderDistribution(selectedDay());renderCalendar();}
 }
-const allDates=DATA.daily.map(d=>d.date);
+const usableDaily=(DATA.daily||[]).filter(d=>d.is_complete!==false);
+const allDates=usableDaily.map(d=>d.date);
 const minDate=allDates[0],maxDate=allDates[allDates.length-1];
 const years=[...new Set(allDates.map(d=>Number(d.slice(0,4))))].sort((a,b)=>a-b);
 const currentYear=years[years.length-1];
 let mode='range',breadthMode='count',calendarMetric='avg_return',selectedCalendarYear=currentYear,selectedDistributionDate=maxDate,currentTheme='light';
 
-function inRange(){return DATA.daily.filter(d=>d.date>=$('startDate').value&&d.date<=$('endDate').value);}
+function inRange(){return usableDaily.filter(d=>d.date>=$('startDate').value&&d.date<=$('endDate').value);}
 function getLatest(rows){return rows.length?rows[rows.length-1]:null;}
 function setDateInputs(a,b){$('startDate').value=a;$('endDate').value=b;}
 function yearBounds(y){
@@ -831,7 +966,7 @@ function buildDateSelect(rows){
 function selectedDay(){
  const rows=inRange();
  if(mode==='latest')return getLatest(rows);
- return DATA.daily.find(d=>d.date===selectedDistributionDate)||getLatest(rows);
+ return rows.find(d=>d.date===selectedDistributionDate)||getLatest(rows);
 }
 function renderKpis(rows,day){
  const mean=rows.length?rows.reduce((s,d)=>s+Number(d.avg_return||0),0)/rows.length:null;
@@ -874,14 +1009,14 @@ function renderDistribution(day){
  const barColors=labels.map((_,i)=>i<Math.floor(labels.length/2)?C.green:C.red);
  Plotly.react('distributionChart',[{x:labels,y:counts,type:'bar',marker:{color:barColors},hovertemplate:'涨跌幅区间：%{x}<br>股票数量：%{y}<extra></extra>'}],
   {...BASE,margin:{l:55,r:20,t:20,b:80},xaxis:{title:'个股日涨跌幅区间',tickangle:-50,gridcolor:THEMES[currentTheme].grid},yaxis:{title:'股票数量',gridcolor:THEMES[currentTheme].grid},showlegend:false},CFG);
- const stats=[['股票样本数',fmtNum(day.total)],['均值',fmtPct(day.avg_return)],['中位数 P50',fmtPct(day.median_return)],['下分位 P5',fmtPct(day.q5_return)],['下分位 P25',fmtPct(day.q25_return)],['上分位 P75',fmtPct(day.q75_return)],['上分位 P95',fmtPct(day.q95_return)],['上涨 / 下跌',fmtNum(day.up)+' / '+fmtNum(day.down)]];
+ const stats=[['股票样本数',fmtNum(day.total)],['样本覆盖率',fmtPct(day.coverage_ratio)],['均值',fmtPct(day.avg_return)],['中位数 P50',fmtPct(day.median_return)],['下分位 P5',fmtPct(day.q5_return)],['下分位 P25',fmtPct(day.q25_return)],['上分位 P75',fmtPct(day.q75_return)],['上分位 P95',fmtPct(day.q95_return)],['上涨 / 下跌',fmtNum(day.up)+' / '+fmtNum(day.down)]];
  $('distributionStats').innerHTML=stats.map((x,i)=>`<div class="kpi"><label>${x[0]}</label><strong>${x[1]}</strong></div>`).join('');
 }
 function monthMatrix(year,month){const first=new Date(year,month-1,1),start=first.getDay(),days=new Date(year,month,0).getDate();let weeks=[],w=new Array(start).fill(0);for(let d=1;d<=days;d++){w.push(d);if(w.length===7){weeks.push(w);w=[];}}if(w.length){while(w.length<7)w.push(0);weeks.push(w);}return weeks;}
 function metricColor(v){if(v==null||!Number.isFinite(Number(v)))return 'transparent';const a=Math.min(.82,.16+Math.min(Math.abs(Number(v))*7,1)*.66).toFixed(2);return Number(v)>=0?`rgba(240,108,117,${a})`:`rgba(56,189,145,${a})`;}
 function fmtCell(v){return v==null||!Number.isFinite(Number(v))?'':`${Number(v)>=0?'+':''}${(Number(v)*100).toFixed(2)}%`;}
 function renderCalendar(){
- const year=Number(selectedCalendarYear), rows=DATA.daily.filter(d=>Number(d.date.slice(0,4))===year), byDate=Object.fromEntries(rows.map(d=>[d.date,d]));
+ const year=Number(selectedCalendarYear), rows=usableDaily.filter(d=>Number(d.date.slice(0,4))===year), byDate=Object.fromEntries(rows.map(d=>[d.date,d]));
  let html=''; const headers=['日','一','二','三','四','五','六'];
  for(let month=1;month<=12;month++){let body='';monthMatrix(year,month).forEach(week=>{body+='<tr>'+week.map(day=>{if(!day)return '<td class="empty"></td>';const key=`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`,d=byDate[key],v=d?d[calendarMetric]:null;return `<td style="background:${metricColor(v)}"><div class="day-num">${day}</div><div class="day-val">${fmtCell(v)}</div></td>`;}).join('')+'</tr>';});
   const monthRows=rows.filter(d=>Number(d.date.slice(5,7))===month), vals=monthRows.map(d=>Number(d[calendarMetric])).filter(Number.isFinite); const cumulative=vals.length?((vals.reduce((a,b)=>a*(1+b),1)-1)):null; const up=vals.filter(v=>v>0).length,down=vals.filter(v=>v<0).length;
@@ -908,7 +1043,7 @@ function render(){
  const rows=inRange();
  buildDateSelect(rows);
  const latestDay=getLatest(rows);
- const distributionDay=mode==='latest'?latestDay:(DATA.daily.find(d=>d.date===selectedDistributionDate)||latestDay);
+ const distributionDay=mode==='latest'?latestDay:(rows.find(d=>d.date===selectedDistributionDate)||latestDay);
  renderKpis(rows,latestDay);
  $('dailyPanel').classList.toggle('hidden',mode==='latest');
  $('calendarPanel').classList.toggle('hidden',mode==='latest');
@@ -942,7 +1077,14 @@ const [defaultStart,defaultEnd]=yearBounds(currentYear);
 setDateInputs(defaultStart,defaultEnd);
 document.querySelector('[data-quick="ytd"]').classList.add('active');
 selectedDistributionDate=maxDate;
-$('foot').textContent='统计说明：日历中的均值、中位数、P25、P75均按当日有效股票收益率计算；停牌、未上市或缺少有效价格的股票不计入当日样本。缓存目录：'+(DATA.meta.cache_dir||'--')+'；生成时间：'+(DATA.meta.generated_at||'--');
+const incompleteDays=DATA.meta.incomplete_days||[];
+const excludedDetail=incompleteDays.length
+ ? incompleteDays.map(d=>`${d.date}（${fmtNum(d.total)}/${fmtNum(d.expected)}，覆盖率 ${fmtPct(d.coverage_ratio)}）`).join('、')
+ : '近期没有样本不足日期';
+const qualityNote=(DATA.meta.excluded_daily_count||0)>0
+ ? '；已排除样本不足日期 '+fmtNum(DATA.meta.excluded_daily_count)+' 天；最近被排除日期：'+excludedDetail
+ : '；全部交易日样本覆盖率检查通过';
+$('foot').textContent='统计说明：日历中的均值、中位数、P25、P75均按当日有效股票收益率计算；停牌、未上市或缺少有效价格的股票不计入当日样本。全历史完整性门槛：'+fmtPct(DATA.meta.min_daily_coverage_ratio||0.80)+qualityNote+'。缓存目录：'+(DATA.meta.cache_dir||'--')+'；生成时间：'+(DATA.meta.generated_at||'--');
 render();
 </script></body></html>"""
     return template.replace("__TITLE__", html.escape(title)).replace("__DATA__", data)
@@ -974,9 +1116,34 @@ def build_market_payload(daily: pd.DataFrame, annual: pd.DataFrame, weekly: pd.D
         m["month_num"] = m["period"].dt.month.astype(int)
         m["month"] = m["period"].dt.strftime("%Y-%m")
         m["period"] = m["month"]
+    incomplete_days = []
+    if daily is not None and not daily.empty and "is_complete" in daily.columns:
+        incomplete_all = daily.loc[
+            ~daily["is_complete"].astype(bool),
+            ["date", "total", "coverage_ratio"],
+        ]
+        incomplete_days = [
+            {
+                "date": str(row.date),
+                "total": int(row.total),
+                "expected": int(stock_count),
+                "coverage_ratio": (
+                    float(row.coverage_ratio)
+                    if pd.notna(row.coverage_ratio) else None
+                ),
+            }
+            for row in incomplete_all.tail(RECENT_DAILY_COMPLETENESS_DAYS).itertuples(index=False)
+        ]
+        excluded_daily_count = int(len(incomplete_all))
+    else:
+        excluded_daily_count = 0
+
     return {
         "meta": {
             "stock_count": int(stock_count),
+            "min_daily_coverage_ratio": MIN_DAILY_COVERAGE_RATIO,
+            "excluded_daily_count": excluded_daily_count,
+            "incomplete_days": incomplete_days,
             "start": cfg.start_date.strftime("%Y-%m-%d"),
             "end": cfg.end_date.strftime("%Y-%m-%d"),
             "generated_at": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
@@ -995,6 +1162,15 @@ def build_market_payload(daily: pd.DataFrame, annual: pd.DataFrame, weekly: pd.D
 # 主流程
 # ---------------------------------------------------------------------------
 def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]], Dict[str, Path]]:
+    # 手动触发工作流时也只分析已收盘交易日，避免把盘中日线写入长期缓存。
+    requested_end = cfg.end_date
+    cfg.end_date = _resolve_completed_end_date(cfg.end_date)
+    if cfg.end_date != requested_end:
+        print(
+            f">>> 结束日期由 {requested_end:%Y-%m-%d} 调整为最近已完成交易日 "
+            f"{cfg.end_date:%Y-%m-%d}"
+        )
+
     cfg.cache_dir.mkdir(parents=True, exist_ok=True)
     cfg.output_dir.mkdir(parents=True, exist_ok=True)
     universe = load_universe(cfg)
@@ -1009,16 +1185,21 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
     score_rows: List[Dict[str, Any]] = []
     done = 0
     failed = 0
+    stale_cache_fallback = 0
     tasks = [(str(r.symbol), str(r.name)) for r in universe.itertuples(index=False)]
 
     def process(code: str, name: str, frame: pd.DataFrame, err: Optional[str]) -> None:
-        nonlocal done, failed
+        nonlocal done, failed, stale_cache_fallback
         done += 1
-        if err or frame.empty:
+        if frame is None or frame.empty:
             failed += 1
             if failed <= 10:
                 print(f"⚠️ {name}({code}) 跳过：{err or '无数据'}")
             return
+        if err:
+            stale_cache_fallback += 1
+            if stale_cache_fallback <= 10:
+                print(f"⚠️ {name}({code})：{err}")
         frame["Date"] = pd.to_datetime(frame["Date"], errors="coerce")
         close = pd.Series(pd.to_numeric(frame["Close"], errors="coerce").values,
                           index=frame["Date"]).dropna()
@@ -1079,12 +1260,18 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
             del futures
             gc.collect()
 
-    daily = _daily_frame(daily_acc)
+    daily = _daily_frame(daily_acc, expected_stock_count=len(universe))
+    if daily.empty:
+        raise RuntimeError("没有得到任何有效日线数据；请检查 akshare、网络连接或价格缓存。")
+    complete_days = int(daily["is_complete"].astype(bool).sum())
+    if complete_days == 0:
+        raise RuntimeError(
+            "没有任何交易日通过全市场样本覆盖率检查，拒绝生成/发布不完整看板；"
+            "请检查行情接口、股票池和缓存。"
+        )
     annual = _aggregate_period_records(annual_records, "period")
     weekly = _aggregate_period_records(weekly_records, "period")
     monthly = _aggregate_period_records(monthly_records, "period")
-    if daily.empty:
-        raise RuntimeError("没有得到任何有效日线数据；请检查 akshare、网络连接或价格缓存。")
     rankings = _build_rankings(annual_records, 20)
     payload = build_market_payload(daily, annual, weekly, monthly, rankings,
                                    len(universe), cfg, cfg.cache_dir)
@@ -1104,12 +1291,24 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
     _atomic_to_csv(monthly, files["monthly"], encoding="utf-8-sig")
     with open(files["dashboard"], "w", encoding="utf-8") as f:
         f.write(render_market_dashboard(payload))
+    if stale_cache_fallback:
+        print(
+            f"⚠️ 本次有 {stale_cache_fallback} 只股票抓取失败，"
+            "已使用旧缓存继续统计；请留意近期日期的样本覆盖率。"
+        )
+    incomplete_count = int((~daily["is_complete"].astype(bool)).sum())
+    if incomplete_count:
+        print(
+            f"⚠️ 最近 {RECENT_DAILY_COMPLETENESS_DAYS} 个交易日中，"
+            f"{incomplete_count} 个日期未达到 {MIN_DAILY_COVERAGE_RATIO:.0%} 覆盖率，"
+            "网页默认排除这些日期。"
+        )
     print(f">>> 已生成收益汇总看板：{files['dashboard']}")
     return payload, score_rows, files
 
 
 def parse_args() -> Config:
-    today = pd.Timestamp.today().normalize()
+    today = pd.Timestamp.now(tz="Asia/Shanghai").tz_localize(None).normalize()
     default_start = today - pd.DateOffset(years=3)
     parser = argparse.ArgumentParser(description="近三年 A 股全市场收益与评分汇总看板")
     parser.add_argument("--start-date", default=default_start.strftime("%Y-%m-%d"))
