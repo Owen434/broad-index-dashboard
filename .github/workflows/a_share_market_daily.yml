@@ -9,7 +9,7 @@ on:
 
 concurrency:
   # 与原 daily_update.yml 使用相同的并发组，避免两个工作流同时提交 docs
-  group: docs-update
+  group: daily-update
   cancel-in-progress: false
 
 permissions:
