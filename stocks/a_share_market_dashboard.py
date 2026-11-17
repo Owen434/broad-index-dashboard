@@ -20,7 +20,7 @@
 说明：
 - 行情接口优先使用当前版本的 ak.stock_zh_a_daily_sina(..., adjust="qfq")；
   对旧版 AKShare 再回退到 ak.stock_zh_a_daily。
-- 缓存文件按股票代码拆分为 csv.gz；刷新失败时优先沿用旧缓存，避免整只股票历史数据丢失。
+- 缓存文件按股票代码拆分为 csv.gz；缓存必须包含本次目标交易日，刷新失败时沿用旧缓存但阻止不完整最新日期发布。
 - 年度/月度“累计涨幅”优先取上一期最后一个有效收盘价到本期末的收益；
   上市首期若无上期收盘价，则取上市后首个有效收盘价到本期末，
   汇总中的“等权平均”是股票收益的算术平均；“市场指数收益”是每日等权收益复合。
@@ -56,7 +56,6 @@ DEFAULT_OUTPUT_DIR = "a_share_dashboard"
 DEFAULT_CACHE_DIR = ".cache/a_share"
 UNIVERSE_CACHE_NAME = "a_share_universe.csv"
 UNIVERSE_CACHE_DAYS = 7
-PRICE_CACHE_STALE_DAYS = 3
 # 全历史日期统一按股票池规模校验样本覆盖率；页面仅列示最近 10 个被排除日期。
 MIN_DAILY_COVERAGE_RATIO = 0.80
 RECENT_DAILY_COMPLETENESS_DAYS = 10
@@ -383,13 +382,16 @@ def _price_cache_path(cfg: Config, code: str) -> Path:
 
 
 def _cache_is_fresh(path: Path, expected_latest: pd.Timestamp) -> bool:
+    """缓存必须覆盖本次目标交易日，不能用几天前的行情冒充最新数据。"""
     try:
         sample = pd.read_csv(path, usecols=["Date"], compression="infer")
-        latest = pd.to_datetime(sample["Date"], errors="coerce").max()
-        if pd.isna(latest):
+        dates = pd.to_datetime(sample["Date"], errors="coerce").dropna()
+        if dates.empty:
             return False
-        # 允许周末和节假日，只要求缓存不落后于最近三个交易日。
-        return latest.normalize() >= expected_latest.normalize()
+        target = pd.Timestamp(expected_latest).normalize()
+        # 目标日期是已确认的最近完整交易日。若个股当日停牌，缓存会被重新检查/抓取，
+        # 最终仍由全市场覆盖率门槛决定是否允许发布。
+        return bool((dates.dt.normalize() >= target).any())
     except Exception:
         return False
 
@@ -397,31 +399,60 @@ def _cache_is_fresh(path: Path, expected_latest: pd.Timestamp) -> bool:
 def _fetch_daily_price(ak: Any, symbol: str,
                        start_date: Optional[pd.Timestamp] = None,
                        end_date: Optional[pd.Timestamp] = None) -> pd.DataFrame:
-    """兼容 AKShare 1.20.46+ 的日线接口改名。"""
-    # stock_zh_a_daily 在 AKShare 1.20.46 被移除并改名为
-    # stock_zh_a_daily_sina。优先按新接口调用，旧版本再回退。
-    fetcher = getattr(ak, "stock_zh_a_daily_sina", None)
-    if fetcher is None:
-        fetcher = getattr(ak, "stock_zh_a_daily", None)
-    if fetcher is None:
-        raise AttributeError(
-            "当前 AKShare 未提供 stock_zh_a_daily_sina；请升级：pip install -U akshare"
-        )
-    kwargs: Dict[str, Any] = {"symbol": symbol, "adjust": "qfq"}
-    if start_date is not None:
-        # 多取几个交易日，保证首个统计日能找到前一交易日收盘价。
-        kwargs["start_date"] = (pd.Timestamp(start_date) - pd.offsets.BDay(5)).strftime("%Y%m%d")
-    if end_date is not None:
-        kwargs["end_date"] = pd.Timestamp(end_date).strftime("%Y%m%d")
-    return fetcher(**kwargs)
+    """获取前复权日线：优先新浪接口，失败时回退东方财富接口。"""
+    start_text = (
+        (pd.Timestamp(start_date) - pd.offsets.BDay(5)).strftime("%Y%m%d")
+        if start_date is not None else None
+    )
+    end_text = pd.Timestamp(end_date).strftime("%Y%m%d") if end_date is not None else None
+    errors: List[str] = []
+
+    # AKShare 1.20.46+ 使用 stock_zh_a_daily_sina；旧版本尝试旧名称。
+    for fetcher_name in ("stock_zh_a_daily_sina", "stock_zh_a_daily"):
+        fetcher = getattr(ak, fetcher_name, None)
+        if fetcher is None:
+            continue
+        kwargs: Dict[str, Any] = {"symbol": symbol, "adjust": "qfq"}
+        if start_text is not None:
+            kwargs["start_date"] = start_text
+        if end_text is not None:
+            kwargs["end_date"] = end_text
+        try:
+            raw = fetcher(**kwargs)
+            if raw is not None and not raw.empty:
+                return raw
+            errors.append(f"{fetcher_name}: 接口返回空数据")
+        except Exception as exc:
+            errors.append(f"{fetcher_name}: {exc}")
+
+    # 新浪接口对少数股票可能因股本字段缺失而报 Length mismatch；回退东方财富日线。
+    fallback = getattr(ak, "stock_zh_a_hist", None)
+    if fallback is not None:
+        kwargs = {
+            "symbol": _plain_code(symbol),
+            "period": "daily",
+            "adjust": "qfq",
+        }
+        if start_text is not None:
+            kwargs["start_date"] = start_text
+        if end_text is not None:
+            kwargs["end_date"] = end_text
+        try:
+            raw = fallback(**kwargs)
+            if raw is not None and not raw.empty:
+                return raw
+            errors.append("stock_zh_a_hist: 接口返回空数据")
+        except Exception as exc:
+            errors.append(f"stock_zh_a_hist: {exc}")
+
+    detail = "；".join(errors) if errors else "当前 AKShare 未提供可用日线接口"
+    raise RuntimeError(f"{symbol} 行情获取失败：{detail}")
 
 
 def load_or_fetch_price(code: str, name: str, cfg: Config) -> Tuple[str, str, pd.DataFrame, Optional[str]]:
     path = _price_cache_path(cfg, code)
-    expected_latest = (
-        min(cfg.end_date.normalize(), pd.Timestamp.now(tz="Asia/Shanghai").tz_localize(None).normalize())
-        - pd.offsets.BDay(PRICE_CACHE_STALE_DAYS)
-    )
+    # analyze() 已将 cfg.end_date 解析为最近一个已完成交易日；缓存必须覆盖这一天。
+    expected_latest = pd.Timestamp(cfg.end_date).normalize()
 
     # 无论缓存是否过期，都先读入旧缓存。刷新失败时必须保留它，不能让整只股票的历史数据消失。
     cached_frame: Optional[pd.DataFrame] = None
@@ -1144,6 +1175,7 @@ def build_market_payload(daily: pd.DataFrame, annual: pd.DataFrame, weekly: pd.D
             "min_daily_coverage_ratio": MIN_DAILY_COVERAGE_RATIO,
             "excluded_daily_count": excluded_daily_count,
             "incomplete_days": incomplete_days,
+            "latest_target_date": cfg.end_date.strftime("%Y-%m-%d"),
             "start": cfg.start_date.strftime("%Y-%m-%d"),
             "end": cfg.end_date.strftime("%Y-%m-%d"),
             "generated_at": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
@@ -1186,10 +1218,13 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
     done = 0
     failed = 0
     stale_cache_fallback = 0
+    target_date_price_count = 0
+    target_date_missing_count = 0
     tasks = [(str(r.symbol), str(r.name)) for r in universe.itertuples(index=False)]
 
     def process(code: str, name: str, frame: pd.DataFrame, err: Optional[str]) -> None:
         nonlocal done, failed, stale_cache_fallback
+        nonlocal target_date_price_count, target_date_missing_count
         done += 1
         if frame is None or frame.empty:
             failed += 1
@@ -1201,6 +1236,11 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
             if stale_cache_fallback <= 10:
                 print(f"⚠️ {name}({code})：{err}")
         frame["Date"] = pd.to_datetime(frame["Date"], errors="coerce")
+        frame_dates = frame["Date"].dropna().dt.normalize()
+        if bool((frame_dates == cfg.end_date.normalize()).any()):
+            target_date_price_count += 1
+        else:
+            target_date_missing_count += 1
         close = pd.Series(pd.to_numeric(frame["Close"], errors="coerce").values,
                           index=frame["Date"]).dropna()
         close = close[~close.index.duplicated(keep="last")].sort_index()
@@ -1263,6 +1303,33 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
     daily = _daily_frame(daily_acc, expected_stock_count=len(universe))
     if daily.empty:
         raise RuntimeError("没有得到任何有效日线数据；请检查 akshare、网络连接或价格缓存。")
+
+    # 明确检查本次目标交易日，防止网页默默回退到几天前的旧日期。
+    target_date_text = cfg.end_date.strftime("%Y-%m-%d")
+    target_rows = daily.loc[daily["date"] == target_date_text]
+    min_target_samples = max(1, int(math.ceil(len(universe) * MIN_DAILY_COVERAGE_RATIO)))
+    target_count = int(target_rows.iloc[-1]["total"]) if not target_rows.empty else 0
+    target_coverage = target_count / len(universe) if len(universe) else 0.0
+
+    print("\n========== 最新交易日数据检查 ==========")
+    print(f"目标交易日：{target_date_text}")
+    print(f"股票池数量：{len(universe)}")
+    print(f"目标日有效收益样本：{target_count}")
+    print(f"目标日行情缓存含目标日期：{target_date_price_count}")
+    print(f"目标日行情缓存不含目标日期：{target_date_missing_count}")
+    print(f"最低有效样本要求：{min_target_samples}")
+    print(f"目标日收益样本覆盖率：{target_coverage:.2%}")
+    print(f"刷新失败后沿用旧缓存：{stale_cache_fallback} 只")
+    print("========================================\n")
+
+    if target_rows.empty or target_count < min_target_samples:
+        raise RuntimeError(
+            f"最新完整交易日 {target_date_text} 的全市场样本不足："
+            f"{target_count}/{len(universe)}（{target_coverage:.2%}），"
+            f"要求至少 {min_target_samples} 只（{MIN_DAILY_COVERAGE_RATIO:.0%}）。"
+            "为避免发布过期页面，本次停止生成；请检查行情接口和缓存刷新日志。"
+        )
+
     complete_days = int(daily["is_complete"].astype(bool).sum())
     if complete_days == 0:
         raise RuntimeError(
@@ -1296,11 +1363,12 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
             f"⚠️ 本次有 {stale_cache_fallback} 只股票抓取失败，"
             "已使用旧缓存继续统计；请留意近期日期的样本覆盖率。"
         )
-    incomplete_count = int((~daily["is_complete"].astype(bool)).sum())
-    if incomplete_count:
+    recent_window = daily.tail(RECENT_DAILY_COMPLETENESS_DAYS)
+    recent_incomplete_count = int((~recent_window["is_complete"].astype(bool)).sum())
+    if recent_incomplete_count:
         print(
-            f"⚠️ 最近 {RECENT_DAILY_COMPLETENESS_DAYS} 个交易日中，"
-            f"{incomplete_count} 个日期未达到 {MIN_DAILY_COVERAGE_RATIO:.0%} 覆盖率，"
+            f"⚠️ 最近 {len(recent_window)} 个有数据的交易日中，"
+            f"{recent_incomplete_count} 个日期未达到 {MIN_DAILY_COVERAGE_RATIO:.0%} 覆盖率，"
             "网页默认排除这些日期。"
         )
     print(f">>> 已生成收益汇总看板：{files['dashboard']}")
