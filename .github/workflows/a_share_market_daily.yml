@@ -47,8 +47,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: stocks/.cache/a_share
-          key: a-share-cache-v1-${{ runner.os }}-${{ steps.dates.outputs.day }}
+          key: a-share-cache-v1-${{ runner.os }}-${{ steps.dates.outputs.day }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            a-share-cache-v1-${{ runner.os }}-${{ steps.dates.outputs.day }}
             a-share-cache-v1-${{ runner.os }}-
 
       - name: Install dependencies
