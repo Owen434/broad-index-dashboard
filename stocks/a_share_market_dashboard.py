@@ -1271,7 +1271,7 @@ def analyze(cfg: Config, core: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]
 
     # 网络抓取使用分批 Future，避免一次性创建 5000+ 个任务并长期保留结果。
     # GitHub Actions 内存较小，且 AKShare 的底层网络/解析库不适合高并发长时间运行。
-    workers = max(1, min(int(cfg.workers), 2))
+    workers = max(1, min(int(cfg.workers), 8))
     batch_size = max(workers * 4, 16)
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for batch_start in range(0, len(tasks), batch_size):
