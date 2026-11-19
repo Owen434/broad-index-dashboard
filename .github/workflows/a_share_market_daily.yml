@@ -72,7 +72,7 @@ jobs:
             --end-date "${{ steps.dates.outputs.end }}" \
             --cache-dir ".cache/a_share" \
             --output-dir "a_share_dashboard" \
-            --workers 8 \
+            --workers 4 \
             --retry 2 \
             --no-score
 
