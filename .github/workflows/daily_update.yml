@@ -3,7 +3,7 @@ name: Daily data update
 on:
   schedule:
     # UTC 时间。北京时间 = UTC + 8
-    - cron: '23 15 * * *'
+    - cron: '23 12 * * *'
 
   workflow_dispatch:
 
