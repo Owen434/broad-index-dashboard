@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "options/reference/",
+    "options_microstructure_dashboard.html"
+  ]
+}

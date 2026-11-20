@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>美股期权微观结构与流动性踩踏监控仪表盘</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Google Fonts: Inter & Noto Sans SC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans SC', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
+          colors: {
+            inst: {
+              bg: '#F8FAFC',
+              card: '#FFFFFF',
+              border: '#E2E8F0',
+              navy: '#0F172A',
+              blue: '#1E3A8A',
+              muted: '#64748B',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* 机构极简风定制样式：保证数字等宽防抖动、滑块细腻可控 */
+    body {
+      background-color: #F8FAFC;
+      color: #0F172A;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 细边框定制 Range 滑块 */
+    input[type="range"].inst-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: #E2E8F0;
+      border-radius: 9999px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"].inst-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #1E3A8A;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+      transition: transform 0.12s ease, background-color 0.12s ease;
+    }
+
+    input[type="range"].inst-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #0F172A;
+    }
+
+    input[type="range"].inst-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #1E3A8A;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+      cursor: pointer;
+    }
+
+    /* 去除数字输入框默认上下箭头 */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    /* 轻量级 Toast 提示动画 */
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-anim {
+      animation: fadeInSlide 0.2s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans text-slate-900">
+
+  <!-- 顶部轻提示条（替代 alert） -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- 顶部状态栏与情景切换 -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-3.5">
+      <!-- 第一行：标题 + 综合压力指数 + 阶段判定 -->
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase bg-slate-900 text-white">
+              INSTITUTIONAL MONITOR
+            </span>
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+              美股期权微观结构与流动性踩踏监控仪表盘
+            </h1>
+          </div>
+          <p class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>数据基准：<strong class="text-slate-700 font-medium">2026-11-18/19（月度 OPEX 交割日前）</strong></span>
+            <span class="hidden sm:inline text-slate-300">|</span>
+            <span>口径参考：LSEG Datastream / CBOE / SpotGamma / Squeezemetrics</span>
+          </p>
+        </div>
+
+        <!-- 右侧核心仪表读数：综合压力指数 + 自动阶段徽章 -->
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2">
+            <div>
+              <div class="text-[11px] text-slate-500 font-medium leading-none">综合压力指数</div>
+              <div class="flex items-baseline gap-1 mt-1">
+                <span id="stress-score" class="text-2xl font-bold tabular-nums leading-none text-red-600">--</span>
+                <span class="text-xs text-slate-400 font-medium">/ 100</span>
+              </div>
+            </div>
+            <div class="w-20 sm:w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div id="stress-bar" class="h-full bg-red-600 transition-all duration-300 rounded-full" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div id="regime-badge-box" class="border rounded-lg px-3.5 py-2 bg-red-50 border-red-200">
+            <div class="text-[11px] font-medium text-slate-500 leading-none">系统自动判定阶段</div>
+            <div class="flex items-center gap-2 mt-1">
+              <span id="regime-dot" class="w-2 h-2 rounded-full bg-red-600"></span>
+              <span id="regime-title" class="text-sm font-bold text-red-700 leading-none">阶段三：负反馈翻转与 Vanna 踩踏加速期</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第二行：5个预设情景按钮 + 重置按钮 -->
+      <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-1.5" id="scenario-buttons">
+          <span class="text-xs font-medium text-slate-500 mr-1">情景推演：</span>
+          <button data-scenario="current" class="scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors">
+            当前实盘 (11/19 OPEX前)
+          </button>
+          <button data-scenario="stage1" class="scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors">
+            阶段一：离散繁荣稳态
+          </button>
+          <button data-scenario="stage2" class="scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors">
+            阶段二：偏度与个股预警
+          </button>
+          <button data-scenario="stage3_ext" class="scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors">
+            阶段三升级：宏观全面防御
+          </button>
+          <button data-scenario="stage4" class="scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors">
+            阶段四：OPEX重置/反向Vanna
+          </button>
+        </div>
+
+        <button id="btn-reset" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 transition-colors">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          重置为 11/19 实盘数据
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容容器 -->
+  <main class="max-w-[1440px] mx-auto px-4 sm:px-6 py-5 space-y-5">
+
+    <!-- 模块 1：四阶段反馈机制流程图 + 核心传导链条 -->
+    <section class="bg-white border border-slate-200 rounded-lg p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <span class="w-1 h-4 bg-blue-900 rounded-full"></span>
+          期权微观结构四阶段演化与负反馈闭环
+        </h2>
+        <span id="macro-defense-pill" class="hidden inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300">
+          <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+          已触发：宏观全面防御升级警报
+        </span>
+      </div>
+
+      <!-- 四阶段横向卡片 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="stage-cards">
+        <div data-stage="1" class="stage-card rounded-lg border p-3 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">STAGE 01</span>
+            <span class="stage-pill text-[11px] font-semibold px-2 py-0.5 rounded">待机</span>
+          </div>
+          <div class="text-sm font-bold text-slate-900 mt-1">缩圈与离散稳态期</div>
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+            卖指数波 + 买个股波压低相关性；做市商正 Gamma 充当阻尼器，机械买盘托举权重股。
+          </p>
+        </div>
+
+        <div data-stage="2" class="stage-card rounded-lg border p-3 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">STAGE 02</span>
+            <span class="stage-pill text-[11px] font-semibold px-2 py-0.5 rounded">待机</span>
+          </div>
+          <div class="text-sm font-bold text-slate-900 mt-1">拥挤见顶与先遣撤退期</div>
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+            CBOE SKEW 飙升至 160~170 抢买尾部险；个股 P/C 率先筑底抬头，龙头上升通道松动。
+          </p>
+        </div>
+
+        <div data-stage="3" class="stage-card rounded-lg border p-3 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">STAGE 03</span>
+            <span class="stage-pill text-[11px] font-semibold px-2 py-0.5 rounded">待机</span>
+          </div>
+          <div class="text-sm font-bold text-slate-900 mt-1">负反馈翻转与 Vanna 踩踏加速期</div>
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+            离散平仓、VIX > 28 且期限倒挂、VVIX 破红线；负 Gamma 与 Vanna 双重逼迫做市商砸盘。
+          </p>
+        </div>
+
+        <div data-stage="4" class="stage-card rounded-lg border p-3 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">STAGE 04</span>
+            <span class="stage-pill text-[11px] font-semibold px-2 py-0.5 rounded">待机</span>
+          </div>
+          <div class="text-sm font-bold text-slate-900 mt-1">极端出清与反向 Vanna 修复期</div>
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+            月度 OPEX 交割重置叠加 Put 获利了结；VVIX 回落与倒挂收窄触发反向 Vanna 空头回补。
+          </p>
+        </div>
+      </div>
+
+      <!-- 核心负反馈传导链条条幅 -->
+      <div class="mt-3 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 flex flex-wrap items-center gap-y-1.5 text-xs">
+        <span class="font-bold text-slate-800 mr-2 shrink-0">核心负反馈传导链：</span>
+        <div class="flex flex-wrap items-center gap-1.5 text-slate-700 font-medium">
+          <span class="px-2 py-0.5 bg-white border border-slate-200 rounded">相关性抬升</span>
+          <span class="text-slate-400">→</span>
+          <span class="px-2 py-0.5 bg-white border border-slate-200 rounded">离散交易亏损平仓</span>
+          <span class="text-slate-400">→</span>
+          <span class="px-2 py-0.5 bg-white border border-slate-200 rounded">机械买盘消失 &amp; 负Gamma/负Delta挤压</span>
+          <span class="text-slate-400">→</span>
+          <span class="px-2 py-0.5 bg-white border border-slate-200 rounded">VIX/VVIX跳升 &amp; 期限倒挂</span>
+          <span class="text-slate-400">→</span>
+          <span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-800 rounded font-semibold">Vanna触发</span>
+          <span class="text-slate-400">→</span>
+          <span class="px-2 py-0.5 bg-red-50 border border-red-200 text-red-700 rounded font-semibold">机械式砸盘加速器</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模块 2：交互式可视化图表区（3栏紧凑布局） -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- 图表 1：波动率期限结构曲线 -->
+      <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">波动率期限结构曲线</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">VIX9D / VIX 30D / VXV 3M 实时推算（虚线为 28.0 Vanna 阈值）</p>
+          </div>
+          <span id="term-structure-badge" class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border">
+            Backwardation 倒挂
+          </span>
+        </div>
+        <div class="relative h-52 w-full flex-1">
+          <canvas id="termStructureChart"></canvas>
+        </div>
+        <div class="mt-2 pt-2 border-t border-slate-100 grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div class="text-[11px] text-slate-400">VIX9D (推算)</div>
+            <div id="calc-vix9d" class="text-xs font-bold tabular-nums text-slate-800">--</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-slate-400">VIX (30D基准)</div>
+            <div id="calc-vix30" class="text-xs font-bold tabular-nums text-slate-800">--</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-slate-400">VXV (3M推算)</div>
+            <div id="calc-vxv" class="text-xs font-bold tabular-nums text-slate-800">--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 图表 2：期权流量扩散对比柱状图 -->
+      <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">期权流量扩散对比（CBOE Put/Call）</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">当前量能比 vs 风险扩散红线阈值（0.80 / 1.25 / 1.25）</p>
+          </div>
+          <span id="flow-status-badge" class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border">
+            个股率先发力
+          </span>
+        </div>
+        <div class="relative h-52 w-full flex-1">
+          <canvas id="orderFlowChart"></canvas>
+        </div>
+        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+          <span>结构特征：<strong id="flow-pattern-text" class="text-slate-700">接近 2022 年初个股先行扩散</strong></span>
+          <span class="tabular-nums">基准红线：1.25</span>
+        </div>
+      </div>
+
+      <!-- 图表 3：做市商 Gamma 历史底线水位条 -->
+      <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">做市商库存与历史底线水位</h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">Dealer Agg Gamma (-8.6B 底线) / SPX GEX / Net Delta</p>
+            </div>
+            <span id="dealer-status-badge" class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border">
+              深度负 Gamma
+            </span>
+          </div>
+
+          <!-- 水位条 1：Dealer Agg Gamma -->
+          <div class="space-y-1.5 mb-4">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-slate-700">SPX Dealer Agg Gamma</span>
+              <span id="gauge-dealer-val" class="font-bold tabular-nums text-red-600">-7.3 $B</span>
+            </div>
+            <div class="relative h-5 bg-slate-100 border border-slate-200 rounded overflow-hidden">
+              <!-- 负值区底色与正值区底色 -->
+              <div class="absolute inset-y-0 left-0 w-1/2 bg-red-50/70"></div>
+              <div class="absolute inset-y-0 right-0 w-1/2 bg-emerald-50/60"></div>
+              <!-- 历史底线 -8.6B 标记（区间 -10B 到 +10B，-8.6B 在 7% 处） -->
+              <div class="absolute inset-y-0 border-l-2 border-dashed border-red-600 z-10" style="left: 7%;" title="历史底线 -8.6B"></div>
+              <!-- 零轴 Gamma Flip 标记（50% 处） -->
+              <div class="absolute inset-y-0 border-l-2 border-slate-800 z-10" style="left: 50%;" title="Gamma Flip 0B"></div>
+              <!-- 当前值动态填充条 -->
+              <div id="gauge-dealer-bar" class="absolute inset-y-0.5 bg-red-600/85 transition-all duration-300 rounded-sm"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 tabular-nums">
+              <span class="text-red-700 font-semibold">底线 -8.6B</span>
+              <span>零轴翻转 0.0B</span>
+              <span class="text-emerald-700">正Gamma +10B</span>
+            </div>
+          </div>
+
+          <!-- 水位条 2：SPX GEX -->
+          <div class="space-y-1.5 mb-4">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-slate-700">SPX Gamma Exposure (GEX)</span>
+              <span id="gauge-gex-val" class="font-bold tabular-nums text-red-600">-$100.5B</span>
+            </div>
+            <div class="relative h-5 bg-slate-100 border border-slate-200 rounded overflow-hidden">
+              <div class="absolute inset-y-0 left-0 w-1/2 bg-red-50/70"></div>
+              <div class="absolute inset-y-0 right-0 w-1/2 bg-emerald-50/60"></div>
+              <!-- 零轴 50% -->
+              <div class="absolute inset-y-0 border-l-2 border-slate-800 z-10" style="left: 50%;"></div>
+              <!-- 极值参考区间 -$97B ~ -$104B（区间 -130 到 +130） -->
+              <div id="gauge-gex-bar" class="absolute inset-y-0.5 bg-red-600/85 transition-all duration-300 rounded-sm"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 tabular-nums">
+              <span>-$130B (极值)</span>
+              <span>零轴 0B</span>
+              <span>+$130B</span>
+            </div>
+          </div>
+
+          <!-- 水位条 3：Estimated Net Delta Flow -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-slate-700">Estimated Net Delta Flow</span>
+              <span id="gauge-delta-val" class="font-bold tabular-nums text-red-600">-110</span>
+            </div>
+            <div class="relative h-5 bg-slate-100 border border-slate-200 rounded overflow-hidden">
+              <div class="absolute inset-y-0 left-0 w-1/2 bg-red-50/70"></div>
+              <div class="absolute inset-y-0 right-0 w-1/2 bg-emerald-50/60"></div>
+              <div class="absolute inset-y-0 border-l-2 border-slate-800 z-10" style="left: 50%;"></div>
+              <div id="gauge-delta-bar" class="absolute inset-y-0.5 bg-red-600/85 transition-all duration-300 rounded-sm"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 tabular-nums">
+              <span>-150 (持续卖出)</span>
+              <span>零轴平衡点</span>
+              <span>+150 (买回对冲)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+          <span>距离 -8.6B 历史底线缓冲：</span>
+          <strong id="dealer-buffer-text" class="tabular-nums text-red-700">1.3 $B</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模块 3：五大维度核心指标监控面板（支持输入与滑块实时联动） -->
+    <section class="space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <span class="w-1 h-4 bg-blue-900 rounded-full"></span>
+          五大维度核心指标实时监控与压力测试（支持直接输入或拖动滑块推演）
+        </h2>
+        <div class="flex items-center gap-3 text-[11px] text-slate-500">
+          <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>正常</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>警戒</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-600"></span>触发红线</span>
+        </div>
+      </div>
+
+      <!-- 动态渲染 5 个维度分组卡片 -->
+      <div id="indicators-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- 模块 4：底部每日复盘 Checklist -->
+    <section class="bg-white border border-slate-200 rounded-lg p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-100">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-1 h-4 bg-blue-900 rounded-full"></span>
+            每日复盘 Checklist（支持人工勾选 + 指标自动高亮触发状态）
+          </h2>
+          <p class="text-[11px] text-slate-500 mt-0.5">左侧监控“踩踏向宏观全面防御扩散”，右侧监控“OPEX 交割重置与反向 Vanna 修复”</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <span id="checklist-risk-count" class="px-2.5 py-1 rounded bg-red-50 text-red-700 border border-red-200 font-semibold tabular-nums">风险触发: 0/4</span>
+          <span id="checklist-reset-count" class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold tabular-nums">修复触发: 0/4</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- 左侧：风险升级确认项 -->
+        <div class="border border-red-200/80 bg-red-50/20 rounded-lg p-3.5">
+          <div class="flex items-center justify-between mb-2.5">
+            <h3 class="text-xs font-bold text-red-800 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-red-600"></span>
+              风险升级确认项（向全市场扩散）
+            </h3>
+            <span class="text-[11px] text-red-600/80 font-medium">满足越多，下行加速风险越高</span>
+          </div>
+          <div id="checklist-risk" class="space-y-2"></div>
+        </div>
+
+        <!-- 右侧：止跌与 OPEX 重置确认项 -->
+        <div class="border border-emerald-200/80 bg-emerald-50/20 rounded-lg p-3.5">
+          <div class="flex items-center justify-between mb-2.5">
+            <h3 class="text-xs font-bold text-emerald-800 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+              止跌与 OPEX 重置确认项（反向 Vanna 修复）
+            </h3>
+            <span class="text-[11px] text-emerald-700/80 font-medium">满足越多，空头回补概率越高</span>
+          </div>
+          <div id="checklist-reset" class="space-y-2"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-[1440px] mx-auto px-4 sm:px-6 py-4 text-center text-[11px] text-slate-400">
+    美股期权微观结构与流动性踩踏监控仪表盘 · 仅用于机构微观结构逻辑推演与复盘参考，不构成投资建议
+  </footer>
+
+  <script>
+    /**
+     * ============================================================================
+     * 美股期权微观结构与流动性踩踏监控仪表盘 - 核心状态与交互逻辑
+     * ============================================================================
+     */
+
+    // 1. 预设情景数据集
+    const SCENARIOS = {
+      current: {
+        label: '当前实盘 (11/19 OPEX前)',
+        values: {
+          vixeqVix: 1.60,
+          dspx: 37.2,
+          nvda: 146.0,
+          vix: 28.4,
+          vvix: 122.0,
+          vixVxv: 1.05,
+          vix9dVix: 1.03,
+          skew: 141.0,
+          pcEquity: 0.72,
+          pcTotal: 1.05,
+          pcIndex: 1.15,
+          spxGex: -100.5,
+          dealerGamma: -7.3,
+          netDelta: -110
+        }
+      },
+      stage1: {
+        label: '阶段一：离散繁荣稳态',
+        values: {
+          vixeqVix: 2.65,
+          dspx: 44.5,
+          nvda: 178.0,
+          vix: 14.2,
+          vvix: 84.0,
+          vixVxv: 0.86,
+          vix9dVix: 0.88,
+          skew: 146.0,
+          pcEquity: 0.52,
+          pcTotal: 0.82,
+          pcIndex: 1.05,
+          spxGex: 85.0,
+          dealerGamma: 4.8,
+          netDelta: 65
+        }
+      },
+      stage2: {
+        label: '阶段二：偏度与个股预警',
+        values: {
+          vixeqVix: 2.12,
+          dspx: 41.0,
+          nvda: 162.0,
+          vix: 18.8,
+          vvix: 102.0,
+          vixVxv: 0.96,
+          vix9dVix: 0.98,
+          skew: 166.0,
+          pcEquity: 0.71,
+          pcTotal: 1.01,
+          pcIndex: 1.12,
+          spxGex: 12.0,
+          dealerGamma: 0.4,
+          netDelta: -15
+        }
+      },
+      stage3_ext: {
+        label: '阶段三升级：宏观全面防御',
+        values: {
+          vixeqVix: 1.35,
+          dspx: 31.5,
+          nvda: 132.0,
+          vix: 35.8,
+          vvix: 142.0,
+          vixVxv: 1.14,
+          vix9dVix: 1.11,
+          skew: 132.0,
+          pcEquity: 0.88,
+          pcTotal: 1.34,
+          pcIndex: 1.42,
+          spxGex: -118.0,
+          dealerGamma: -9.1,
+          netDelta: -138
+        }
+      },
+      stage4: {
+        label: '阶段四：OPEX重置/反向Vanna',
+        values: {
+          vixeqVix: 1.72,
+          dspx: 36.0,
+          nvda: 151.5,
+          vix: 22.6,
+          vvix: 101.0,
+          vixVxv: 0.96,
+          vix9dVix: 0.94,
+          skew: 134.0,
+          pcEquity: 0.74,
+          pcTotal: 1.08,
+          pcIndex: 1.22,
+          spxGex: -18.0,
+          dealerGamma: -1.4,
+          netDelta: 15
+        }
+      }
+    };
+
+    // 2. 五大维度指标元数据配置
+    const INDICATOR_GROUPS = [
+      {
+        id: 'dispersion',
+        title: '一、离散与相关性',
+        subtitle: '衡量权重股分化与离散交易平仓压力',
+        items: [
+          {
+            key: 'vixeqVix',
+            name: 'VIXEQ / VIX 比值',
+            unit: 'x',
+            min: 1.0, max: 3.5, step: 0.05, decimals: 2,
+            thresholdText: '红线 < 2.00（高位断崖回落）',
+            evalStatus: (v) => v < 1.85 ? 'red' : (v < 2.15 ? 'amber' : 'green')
+          },
+          {
+            key: 'dspx',
+            name: 'DSPX 官方离散度指数',
+            unit: '',
+            min: 15, max: 60, step: 0.5, decimals: 1,
+            thresholdText: '相关性飙升时高位回落',
+            evalStatus: (v, s) => (v < 35 && s.vix > 25) ? 'red' : (v < 39 ? 'amber' : 'green')
+          },
+          {
+            key: 'nvda',
+            name: 'NVIDIA 股价风向标',
+            unit: '$',
+            min: 90, max: 220, step: 0.5, decimals: 1,
+            thresholdText: '上升通道考验位 ~150',
+            evalStatus: (v) => v < 148 ? 'red' : (v < 160 ? 'amber' : 'green')
+          }
+        ]
+      },
+      {
+        id: 'volatility',
+        title: '二、波动率与流动性挤兑',
+        subtitle: '监测基准恐慌与对冲工具爆炒红灯',
+        items: [
+          {
+            key: 'vix',
+            name: '30天基准 VIX',
+            unit: '',
+            min: 10, max: 55, step: 0.2, decimals: 1,
+            thresholdText: '红线 > 28.0（触发 Vanna）',
+            evalStatus: (v) => v >= 28.0 ? 'red' : (v >= 20.0 ? 'amber' : 'green')
+          },
+          {
+            key: 'vvix',
+            name: 'VVIX（波动率的波动率）',
+            unit: '',
+            min: 70, max: 170, step: 1, decimals: 1,
+            thresholdText: '红线 110 ~ 120（流动性挤兑）',
+            evalStatus: (v) => v >= 115 ? 'red' : (v >= 100 ? 'amber' : 'green')
+          }
+        ]
+      },
+      {
+        id: 'term_skew',
+        title: '三、期限结构与结构性偏度',
+        subtitle: '近远端倒挂斜率与尾部保护成本',
+        items: [
+          {
+            key: 'vixVxv',
+            name: 'VIX / VXV（近远端倒挂比率）',
+            unit: 'x',
+            min: 0.75, max: 1.35, step: 0.01, decimals: 2,
+            thresholdText: '红线 > 1.00（Backwardation）',
+            evalStatus: (v) => v > 1.00 ? 'red' : (v >= 0.95 ? 'amber' : 'green')
+          },
+          {
+            key: 'vix9dVix',
+            name: 'VIX9D / VIX（短端爆发斜率）',
+            unit: 'x',
+            min: 0.75, max: 1.35, step: 0.01, decimals: 2,
+            thresholdText: '红线 > 1.00（超短端反超）',
+            evalStatus: (v) => v > 1.00 ? 'red' : (v >= 0.95 ? 'amber' : 'green')
+          },
+          {
+            key: 'skew',
+            name: 'CBOE SKEW 偏度指数',
+            unit: '',
+            min: 115, max: 185, step: 1, decimals: 1,
+            thresholdText: '警戒区 160~170；见顶回落切入去杠杆',
+            evalStatus: (v, s) => {
+              if (v >= 160) return 'amber';
+              if (s.vix >= 25 && v < 150) return 'red';
+              return 'green';
+            }
+          }
+        ]
+      },
+      {
+        id: 'order_flow',
+        title: '四、期权流量（CBOE Put/Call）',
+        subtitle: '追踪防御需求从个股向全市场扩散',
+        items: [
+          {
+            key: 'pcEquity',
+            name: '个股 P/C（灰线）',
+            unit: '',
+            min: 0.35, max: 1.20, step: 0.01, decimals: 2,
+            thresholdText: '红线 > 0.80（2022式个股去杠杆）',
+            evalStatus: (v) => v >= 0.80 ? 'red' : (v >= 0.68 ? 'amber' : 'green')
+          },
+          {
+            key: 'pcTotal',
+            name: '全市场综合 P/C（橙线）',
+            unit: '',
+            min: 0.60, max: 1.60, step: 0.01, decimals: 2,
+            thresholdText: '红线 > 1.25（全市场扩散）',
+            evalStatus: (v) => v >= 1.25 ? 'red' : (v >= 1.00 ? 'amber' : 'green')
+          },
+          {
+            key: 'pcIndex',
+            name: '指数 P/C（蓝线）',
+            unit: '',
+            min: 0.70, max: 1.80, step: 0.01, decimals: 2,
+            thresholdText: '红线 > 1.25 站稳（宏观全面防御）',
+            evalStatus: (v) => v >= 1.25 ? 'red' : (v >= 1.12 ? 'amber' : 'green')
+          }
+        ]
+      },
+      {
+        id: 'dealer_flow',
+        title: '五、做市商敞口（Hedging Flow）',
+        subtitle: '监控 Gamma Flip 翻转与机械抛压极值',
+        items: [
+          {
+            key: 'spxGex',
+            name: 'SPX GEX 敞口',
+            unit: ' $B',
+            min: -130, max: 130, step: 0.5, decimals: 1,
+            thresholdText: '零轴翻转（当前极值 -$97B~-$104B）',
+            evalStatus: (v) => v <= -50 ? 'red' : (v < 0 ? 'amber' : 'green')
+          },
+          {
+            key: 'dealerGamma',
+            name: 'SPX Dealer Agg Gamma',
+            unit: ' $B',
+            min: -10.0, max: 10.0, step: 0.1, decimals: 1,
+            thresholdText: '历史底线 -8.6 $B / 零轴翻转',
+            evalStatus: (v) => v <= -5.0 ? 'red' : (v < 0 ? 'amber' : 'green')
+          },
+          {
+            key: 'netDelta',
+            name: 'Estimated Net Delta Flow',
+            unit: '',
+            min: -150, max: 150, step: 1, decimals: 0,
+            thresholdText: '零轴平衡点（负值=机械卖出对冲）',
+            evalStatus: (v) => v <= -60 ? 'red' : (v < 0 ? 'amber' : 'green')
+          }
+        ]
+      }
+    ];
+
+    // 3. 每日复盘 Checklist 配置
+    const CHECKLIST_RISK = [
+      {
+        id: 'risk_1',
+        text: '个股 P/C 突破 0.80 且全市场 P/C 冲击 1.25',
+        sub: '确认高估值/拥挤个股去杠杆向全市场扩散',
+        checkAuto: (s) => s.pcEquity >= 0.80 && s.pcTotal >= 1.25
+      },
+      {
+        id: 'risk_2',
+        text: '指数 P/C 放量站稳 1.25 上方（机构全面宏观防御）',
+        sub: '蓝线突破基准线，标志宏观恐慌对冲全面打满',
+        checkAuto: (s) => s.pcIndex >= 1.25
+      },
+      {
+        id: 'risk_3',
+        text: 'SPX Dealer Agg Gamma 有效跌穿 -8.6B 历史底线',
+        sub: '做市商流动性缓冲彻底击穿历史极值区间',
+        checkAuto: (s) => s.dealerGamma <= -8.6
+      },
+      {
+        id: 'risk_4',
+        text: 'VIX > 28、VIX/VXV > 1.00 且 VVIX 拒绝跌回 110 下方',
+        sub: 'Vanna 螺旋持续强化，对冲工具维持挤兑状态',
+        checkAuto: (s) => s.vix > 28.0 && s.vixVxv > 1.00 && s.vvix >= 110
+      }
+    ];
+
+    const CHECKLIST_RESET = [
+      {
+        id: 'reset_1',
+        text: '月度 OPEX 交割日落地，Net Delta 与 GEX 出现周期性重置回拉',
+        sub: 'SPX GEX 收窄至 -30B 以上或 Net Delta 回升至零轴上方',
+        checkAuto: (s) => s.spxGex > -30 && s.netDelta >= 0
+      },
+      {
+        id: 'reset_2',
+        text: 'VVIX 率先跌回 110 红线下方（尾部挤兑降温）',
+        sub: '对 VIX 看涨期权的非理性抢筹退潮',
+        checkAuto: (s) => s.vvix < 110
+      },
+      {
+        id: 'reset_3',
+        text: 'VIX/VXV 与 VIX9D/VIX 双双回落至 1.00 以下（解除 Vanna 倒挂条件）',
+        sub: '波动率期限结构由 Backwardation 恢复至 Contango',
+        checkAuto: (s) => s.vixVxv < 1.00 && s.vix9dVix < 1.00
+      },
+      {
+        id: 'reset_4',
+        text: 'VIXEQ/VIX 在 1.6 附近止跌企稳，隐含相关性停止飙升',
+        sub: '离散交易平仓止血（VIXEQ/VIX >= 1.70 且 VIX < 25）',
+        checkAuto: (s) => s.vixeqVix >= 1.70 && s.vix < 25.0
+      }
+    ];
+
+    // 全局运行状态
+    let state = { ...SCENARIOS.current.values };
+    let activeScenarioKey = 'current';
+    let manualChecklistState = {};
+    let termChart = null;
+    let flowChart = null;
+
+    // 轻量提示函数（严禁使用 alert）
+    function showToast(msg) {
+      try {
+        const container = document.getElementById('toast-container');
+        const el = document.createElement('div');
+        el.className = 'toast-anim bg-slate-900 text-white text-xs font-medium px-3.5 py-2 rounded-md shadow-lg border border-slate-700';
+        el.textContent = msg;
+        container.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.25s ease';
+          setTimeout(() => el.remove(), 250);
+        }, 2000);
+      } catch (e) {
+        console.error('Toast error:', e);
+      }
+    }
+
+    // 工具函数：数值限幅
+    function clamp(val, min, max) {
+      return Math.min(Math.max(val, min), max);
+    }
+
+    // 4. 计算综合压力指数 (0 - 100)
+    function computeStressIndex(s) {
+      // 波动率与挤兑 (25分)
+      const vixScore = clamp(((s.vix - 14) / (36 - 14)) * 15, 0, 15);
+      const vvixScore = clamp(((s.vvix - 85) / (135 - 85)) * 10, 0, 10);
+
+      // 期限结构倒挂 (15分)
+      const termScore1 = clamp(((s.vixVxv - 0.88) / (1.12 - 0.88)) * 9, 0, 9);
+      const termScore2 = clamp(((s.vix9dVix - 0.88) / (1.12 - 0.88)) * 6, 0, 6);
+
+      // 做市商负敞口 (30分)
+      const gexScore = clamp(((20 - s.spxGex) / 140) * 12, 0, 12);
+      const dealerScore = clamp(((1 - s.dealerGamma) / 10) * 10, 0, 10);
+      const deltaScore = clamp(((20 - s.netDelta) / 160) * 8, 0, 8);
+
+      // 离散平仓 (15分)
+      const dispScore = clamp(((2.5 - s.vixeqVix) / (2.5 - 1.35)) * 15, 0, 15);
+
+      // 期权流量扩散 (15分)
+      const pcEqScore = clamp(((s.pcEquity - 0.50) / (0.90 - 0.50)) * 6, 0, 6);
+      const pcTotScore = clamp(((s.pcTotal - 0.80) / (1.35 - 0.80)) * 5, 0, 5);
+      const pcIdxScore = clamp(((s.pcIndex - 1.00) / (1.40 - 1.00)) * 4, 0, 4);
+
+      const total = vixScore + vvixScore + termScore1 + termScore2 + gexScore + dealerScore + deltaScore + dispScore + pcEqScore + pcTotScore + pcIdxScore;
+      return Math.round(clamp(total, 0, 100));
+    }
+
+    // 5. 自动判定当前所处四阶段
+    function detectRegime(s) {
+      const macroDefense = (s.pcIndex >= 1.25 && s.pcEquity >= 0.80) || s.dealerGamma <= -8.6;
+
+      // 阶段三：深度负 Gamma 或 VIX 破 26 且伴随期限倒挂/VVIX 飙升
+      if (
+        (s.vix >= 26.0 && (s.vixVxv >= 1.00 || s.vvix >= 110)) ||
+        (s.dealerGamma <= -4.5 && s.spxGex <= -50)
+      ) {
+        return {
+          stage: 3,
+          title: macroDefense
+            ? '阶段三升级：Vanna 踩踏与宏观全面防御'
+            : '阶段三：负反馈翻转与 Vanna 踩踏加速期',
+          color: 'red',
+          macroDefense
+        };
+      }
+
+      // 阶段一：正 Gamma 稳态、低波、低流量防御
+      if (
+        s.dealerGamma >= 1.5 &&
+        s.spxGex >= 25 &&
+        s.vix < 18.0 &&
+        s.skew < 158
+      ) {
+        return {
+          stage: 1,
+          title: '阶段一：缩圈与离散稳态期',
+          color: 'green',
+          macroDefense: false
+        };
+      }
+
+      // 阶段四：OPEX 重置与反向 Vanna 修复（倒挂解除、VVIX 回落至 110 下方、Delta 回正且 GEX 已从深度负值收敛，且非高 SKEW 预警）
+      if (
+        s.vixVxv < 1.00 &&
+        s.vvix < 110 &&
+        s.skew < 155 &&
+        s.netDelta >= 0 &&
+        s.spxGex < 25 &&
+        s.vixeqVix < 2.0
+      ) {
+        return {
+          stage: 4,
+          title: '阶段四：极端出清与反向 Vanna 修复期',
+          color: 'blue',
+          macroDefense: false
+        };
+      }
+
+      // 阶段二：偏度飙升预警 / 个股 P/C 率先抬头 / 临近 Gamma Flip
+      return {
+        stage: 2,
+        title: '阶段二：拥挤见顶与先遣撤退期',
+        color: 'amber',
+        macroDefense: false
+      };
+    }
+
+    // 6. 初始化渲染五大维度指标卡片 DOM
+    function buildIndicatorPanels() {
+      const container = document.getElementById('indicators-grid');
+      container.innerHTML = '';
+
+      INDICATOR_GROUPS.forEach((group) => {
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between';
+
+        let itemsHtml = '';
+        group.items.forEach((item) => {
+          itemsHtml += `
+            <div class="py-2.5 border-t border-slate-100 first:border-t-0 first:pt-0 last:pb-0">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span id="dot-${item.key}" class="w-2 h-2 rounded-full shrink-0 bg-slate-300"></span>
+                    <label for="num-${item.key}" class="text-xs font-semibold text-slate-800 truncate">${item.name}</label>
+                  </div>
+                  <div class="text-[11px] text-slate-400 mt-0.5 truncate">${item.thresholdText}</div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <input
+                    id="num-${item.key}"
+                    data-key="${item.key}"
+                    type="number"
+                    min="${item.min}"
+                    max="${item.max}"
+                    step="${item.step}"
+                    class="indicator-num w-18 sm:w-20 text-right text-xs font-bold tabular-nums px-2 py-1 rounded border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-800 focus:outline-none text-slate-900"
+                  />
+                  ${item.unit ? `<span class="text-[11px] font-medium text-slate-500 w-6">${item.unit.trim()}</span>` : '<span class="w-1"></span>'}
+                  <span id="badge-${item.key}" class="text-[10px] font-semibold px-1.5 py-0.5 rounded border whitespace-nowrap w-14 text-center">--</span>
+                </div>
+              </div>
+              <input
+                id="range-${item.key}"
+                data-key="${item.key}"
+                type="range"
+                min="${item.min}"
+                max="${item.max}"
+                step="${item.step}"
+                class="indicator-range inst-slider"
+              />
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div>
+            <div class="mb-3">
+              <h3 class="text-xs font-bold text-slate-900 tracking-wide">${group.title}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">${group.subtitle}</p>
+            </div>
+            <div>${itemsHtml}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // 绑定滑块与数字输入事件
+      document.querySelectorAll('.indicator-range').forEach((el) => {
+        el.addEventListener('input', (e) => {
+          const key = e.target.dataset.key;
+          const val = parseFloat(e.target.value);
+          if (!isNaN(val)) {
+            state[key] = val;
+            activeScenarioKey = null;
+            updateDashboard();
+          }
+        });
+      });
+
+      document.querySelectorAll('.indicator-num').forEach((el) => {
+        el.addEventListener('change', (e) => {
+          const key = e.target.dataset.key;
+          const meta = findIndicatorMeta(key);
+          let val = parseFloat(e.target.value);
+          if (isNaN(val)) val = state[key];
+          if (meta) val = clamp(val, meta.min, meta.max);
+          state[key] = val;
+          activeScenarioKey = null;
+          updateDashboard();
+        });
+      });
+    }
+
+    function findIndicatorMeta(key) {
+      for (const g of INDICATOR_GROUPS) {
+        const found = g.items.find((i) => i.key === key);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    // 7. 初始化 Checklist DOM
+    function buildChecklists() {
+      const renderList = (containerId, list, theme) => {
+        const box = document.getElementById(containerId);
+        box.innerHTML = '';
+        list.forEach((item) => {
+          const row = document.createElement('label');
+          row.id = `row-${item.id}`;
+          row.className = 'flex items-start gap-2.5 p-2.5 rounded-md border bg-white border-slate-200 cursor-pointer transition-colors hover:bg-slate-50';
+          row.innerHTML = `
+            <input type="checkbox" id="chk-${item.id}" data-id="${item.id}" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-900 focus:ring-blue-800 cursor-pointer" />
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center justify-between gap-1.5">
+                <span class="text-xs font-semibold text-slate-800 leading-snug">${item.text}</span>
+                <span id="auto-${item.id}" class="text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0">未触发</span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${item.sub}</div>
+            </div>
+          `;
+          box.appendChild(row);
+
+          const chk = row.querySelector('input[type="checkbox"]');
+          chk.addEventListener('change', (e) => {
+            manualChecklistState[item.id] = e.target.checked;
+          });
+        });
+      };
+
+      renderList('checklist-risk', CHECKLIST_RISK, 'red');
+      renderList('checklist-reset', CHECKLIST_RESET, 'green');
+    }
+
+    // 8. 初始化 Chart.js 图表
+    function initCharts() {
+      try {
+        // 图表 1：波动率期限结构曲线
+        const ctx1 = document.getElementById('termStructureChart').getContext('2d');
+        termChart = new Chart(ctx1, {
+          type: 'line',
+          data: {
+            labels: ['VIX9D (9天超短端)', 'VIX (30天基准)', 'VXV (3个月季度端)'],
+            datasets: [
+              {
+                label: '当前期限结构',
+                data: [29.3, 28.4, 27.0],
+                borderColor: '#DC2626',
+                backgroundColor: 'rgba(220, 38, 38, 0.08)',
+                borderWidth: 2.5,
+                pointRadius: 5,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#FFFFFF',
+                pointBorderColor: '#DC2626',
+                pointBorderWidth: 2,
+                fill: true,
+                tension: 0.18
+              },
+              {
+                label: 'Vanna 触发阈值 (28.0)',
+                data: [28.0, 28.0, 28.0],
+                borderColor: '#94A3B8',
+                borderWidth: 1.5,
+                borderDash: [5, 4],
+                pointRadius: 0,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                  boxWidth: 12,
+                  font: { size: 11, family: 'Inter, Noto Sans SC' },
+                  color: '#475569'
+                }
+              },
+              tooltip: {
+                backgroundColor: '#0F172A',
+                titleFont: { size: 11 },
+                bodyFont: { size: 11 },
+                padding: 8
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 11 }, color: '#475569' }
+              },
+              y: {
+                suggestedMin: 10,
+                suggestedMax: 40,
+                grid: { color: '#F1F5F9' },
+                ticks: { font: { size: 11 }, color: '#64748B' }
+              }
+            }
+          }
+        });
+
+        // 图表 2：期权流量扩散对比柱状图
+        const ctx2 = document.getElementById('orderFlowChart').getContext('2d');
+        flowChart = new Chart(ctx2, {
+          type: 'bar',
+          data: {
+            labels: ['个股 P/C (灰线)', '全市场 P/C (橙线)', '指数 P/C (蓝线)'],
+            datasets: [
+              {
+                label: '当前数值',
+                data: [0.72, 1.05, 1.15],
+                backgroundColor: ['#64748B', '#EA580C', '#1D4ED8'],
+                borderRadius: 4,
+                barPercentage: 0.65,
+                categoryPercentage: 0.65
+              },
+              {
+                label: '红线阈值',
+                data: [0.80, 1.25, 1.25],
+                backgroundColor: ['rgba(220,38,38,0.16)', 'rgba(220,38,38,0.16)', 'rgba(220,38,38,0.16)'],
+                borderColor: ['#DC2626', '#DC2626', '#DC2626'],
+                borderWidth: 1.5,
+                borderDash: [3, 3],
+                borderRadius: 4,
+                barPercentage: 0.65,
+                categoryPercentage: 0.65
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                  boxWidth: 12,
+                  font: { size: 11, family: 'Inter, Noto Sans SC' },
+                  color: '#475569'
+                }
+              },
+              tooltip: {
+                backgroundColor: '#0F172A',
+                titleFont: { size: 11 },
+                bodyFont: { size: 11 },
+                padding: 8
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 11 }, color: '#475569' }
+              },
+              y: {
+                min: 0,
+                suggestedMax: 1.6,
+                grid: { color: '#F1F5F9' },
+                ticks: { font: { size: 11 }, color: '#64748B' }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Chart initialization error:', err);
+        showToast('图表渲染出现异常，请刷新重试');
+      }
+    }
+
+    // 9. 更新水位条几何位置（以 50% 为零轴）
+    function updateZeroCenteredBar(barId, value, maxAbs) {
+      const bar = document.getElementById(barId);
+      if (!bar) return;
+      const clamped = clamp(value, -maxAbs, maxAbs);
+      const pct = (Math.abs(clamped) / maxAbs) * 50;
+
+      if (clamped < 0) {
+        bar.style.left = `${50 - pct}%`;
+        bar.style.width = `${pct}%`;
+        bar.className = 'absolute inset-y-0.5 bg-red-600/85 transition-all duration-300 rounded-l-sm';
+      } else {
+        bar.style.left = '50%';
+        bar.style.width = `${pct}%`;
+        bar.className = 'absolute inset-y-0.5 bg-emerald-600/85 transition-all duration-300 rounded-r-sm';
+      }
+    }
+
+    // 10. 全局状态同步与 UI 刷新引擎
+    function updateDashboard() {
+      try {
+        const s = state;
+
+        // A. 更新情景按钮激活态
+        document.querySelectorAll('.scenario-btn').forEach((btn) => {
+          const isAct = btn.dataset.scenario === activeScenarioKey;
+          if (isAct) {
+            btn.className = 'scenario-btn px-3 py-1.5 rounded-md text-xs font-semibold border bg-slate-900 text-white border-slate-900 shadow-sm transition-colors';
+          } else {
+            btn.className = 'scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors';
+          }
+        });
+
+        // B. 更新综合压力指数与阶段徽章
+        const stress = computeStressIndex(s);
+        const regime = detectRegime(s);
+
+        const scoreEl = document.getElementById('stress-score');
+        const barEl = document.getElementById('stress-bar');
+        scoreEl.textContent = stress;
+        barEl.style.width = `${stress}%`;
+
+        if (stress >= 70) {
+          scoreEl.className = 'text-2xl font-bold tabular-nums leading-none text-red-600';
+          barEl.className = 'h-full bg-red-600 transition-all duration-300 rounded-full';
+        } else if (stress >= 40) {
+          scoreEl.className = 'text-2xl font-bold tabular-nums leading-none text-amber-600';
+          barEl.className = 'h-full bg-amber-500 transition-all duration-300 rounded-full';
+        } else {
+          scoreEl.className = 'text-2xl font-bold tabular-nums leading-none text-emerald-600';
+          barEl.className = 'h-full bg-emerald-600 transition-all duration-300 rounded-full';
+        }
+
+        const badgeBox = document.getElementById('regime-badge-box');
+        const badgeDot = document.getElementById('regime-dot');
+        const badgeTitle = document.getElementById('regime-title');
+        badgeTitle.textContent = regime.title;
+
+        const colorMap = {
+          red: { box: 'bg-red-50 border-red-200', dot: 'bg-red-600', text: 'text-red-700' },
+          amber: { box: 'bg-amber-50 border-amber-200', dot: 'bg-amber-500', text: 'text-amber-800' },
+          green: { box: 'bg-emerald-50 border-emerald-200', dot: 'bg-emerald-600', text: 'text-emerald-800' },
+          blue: { box: 'bg-blue-50 border-blue-200', dot: 'bg-blue-700', text: 'text-blue-900' }
+        };
+        const c = colorMap[regime.color];
+        badgeBox.className = `border rounded-lg px-3.5 py-2 ${c.box}`;
+        badgeDot.className = `w-2 h-2 rounded-full ${c.dot}`;
+        badgeTitle.className = `text-sm font-bold leading-none ${c.text}`;
+
+        // 宏观全面防御提示胶囊
+        const macroPill = document.getElementById('macro-defense-pill');
+        if (regime.macroDefense) {
+          macroPill.classList.remove('hidden');
+        } else {
+          macroPill.classList.add('hidden');
+        }
+
+        // C. 高亮四阶段流程卡片
+        document.querySelectorAll('.stage-card').forEach((card) => {
+          const stNum = parseInt(card.dataset.stage, 10);
+          const pill = card.querySelector('.stage-pill');
+          if (stNum === regime.stage) {
+            const activeStyles = {
+              1: 'border-emerald-500 bg-emerald-50/40 ring-1 ring-emerald-500/30',
+              2: 'border-amber-500 bg-amber-50/40 ring-1 ring-amber-500/30',
+              3: 'border-red-600 bg-red-50/40 ring-1 ring-red-600/30',
+              4: 'border-blue-700 bg-blue-50/40 ring-1 ring-blue-700/30'
+            };
+            const pillStyles = {
+              1: 'bg-emerald-600 text-white',
+              2: 'bg-amber-500 text-white',
+              3: 'bg-red-600 text-white',
+              4: 'bg-blue-800 text-white'
+            };
+            card.className = `stage-card rounded-lg border p-3 transition-all ${activeStyles[stNum]}`;
+            pill.className = `stage-pill text-[11px] font-semibold px-2 py-0.5 rounded ${pillStyles[stNum]}`;
+            pill.textContent = '当前激活';
+          } else {
+            card.className = 'stage-card rounded-lg border border-slate-200 bg-white p-3 opacity-75 transition-all';
+            pill.className = 'stage-pill text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500';
+            pill.textContent = stNum < regime.stage ? '已演进' : '观察中';
+          }
+        });
+
+        // D. 同步所有指标输入框、滑块与状态灯
+        INDICATOR_GROUPS.forEach((group) => {
+          group.items.forEach((item) => {
+            const val = s[item.key];
+            const numEl = document.getElementById(`num-${item.key}`);
+            const rangeEl = document.getElementById(`range-${item.key}`);
+            const dotEl = document.getElementById(`dot-${item.key}`);
+            const badgeEl = document.getElementById(`badge-${item.key}`);
+
+            if (numEl && document.activeElement !== numEl) {
+              numEl.value = val.toFixed(item.decimals);
+            }
+            if (rangeEl) {
+              rangeEl.value = val;
+            }
+
+            const status = item.evalStatus(val, s);
+            if (status === 'red') {
+              dotEl.className = 'w-2 h-2 rounded-full shrink-0 bg-red-600';
+              badgeEl.className = 'text-[10px] font-semibold px-1.5 py-0.5 rounded border whitespace-nowrap w-14 text-center bg-red-50 text-red-700 border-red-200';
+              badgeEl.textContent = '触发红线';
+            } else if (status === 'amber') {
+              dotEl.className = 'w-2 h-2 rounded-full shrink-0 bg-amber-500';
+              badgeEl.className = 'text-[10px] font-semibold px-1.5 py-0.5 rounded border whitespace-nowrap w-14 text-center bg-amber-50 text-amber-800 border-amber-200';
+              badgeEl.textContent = '警戒';
+            } else {
+              dotEl.className = 'w-2 h-2 rounded-full shrink-0 bg-emerald-500';
+              badgeEl.className = 'text-[10px] font-semibold px-1.5 py-0.5 rounded border whitespace-nowrap w-14 text-center bg-emerald-50 text-emerald-700 border-emerald-200';
+              badgeEl.textContent = '正常';
+            }
+          });
+        });
+
+        // E. 更新图表 1：波动率期限结构
+        const vix9d = Number((s.vix * s.vix9dVix).toFixed(1));
+        const vix30 = Number(s.vix.toFixed(1));
+        const vxv = Number((s.vix / s.vixVxv).toFixed(1));
+
+        document.getElementById('calc-vix9d').textContent = vix9d.toFixed(1);
+        document.getElementById('calc-vix30').textContent = vix30.toFixed(1);
+        document.getElementById('calc-vxv').textContent = vxv.toFixed(1);
+
+        const isBackwardation = s.vixVxv > 1.0 || s.vix9dVix > 1.0;
+        const termBadge = document.getElementById('term-structure-badge');
+        if (isBackwardation) {
+          termBadge.textContent = 'Backwardation 倒挂';
+          termBadge.className = 'shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-red-50 text-red-700 border-red-200';
+        } else {
+          termBadge.textContent = 'Contango 升水';
+          termBadge.className = 'shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-200';
+        }
+
+        if (termChart) {
+          const lineColor = isBackwardation ? '#DC2626' : '#059669';
+          const fillColor = isBackwardation ? 'rgba(220, 38, 38, 0.08)' : 'rgba(5, 150, 105, 0.08)';
+          termChart.data.datasets[0].data = [vix9d, vix30, vxv];
+          termChart.data.datasets[0].borderColor = lineColor;
+          termChart.data.datasets[0].pointBorderColor = lineColor;
+          termChart.data.datasets[0].backgroundColor = fillColor;
+          termChart.update('none');
+        }
+
+        // F. 更新图表 2：期权流量扩散对比
+        if (flowChart) {
+          flowChart.data.datasets[0].data = [s.pcEquity, s.pcTotal, s.pcIndex];
+          flowChart.update('none');
+        }
+
+        const flowBadge = document.getElementById('flow-status-badge');
+        const flowPattern = document.getElementById('flow-pattern-text');
+        if (s.pcIndex >= 1.25 && s.pcEquity >= 0.80) {
+          flowBadge.textContent = '宏观全面防御';
+          flowBadge.className = 'shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-red-50 text-red-700 border-red-200';
+          flowPattern.textContent = '个股与机构指数共振，全面防御模式落地';
+        } else if (s.pcEquity >= 0.68 || s.pcTotal >= 1.00) {
+          flowBadge.textContent = '个股率先发力';
+          flowBadge.className = 'shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-amber-50 text-amber-800 border-amber-200';
+          flowPattern.textContent = '接近 2022 年初个股率先抬头特征';
+        } else {
+          flowBadge.textContent = '结构平稳';
+          flowBadge.className = 'shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-200';
+          flowPattern.textContent = '个股 Call 拥挤，指数常规对冲';
+        }
+
+        // G. 更新图表 3：做市商库存水位条
+        const dealerValEl = document.getElementById('gauge-dealer-val');
+        const gexValEl = document.getElementById('gauge-gex-val');
+        const deltaValEl = document.getElementById('gauge-delta-val');
+        const dealerBadge = document.getElementById('dealer-status-badge');
+        const bufferEl = document.getElementById('dealer-buffer-text');
+
+        dealerValEl.textContent = `${s.dealerGamma > 0 ? '+' : ''}${s.dealerGamma.toFixed(1)} $B`;
+        dealerValEl.className = `font-bold tabular-nums ${s.dealerGamma < 0 ? 'text-red-600' : 'text-emerald-600'}`;
+
+        gexValEl.textContent = `${s.spxGex < 0 ? '-$' : '+$'}${Math.abs(s.spxGex).toFixed(1)}B`;
+        gexValEl.className = `font-bold tabular-nums ${s.spxGex < 0 ? 'text-red-600' : 'text-emerald-600'}`;
+
+        deltaValEl.textContent = `${s.netDelta > 0 ? '+' : ''}${Math.round(s.netDelta)}`;
+        deltaValEl.className = `font-bold tabular-nums ${s.netDelta < 0 ? 'text-red-600' : 'text-emerald-600'}`;
+
+        updateZeroCenteredBar('gauge-dealer-bar', s.dealerGamma, 10);
+        updateZeroCenteredBar('gauge-gex-bar', s.spxGex, 130);
+        updateZeroCenteredBar('gauge-delta-bar', s.netDelta, 150);
+
+        const buffer = s.dealerGamma - (-8.6);
+        if (buffer <= 0) {
+          bufferEl.textContent = `已跌穿底线 ${Math.abs(buffer).toFixed(1)} $B`;
+          bufferEl.className = 'tabular-nums text-red-700 font-bold';
+        } else {
+          bufferEl.textContent = `+${buffer.toFixed(1)} $B`;
+          bufferEl.className = `tabular-nums font-bold ${buffer < 2.0 ? 'text-red-600' : 'text-slate-700'}`;
+        }
+
+        if (s.dealerGamma <= -8.6) {
+          dealerBadge.textContent = '击穿历史底线';
+          dealerBadge.className = 'shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-red-100 text-red-800 border-red-300';
+        } else if (s.dealerGamma < 0) {
+          dealerBadge.textContent = '负 Gamma 加速区';
+          dealerBadge.className = 'shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-red-50 text-red-700 border-red-200';
+        } else {
+          dealerBadge.textContent = '正 Gamma 阻尼区';
+          dealerBadge.className = 'shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-200';
+        }
+
+        // H. 更新每日复盘 Checklist 自动触发高亮
+        let riskTriggeredCount = 0;
+        CHECKLIST_RISK.forEach((item) => {
+          const triggered = item.checkAuto(s);
+          if (triggered) riskTriggeredCount++;
+          const row = document.getElementById(`row-${item.id}`);
+          const autoBadge = document.getElementById(`auto-${item.id}`);
+          const chk = document.getElementById(`chk-${item.id}`);
+
+          // 若用户未手动干预，默认跟随自动触发态勾选方便复盘
+          if (manualChecklistState[item.id] === undefined) {
+            chk.checked = triggered;
+          }
+
+          if (triggered) {
+            row.className = 'flex items-start gap-2.5 p-2.5 rounded-md border bg-red-50/70 border-red-300 cursor-pointer transition-colors';
+            autoBadge.className = 'text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0 bg-red-600 text-white border-red-600';
+            autoBadge.textContent = '指标已触发';
+          } else {
+            row.className = 'flex items-start gap-2.5 p-2.5 rounded-md border bg-white border-slate-200 cursor-pointer transition-colors hover:bg-slate-50';
+            autoBadge.className = 'text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 bg-slate-100 text-slate-500 border-slate-200';
+            autoBadge.textContent = '未触发';
+          }
+        });
+
+        let resetTriggeredCount = 0;
+        CHECKLIST_RESET.forEach((item) => {
+          const triggered = item.checkAuto(s);
+          if (triggered) resetTriggeredCount++;
+          const row = document.getElementById(`row-${item.id}`);
+          const autoBadge = document.getElementById(`auto-${item.id}`);
+          const chk = document.getElementById(`chk-${item.id}`);
+
+          if (manualChecklistState[item.id] === undefined) {
+            chk.checked = triggered;
+          }
+
+          if (triggered) {
+            row.className = 'flex items-start gap-2.5 p-2.5 rounded-md border bg-emerald-50/70 border-emerald-300 cursor-pointer transition-colors';
+            autoBadge.className = 'text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0 bg-emerald-600 text-white border-emerald-600';
+            autoBadge.textContent = '条件满足';
+          } else {
+            row.className = 'flex items-start gap-2.5 p-2.5 rounded-md border bg-white border-slate-200 cursor-pointer transition-colors hover:bg-slate-50';
+            autoBadge.className = 'text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 bg-slate-100 text-slate-500 border-slate-200';
+            autoBadge.textContent = '未满足';
+          }
+        });
+
+        document.getElementById('checklist-risk-count').textContent = `风险触发: ${riskTriggeredCount}/4`;
+        document.getElementById('checklist-reset-count').textContent = `修复触发: ${resetTriggeredCount}/4`;
+
+      } catch (err) {
+        console.error('Update dashboard error:', err);
+      }
+    }
+
+    // 11. 加载预设情景
+    function applyScenario(key) {
+      const preset = SCENARIOS[key];
+      if (!preset) return;
+      state = { ...preset.values };
+      activeScenarioKey = key;
+      manualChecklistState = {}; // 切换情景时恢复自动勾选联动
+      updateDashboard();
+      showToast(`已切换至：${preset.label}`);
+    }
+
+    // 12. 绑定全局事件与启动入口
+    window.addEventListener('DOMContentLoaded', () => {
+      buildIndicatorPanels();
+      buildChecklists();
+      initCharts();
+
+      // 情景按钮点击
+      document.querySelectorAll('.scenario-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          applyScenario(btn.dataset.scenario);
+        });
+      });
+
+      // 重置按钮点击
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        applyScenario('current');
+      });
+
+      // 首次渲染（默认加载 11/19 OPEX 前实盘数据）
+      updateDashboard();
+    });
+  </script>
+</body>
+</html>

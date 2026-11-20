@@ -1,0 +1,1599 @@
+<!DOCTYPE html><html lang="en-US" itemscope itemtype="http://schema.org/WebPage"><head><script nonce="jBxyI6YKtm3_mMhcm4hc2Q">window['ppConfig'] = {productName: '6b8ce7c01e3dacd3d2c7a8cd322ff979', deleteIsEnforced:  false , sealIsEnforced:  false , heartbeatRate:  0.5 , periodicReportingRateMillis:  60000.0 , disableAllReporting:  false };(function(){'use strict';function k(a){var b=0;return function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}}}function l(a){var b=typeof Symbol!="undefined"&&Symbol.iterator&&a[Symbol.iterator];if(b)return b.call(a);if(typeof a.length=="number")return{next:k(a)};throw Error(String(a)+" is not an iterable or ArrayLike");}function m(a,b){var c;b&&!b.done&&(c=a["return"])&&c.call(a)}
+var n=typeof Object.defineProperties=="function"?Object.defineProperty:function(a,b,c){if(a==Array.prototype||a==Object.prototype)return a;a[b]=c.value;return a};function p(a){a=["object"==typeof globalThis&&globalThis,a,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var b=0;b<a.length;++b){var c=a[b];if(c&&c.Math==Math)return c}throw Error("Cannot find global object");}var q=p(this);
+function r(a,b){if(b)a:{var c=q;a=a.split(".");for(var d=0;d<a.length-1;d++){var e=a[d];if(!(e in c))break a;c=c[e]}a=a[a.length-1];d=c[a];b=b(d);b!=d&&b!=null&&n(c,a,{configurable:!0,writable:!0,value:b})}}r("Object.is",function(a){return a?a:function(b,c){return b===c?b!==0||1/b===1/c:b!==b&&c!==c}});
+r("Array.prototype.includes",function(a){return a?a:function(b,c){var d=this;d instanceof String&&(d=String(d));var e=d.length;c=c||0;for(c<0&&(c=Math.max(c+e,0));c<e;c++){var f=d[c];if(f===b||Object.is(f,b))return!0}return!1}});
+r("String.prototype.includes",function(a){return a?a:function(b,c){if(this==null)throw new TypeError("The 'this' value for String.prototype.includes must not be null or undefined");if(b instanceof RegExp)throw new TypeError("First argument to String.prototype.includes must not be a regular expression");return this.indexOf(b,c||0)!==-1}});function t(a,b,c){a("https://csp.withgoogle.com/csp/proto/"+encodeURIComponent(b),JSON.stringify(c))}function u(){var a;if((a=window.ppConfig)==null?0:a.disableAllReporting)return function(){};var b,c,d,e;return(e=(b=window)==null?void 0:(c=b.navigator)==null?void 0:(d=c.sendBeacon)==null?void 0:d.bind(navigator))!=null?e:v}function v(a,b){var c=new XMLHttpRequest;c.open("POST",a);c.send(b)}
+function w(){var a=(x=Object.prototype)==null?void 0:x.__lookupGetter__("__proto__"),b=y,c=z;return function(){var d=a.call(this),e,f,g,h;t(c,b,{type:"ACCESS_GET",origin:(f=window.location.origin)!=null?f:"unknown",report:{className:(g=d==null?void 0:(e=d.constructor)==null?void 0:e.name)!=null?g:"unknown",stackTrace:(h=Error().stack)!=null?h:"unknown"}});return d}}
+function A(){var a=(B=Object.prototype)==null?void 0:B.__lookupSetter__("__proto__"),b=y,c=z;return function(d){d=a.call(this,d);var e,f,g,h;t(c,b,{type:"ACCESS_SET",origin:(f=window.location.origin)!=null?f:"unknown",report:{className:(g=d==null?void 0:(e=d.constructor)==null?void 0:e.name)!=null?g:"unknown",stackTrace:(h=Error().stack)!=null?h:"unknown"}});return d}}function C(a,b){D(a.productName,b);setInterval(function(){D(a.productName,b)},a.periodicReportingRateMillis)}
+var E="constructor __defineGetter__ __defineSetter__ hasOwnProperty __lookupGetter__ __lookupSetter__ isPrototypeOf propertyIsEnumerable toString valueOf __proto__ toLocaleString x_ngfn_x".split(" "),F=E.concat,G=navigator.userAgent.match(/Firefox\/([0-9]+)\./),H=(!G||G.length<2?0:Number(G[1])<75)?["toSource"]:[],I;if(H instanceof Array)I=H;else{for(var J=l(H),K,L=[];!(K=J.next()).done;)L.push(K.value);I=L}var M=F.call(E,I),N=[];
+function D(a,b){var c=[],d=l(Object.getOwnPropertyNames(Object.prototype)),e=d.next();try{for(;!e.done;e=d.next()){var f=e.value;M.includes(f)||N.includes(f)||c.push(f)}}finally{m(d,e)}e=Object.prototype;d=[];for(f=0;f<c.length;f++){var g=c[f];d[f]={name:g,descriptor:Object.getOwnPropertyDescriptor(Object.prototype,g),type:typeof e[g]}}if(d.length!==0){c=l(d);e=c.next();try{for(;!e.done;e=c.next())N.push(e.value.name)}finally{m(c,e)}var h;t(b,a,{type:"SEAL",origin:(h=window.location.origin)!=null?
+h:"unknown",report:{blockers:d}})}};var O=Math.random(),P=u(),Q=window.ppConfig;Q&&(Q.disableAllReporting||Q.deleteIsEnforced&&Q.sealIsEnforced||O<Q.heartbeatRate&&t(P,Q.productName,{origin:window.location.origin,type:"HEARTBEAT"}));var z=u(),R=window.ppConfig;if(R)if(R.deleteIsEnforced)delete Object.prototype.__proto__;else if(!R.disableAllReporting){var y=R.productName;try{var x,B;Object.defineProperty(Object.prototype,"__proto__",{enumerable:!1,get:w(),set:A()})}catch(a){}}
+(function(){var a=u(),b=window.ppConfig;b&&(b.sealIsEnforced?Object.seal(Object.prototype):b.disableAllReporting||(document.readyState!=="loading"?C(b,a):document.addEventListener("DOMContentLoaded",function(){C(b,a)})))})();}).call(this);
+</script><meta charset="utf-8"><script nonce="jBxyI6YKtm3_mMhcm4hc2Q">var DOCS_timing={}; DOCS_timing['sl']=new Date().getTime();</script><script nonce="jBxyI6YKtm3_mMhcm4hc2Q">function _DumpException(e) {throw e;}</script><script data-id="_gd" nonce="jBxyI6YKtm3_mMhcm4hc2Q">window.WIZ_global_data = {"K1cgmc":"%.@.[null,null,null,[3,1,[1795108367,890547000],4,null,null,null,[1795181152,818365000]],null,25]]","gnD3ee":"%.@.null,null,null,\"https://drive.google.com/viewer/main\"]","nQyAE":{}};</script><script nonce="jBxyI6YKtm3_mMhcm4hc2Q">_docs_flag_initialData={"docs-enpi2":true,"atari-esobi":false,"atari-emtpr":false,"atari-eibrm":false,"atari-eipim":false,"atari-etm":false,"atari-mfsnd":10,"docs-text-usc":true,"docs-text-elsmk":false,"docs-text-elsms":false,"atari-bae":false,"docs-text-etsrdpn":false,"docs-text-etsrds":false,"docs-text-endes":false,"docs-text-escpv":true,"docs-text-ecfs":false,"docs-text-eetxp":false,"docs-text-ettctvs":false,"docs-text-escoubs":false,"docs-text-escivs":false,"docs-text-escitrbs":false,"docs-text-epsi":false,"docs-text-esic":false,"docs-text-elss":false,"docs-text-ebrfs":false,"docs-text-etocs":false,"docs-text-eeds":false,"docs-text-esbefr":false,"docs-etshc":false,"docs-efsmsdl":false,"docs-text-eiosmc":false,"docs-text-ebrmkc":false,"docs-text-eccmkc":false,"docs-text-ehlb":false,"docs-text-dwit":false,"docs-eec":true,"docs-eecac":true,"docs-text-ebwpw":false,"docs-elsp":false,"docs-text-eoblor":false,"docs-esff":false,"docs-text-esprooc":false,"docs-ets":false,"docs-text-eurlsilu":false,"docs-idu":false,"docs-sup":"","docs-dli":false,"docs-liap":"/naLogImpressions","ilcm":{"eui":"AHKXmL0CVWjLekkoTA351W4_N-XK2d6jtooJnnjAavfQnc1HhocCeNlMJ9HlD76R7-2AcHRqoKFu","je":1,"sstu":1795181152812624,"si":"CNH8rvfSlpgDFcADbwYdFXQcFQ","gsc":null,"ei":[5703839,5704621,5706832,5706836,5738513,5738529,5743108,5743124,5776501,5776517,14101306,14101502,14101510,14101534,49472063,49472071,49644015,49644023,49769337,49769345,49822921,49822929,49833462,49833470,49842855,49842863,49924706,49924714,50223641,50223649,50266222,50266230,50273528,50273536,50297076,50297084,50586962,50586970,71079938,71079946,71085241,71085249,71120968,71120976,71387889,71387897,71465947,71465955,71528597,71528605,71530083,71530091,71544834,71544842,71546425,71546433,71658040,71658048,71659813,71659821,71689860,71689868,71710040,71710048,71798420,71798436,71825383,71825391,71855000,71855008,71897827,71897835,71960540,71960548,94327671,94327679,94333153,94333161,94353368,94353376,94386871,94386879,94434257,94434265,94629757,94629765,94692298,94692306,94785229,94785237,94904089,94904097,94918952,94918960,94940194,95087186,95087194,95111985,95111993,95112873,95112881,95314802,95314810,99251983,99251991,99368792,99368800,99402331,99402339,99440853,99440861,99457807,99457815,101492731,101492739,101519280,101519288,101562406,101562414,101575021,101575029,101631191,101631199,101687117,101687125,101836971,101836979,101837416,101837424,101860667,101860675,101887674,101887682,101889043,101889051,101917185,101917193,101922729,101922880,101933491,101933499,102030642,102030650,102059541,102059549,102070930,102070938,102146687,102146695,102161447,102161455,102178402,102178410,102198282,102198290,102244489,102244497,102280628,102280636,102287284,102287292,102343380,102343388,102402679,102402687,102469860,102469868,102517339,102517344,102548521,102548529,102673375,102685384,102685389,102685929,102685934,102718396,102721215,102721220,102727402,102727407,102761474,102761479,102762315,102762323,102783509,102783517,102787563,102807790,102807798,102867835,102867843,102883758,102883766,102902848,102902856,102903660,102903668,102909750,102909755,102925819,102925827,102926523,102926531,102944189,102944194,102944268,102944273,102944503,102944508,102944582,102944587,102944680,102944685,102944785,102944790,102956685,102956693,102972669,102972677,102988272,102988277,102988402,102988407,102988695,102988700,102988929,102988934,103011418,103011426,103163044,103163052,103176010,103176018,103276092,103285966,103285974,103286273,103286281,103286444,103286452,103288306,103288314,103289103,103289108,103289273,103289278,103326407,103326415,103343830,103343838,104530130,104573899,104573907,104575332,104575337,104575491,104575496,104575691,104575696,104575894,104615595,104615603,104699504,104699512,104761751,104761759,104794443,104794451,104842348,104842353,104907811,104907819,104976617,104976625,104983169,104983177,105083748,105083756,105087788,105087796,105125317,105125325,105180894,105180902,105283687,105283695,105292835,105292843,105346285,105346293,105360418,105360426,105373824,105373832,105393811,105393819,105439171,105439179,115511323,115511328,115601129,115601137,115626439,115626447,115669258,115669266,115780458,115780466,115818444,115818449,115821407,115821415,115854768,115854776,115909741,115909749,115955819,115955824,116062710,116062718,116068898,116068906,116176809,116176817,116221334,116221342,116268304,116268309,116276461,116276469,116282976,116282981,116372477,116372485,116400336,116400344,116416034,116416042,116418137,116418145,116425644,116538516,116538524,116567571,116567576,116609471,116609479,116699509,116699517,116756943,116756951,116783822,116783827,116840681,116840686,116901222,116901230,116901303,116901311,116902106,116902114,116902146,116902154,116907270,116907278,116908636,116908644,116908917,116908925,116909050,116909058,116909411,116909419,116909964,116909972,116910125,116910133,116920064,116920072,116920556,116920564,116929413,116929421,116980487,116980495,116982100,116982108,116982191,116982199,116982753,116982761,116984628,116984636,117010933,117010941,117223999,117224007,117268957,117268965,117283949,117283954,117286791,117286799,117290330,117290338,117309374,117309382,117410074,117457958,117457966,117503217,117503225,117504383,117504391,117547661,117547669,117668252,117668260,117848254,117895900,117895908,118094558,118094563,118098249,118098257,118110574,118110582,118171121,118237135,118237143,118281144,118281152,118285275,118291756,118291764,118367937,118367945,118368676,118368684,118417364,118417372,118484679,118484687,118961008,118961016,119022332,119022340,119096461,119096469,119109774,119109782,119208439,119208447,119209377,119346325,119367357,119367362,119528382,119528390,119566028,119566036,119595147,119595155,119605190,119605198,119667272,119667280,119671790,119671798,119770545,119770553,119771791,119771799,119870000,119870008,120049151,120049159,120050650,120050658,120175627,120175635,120305442,120305450,120493132,120493140,120619846,120619851,120650583,120650591,120730671,120730676,120735852,120735857,120773177,120773182,120797077,120797085,120812978,120900452,120900460,120982382,120982390,121110331,121110336,121123431,121123436,121172911,121191812,121191820,121286207,121286215,121307198,121307206,121346120,121346125,121372721,121377918,121377926,121381303,121381308,121381960,121383007,121406244,121406252,121431603,121431611,121442235,121442240,123287377,123287382,123364526,123364613,123364618,123477306,123690974,123690990,123769303,123769311,123948585,123948593,123948921,123948929,123949351,123949359,123949661,123949669,124018937,124018945,124129180,124129246],"crc":0,"cvi":[]},"docs-ccdil":false,"docs-eil":true,"info_params":{},"buildLabel":"editors.sites-viewer-frontend_20261116.02_p0","docs-show_debug_info":false,"atari-jefp":"/_/view/jserror","docs-jern":"view","atari-rhpp":"/_/view","docs-ciusdft":false,"docs-ecuach":false,"docs-cclt":2033,"docs-ecci":true,"docs-esi":false,"docs-efypr":true,"docs-eyprp":true,"docs-li":"104240","docs-trgthnt":"","docs-etmhn":false,"docs-thnt":"","docs-hdet":["nMX17M8pQ0kLUkpsP190WPbQDRJQ","17hED8kG50kLUkpsP190TThQn3DA","BDNZR4PXx0kLUkpsP190SJtNPkYt","Etj5wJCQk0kLUkpsP190NwiL8UMa","xCLbbDUPA0kLUkpsP190XkGJiPUm","2NUkoZehW0kLUkpsP190UUNLiXW9","yuvYtd5590kLUkpsP190Qya5K4UR","ZH4rzt2uk0kLUkpsP190UDkF5Bkq","uQUQhn57A0kLUkpsP190WHoihP41","93w8zoRF70kLUkpsP190TxXbtSeV","fAPatjr1X0kLUkpsP190SaRjNRjw","T4vgqqjK70kLUkpsP190ScPehgAW","JyFR2tYWZ0kLUkpsP190Rn3HzkxT","ufXj7vmeJ0kLUkpsP190QURhvJn2","KFks7UeZ30kLUkpsP190UUMR6cvh","LcTa6EjeC0kLUkpsP190RKgvW5qi","s3UFcjGjt0kLUkpsP190Z45ftWRr","o99ewBQXy0kLUkpsP190Nq2qr6tf","PHVyy5uSS0kLUkpsP190SUsYo8gQ","yZn21akid0iSFTCbiEB0WPiGEST3","h2TtqzmQF0kLUkpsP190YPJiQt7p","MZi9vb5UC0kLUkpsP190ReUhvVjy","dSR6SPjB80kLUkpsP190Y3xHa9qA","Bz6B7VmLu0kLUkpsP190W3FeobP7","AiLoubzsd0kLUkpsP190XtYNPgYT","2J3DVQoVh0kLUkpsP190R5wShSrC","MLmbZasLS0kLUkpsP190YHf6Zjsf","LjsdWFqUn0kLUkpsP190TwXBLtsw","S1T4ezMsZ0kLUkpsP190U6GfQUxi","LwAAPYPwi0kLUkpsP190TR4aaiFR","zZpS7TtwA0kLUkpsP190SJfhmHn8","LqadmuFLc0kLUkpsP190VqMgRe9G","6t7XcXcN50kLUkpsP190RiQUG9W5","PyRpJWvnF0kLUkpsP190X6czxBQU","oiu5UhKXt0kLUkpsP190XWFatA4U","MbCqiCTik0kLUkpsP190XpDkFpKL","m3m67mpQU0kLUkpsP190RpzeM6tt","WKyXQmUiJ0kLUkpsP190WtAghmdt","Nf2nd9NhF0kLUkpsP190REtRKaUF","fjqF9C7Mg0kLUkpsP190WGtWAuX2","cb1fdvu6p0kLUkpsP190U5AywQpZ","43PL8e9wN0kLUkpsP190PfUhabvT","q4iJ7XzP90kLUkpsP190TZxmiBwc","n7KMJ1qFh0kLUkpsP190QMptD4uS","gdXR6HiZh0kLUkpsP190TjP3jZNf","N5u4VeWhx0iSFTCbiEB0VUTNdX6g","XM16tjwrD0iSFTCbiEB0NfzvTeuU","ybYTJk1eD0iSFTCbiEB0QV4rkzSF","TgXar1TSG0iSFTCbiEB0SsXMaKuP","JYfGDkExa0iSFTCbiEB0TTQnEDtH","2i9JBUZ3w0iSFTCbiEB0RytbUoNq","pgvTVXNKa0iSFTCbiEB0ShqmBTMR","NsVnd81bW0iSFTCbiEB0RhcXEK9M","rTQirATnb0iSFTCbiEB0W5cPcA7D","wNyww2Syr0iSFTCbiEB0Pzsbemba","DVdpfbqGj0iSFTCbiEB0RP4dMdFg","WKN3dsuG20iSFTCbiEB0NtEYhMK7","S5iPRteXX0iSFTCbiEB0YkMazE6h","6hmou1AcB0iSFTCbiEB0R9rZWXdz","wvo4NcLUj0iSFTCbiEB0Tt7mcVxE","rMLvYG5Cd0iSFTCbiEB0VMB6o5sk","EnxXFzAMR0iSFTCbiEB0NxWnFJEU","4SFrbzo420iSFTCbiEB0W7wu3rzt","Nr7mDWodK0iSFTCbiEB0Ruynrudk","pSnfxxWWp0iSFTCbiEB0RaiP6PBc","WMpW1Q5dP0iSFTCbiEB0WLWPn6Po","jcCQV72Dw0iSFTCbiEB0XjAwaUST","q1LkrPa7u0iSFTCbiEB0VHo7zVhn","rTcCMw3BM0mHq3jmV6o0RHeAExRK","HUYzfGVRa0mHq3jmV6o0Uxe2caXK","1XYMmM1Cu0mHq3jmV6o0Z3pEi8xm","xHhMJiXiV0mHq3jmV6o0WB8WinyM","xwSFpxEiU0mHq3jmV6o0PcnvcKmd","4MBkBg26q0mHq3jmV6o0QeKPRMpY","y5g8iW2T80mHq3jmV6o0Nr8SAj4C","W9YRKy3Lb0iSFTCbiEB0Xfs1EfPr","Ed3nhrN8D0iSFTCbiEB0RN4bJ53y","zxDKY7PC10iSFTCbiEB0UDYPJwDZ","bhEyDmbwi0mHq3jmV6o0TngCF1v2","6rKYZ6uHA0mHq3jmV6o0TeDZjgB8","71Deousgx0mHq3jmV6o0WXBQiyzi","sVEZbUAa70mHq3jmV6o0TNq1M7FF","8ZPFZT5nG0mHq3jmV6o0PJ5yoVh4","LDuvzP2Bd0mHq3jmV6o0TwNPVpW8","P55v8p4Lk0mHq3jmV6o0VjggjHMV","QqnZoz9ko0mHq3jmV6o0QskzBcHn","Nq8mdjdGg0mHq3jmV6o0WShxQA39","iQNA6mEJy0mHq3jmV6o0Q2iGT9fW","sNcbk2hJ80mHq3jmV6o0VbqaovQb","Th1mzDL8q0mHq3jmV6o0Sm16yc1b","6nr31z9Wv0mERqSGkGf0VhuvAXWC","RLHeYNm410mERqSGkGf0Y817EUFK","vmx68XtfJ0mERqSGkGf0RCUBfsQr","687J7yD1q0mERqSGkGf0RVmMYHo1","qwhWQy8Zi0mERqSGkGf0W2tdypUF","wF8Sk241e0mERqSGkGf0YNtN6gpV","ijUhdx2QN0mERqSGkGf0TSD26iBJ","3iBLaMnuG0mERqSGkGf0VdY8XuLS","cFR77YEGo0iSFTCbiEB0PcMDWjX2","evUYuNCS80mERqSGkGf0Psi8j3Dw","soWncRV7C0mERqSGkGf0PZheXrWA","TvjoiCaar0mERqSGkGf0S9qS5adj","txL54xWLC0mERqSGkGf0XoEGTvCu","MP3EsW1un0mERqSGkGf0QDkfTxat","N1q4Y3fqz0mERqSGkGf0W1oPWWoc","pnKWhXiJi0mERqSGkGf0RDJejrBm","uLoGBsxEp0mERqSGkGf0Umz4HBC5","zu73Bdvrn0mERqSGkGf0P7FS5ZnG","KwaNot15n0mERqSGkGf0UnBhGVoK","eCHWxyhvo0mERqSGkGf0RJfZmQ1f","aWZA9kUWi0mERqSGkGf0RtY99iNR","ffZmMGtYT0suK1NZr2K0QUxSzEMN","NagbcZWyB0suK1NZr2K0SJmfmJ3n","KMcLKvubv0suK1NZr2K0PLMUJ7zr","a13ejFS5i0suK1NZr2K0WzewY5tP","pZ1hXv7ve0suK1NZr2K0U5qoNhyU","pwLDucJZU0ezFcgqx310NgtmYpbV","TCKDVQ6J0Bn3gbW4AcZC0PQKypCa","Z7vabQzZ0Bn3gbW4AcZC0TfvmSab","UUNcLtsso0mERqSGkGf0Uwg2tMZa","fznmScpy0Bn3gbW4AcZC0Vie7eK1","6GS1wg3f0Bn3gbW4AcZC0Sr5APMj","wYCZkqoz10fBWirfAym0S1sADKbJ"],"docs-hunds":false,"docs-hae":"PROD","docs-ehn":false,"docs-epq":true,"docs-upap":"/_/view/prefs","docs-eupub":true}; _docs_flag_cek= null ; if (window['DOCS_timing']) {DOCS_timing['ifdld']=new Date().getTime();}</script><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="referrer" content="origin"><link rel="icon" href="https://www.gstatic.com/images/branding/productlogos/sites_2026/v3/ico/sites_2026_64dp.ico"><meta property="og:title" content="美股期权微观结构与流动性踩踏监控仪表盘"><meta property="og:type" content="website"><meta property="og:url" content="https://sites.google.com/view/fupeng715/full-page-embed"><meta itemprop="name" content="美股期权微观结构与流动性踩踏监控仪表盘"><meta itemprop="url" content="https://sites.google.com/view/fupeng715/full-page-embed"><link href="https://fonts.googleapis.com/css?family=Lato%3A300%2C300italic%2C400%2C400italic%2C700%2C700italic&display=swap" rel="stylesheet" nonce="55HBsr-KqQginqJMyDskvw"><link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500|Roboto:300,400,500,700|Source+Code+Pro:400,700&display=swap" rel="stylesheet" nonce="55HBsr-KqQginqJMyDskvw"><link rel="stylesheet" href="https://www.gstatic.com/_/atari/_/ss/k=atari.vw.pJ79fjLrFjE.L.W.O/am=AAAAAAYAAQ/d=1/rs=AGEqA5mv-OWKYKPzUqhRQMRPMqOPcICJEg" data-id="_cl" nonce="55HBsr-KqQginqJMyDskvw"><script nonce="jBxyI6YKtm3_mMhcm4hc2Q"></script><title>美股期权微观结构与流动性踩踏监控仪表盘</title><style jsname="ptDGoc" nonce="55HBsr-KqQginqJMyDskvw">.M63kCb{background-color: rgba(255,255,255,1);}.OUGEr{color: rgba(33,33,33,1);}.duRjpb .OUGEr{color: rgba(34,110,147,1);}.JYVBee .OUGEr{color: rgba(34,110,147,1);}.OmQG5e .OUGEr{color: rgba(33,33,33,1);}.iwQgFb{background-color: rgba(0,0,0,0.150000006);}.ySLm4c{font-family: Lato, sans-serif;}.CbiMKe{background-color: rgba(30,108,147,1);}.qeLZfd .zfr3Q{color: rgba(33,33,33,1);}.qeLZfd .qnVSj{color: rgba(33,33,33,1);}.qeLZfd .Glwbz{color: rgba(33,33,33,1);}.qeLZfd .duRjpb{color: rgba(34,110,147,1);}.qeLZfd .qLrapd{color: rgba(34,110,147,1);}.qeLZfd .JYVBee{color: rgba(34,110,147,1);}.qeLZfd .aHM7ed{color: rgba(34,110,147,1);}.qeLZfd .OmQG5e{color: rgba(33,33,33,1);}.qeLZfd .NHD4Gf{color: rgba(33,33,33,1);}.qeLZfd .aw5Odc{color: rgba(0,101,128,1);}.qeLZfd .dhtgD:hover{color: rgba(0,0,0,1);}.qeLZfd .dhtgD:visited{color: rgba(0,101,128,1);}.qeLZfd .iwQgFb{background-color: rgba(0,0,0,0.150000006);}.qeLZfd .OUGEr{color: rgba(33,33,33,1);}.qeLZfd .duRjpb .OUGEr{color: rgba(34,110,147,1);}.qeLZfd .JYVBee .OUGEr{color: rgba(34,110,147,1);}.qeLZfd .OmQG5e .OUGEr{color: rgba(33,33,33,1);}.qeLZfd:before{background-color: rgba(242,242,242,1); display: block;}.lQAHbd .zfr3Q{color: rgba(255,255,255,1);}.lQAHbd .qnVSj{color: rgba(255,255,255,1);}.lQAHbd .Glwbz{color: rgba(255,255,255,1);}.lQAHbd .duRjpb{color: rgba(255,255,255,1);}.lQAHbd .qLrapd{color: rgba(255,255,255,1);}.lQAHbd .JYVBee{color: rgba(255,255,255,1);}.lQAHbd .aHM7ed{color: rgba(255,255,255,1);}.lQAHbd .OmQG5e{color: rgba(255,255,255,1);}.lQAHbd .NHD4Gf{color: rgba(255,255,255,1);}.lQAHbd .aw5Odc{color: rgba(255,255,255,1);}.lQAHbd .dhtgD:hover{color: rgba(255,255,255,1);}.lQAHbd .dhtgD:visited{color: rgba(255,255,255,1);}.lQAHbd .iwQgFb{background-color: rgba(255,255,255,0.150000006);}.lQAHbd .OUGEr{color: rgba(255,255,255,1);}.lQAHbd .duRjpb .OUGEr{color: rgba(255,255,255,1);}.lQAHbd .JYVBee .OUGEr{color: rgba(255,255,255,1);}.lQAHbd .OmQG5e .OUGEr{color: rgba(255,255,255,1);}.lQAHbd .CbiMKe{background-color: rgba(255,255,255,1);}.lQAHbd:before{background-color: rgba(30,108,147,1); display: block;}.cJgDec .zfr3Q{color: rgba(255,255,255,1);}.cJgDec .zfr3Q .OUGEr{color: rgba(255,255,255,1);}.cJgDec .qnVSj{color: rgba(255,255,255,1);}.cJgDec .Glwbz{color: rgba(255,255,255,1);}.cJgDec .qLrapd{color: rgba(255,255,255,1);}.cJgDec .aHM7ed{color: rgba(255,255,255,1);}.cJgDec .NHD4Gf{color: rgba(255,255,255,1);}.cJgDec .IFuOkc:before{background-color: rgba(33,33,33,1); opacity: 0; display: block;}.O13XJf{height: 340px; padding-bottom: 60px; padding-top: 60px;}.O13XJf .IFuOkc{background-color: rgba(34,110,147,1); background-image: url(https://ssl.gstatic.com/atari/images/simple-header-blended-small.png);}.O13XJf .IFuOkc:before{background-color: rgba(33,33,33,1); opacity: 0.4; display: block;}.O13XJf .zfr3Q{color: rgba(255,255,255,1);}.O13XJf .qnVSj{color: rgba(255,255,255,1);}.O13XJf .Glwbz{color: rgba(255,255,255,1);}.O13XJf .duRjpb{color: rgba(255,255,255,1);}.O13XJf .qLrapd{color: rgba(255,255,255,1);}.O13XJf .JYVBee{color: rgba(255,255,255,1);}.O13XJf .aHM7ed{color: rgba(255,255,255,1);}.O13XJf .OmQG5e{color: rgba(255,255,255,1);}.O13XJf .NHD4Gf{color: rgba(255,255,255,1);}.tpmmCb .zfr3Q{color: rgba(33,33,33,1);}.tpmmCb .zfr3Q .OUGEr{color: rgba(33,33,33,1);}.tpmmCb .qnVSj{color: rgba(33,33,33,1);}.tpmmCb .Glwbz{color: rgba(33,33,33,1);}.tpmmCb .qLrapd{color: rgba(33,33,33,1);}.tpmmCb .aHM7ed{color: rgba(33,33,33,1);}.tpmmCb .NHD4Gf{color: rgba(33,33,33,1);}.tpmmCb .IFuOkc:before{background-color: rgba(255,255,255,1); display: block;}.tpmmCb .Wew9ke{fill: rgba(33,33,33,1);}.aw5Odc{color: rgba(0,101,128,1);}.dhtgD:hover{color: rgba(0,122,147,1);}.dhtgD:active{color: rgba(0,122,147,1);}.dhtgD:visited{color: rgba(0,101,128,1);}.Zjiec{color: rgba(255,255,255,1); font-family: Lato, sans-serif; font-size: 19pt; font-weight: 300; letter-spacing: 1px; line-height: 1.3; padding-bottom: 62.5px; padding-left: 48px; padding-right: 36px; padding-top: 11.5px;}.XMyrgf{margin-top: 0px; margin-left: 48px; margin-bottom: 24px; margin-right: 24px;}.TlfmSc{color: rgba(255,255,255,1); font-family: Lato, sans-serif; font-size: 15pt; font-weight: 300; line-height: 1.333;}.Mz8gvb{color: rgba(255,255,255,1);}.zDUgLc{background-color: rgba(33,33,33,1);}.QTKDff.chg4Jd:focus{background-color: rgba(255,255,255,0.1199999973);}.YTv4We{color: rgba(178,178,178,1);}.YTv4We:hover:before{background-color: rgba(255,255,255,0.1199999973); display: block;}.YTv4We.chg4Jd:focus:before{border-color: rgba(255,255,255,0.3600000143); display: block;}.eWDljc{background-color: rgba(33,33,33,1);}.eWDljc .hDrhEe{padding-left: 8px;}.ZXW7w{color: rgba(255,255,255,1); opacity: 1;}.PsKE7e{color: rgba(255,255,255,1); font-family: Lato, sans-serif; font-size: 12pt; font-weight: 300;}.lhZOrc{color: rgba(73,170,212,1);}.hDrhEe:hover{color: rgba(73,170,212,1);}.M9vuGd{color: rgba(73,170,212,1); font-weight: 400;}.jgXgSe:hover{color: rgba(73,170,212,1);}.j10yRb:hover{color: rgba(0,188,212,1);}.j10yRb.chg4Jd:focus:before{border-color: rgba(255,255,255,0.3600000143); display: block;}.tCHXDc{color: rgba(255,255,255,1);}.iWs3gf.chg4Jd:focus{background-color: rgba(255,255,255,0.1199999973);}.wgxiMe{background-color: rgba(33,33,33,1);}.fOU46b .TlfmSc{color: rgba(255,255,255,1);}.fOU46b .KJll8d{background-color: rgba(255,255,255,1);}.fOU46b .Mz8gvb{color: rgba(255,255,255,1);}.fOU46b .Mz8gvb.chg4Jd:focus:before{border-color: rgba(255,255,255,1); display: block;}.fOU46b .qV4dIc{color: rgba(255,255,255,0.8700000048);}.fOU46b .jgXgSe:hover{color: rgba(255,255,255,1);}.fOU46b .M9vuGd{color: rgba(255,255,255,1);}.fOU46b .tCHXDc{color: rgba(255,255,255,0.8700000048);}.fOU46b .iWs3gf.chg4Jd:focus{background-color: rgba(255,255,255,0.1199999973);}.fOU46b .G8QRnc .Mz8gvb{color: rgba(0,0,0,0.8000000119);}.fOU46b .G8QRnc .Mz8gvb.chg4Jd:focus:before{border-color: rgba(0,0,0,0.8000000119); display: block;}.fOU46b .G8QRnc .ZXW7w{color: rgba(0,0,0,0.8000000119);}.fOU46b .G8QRnc .TlfmSc{color: rgba(0,0,0,0.8000000119);}.fOU46b .G8QRnc .KJll8d{background-color: rgba(0,0,0,0.8000000119);}.fOU46b .G8QRnc .qV4dIc{color: rgba(0,0,0,0.6399999857);}.fOU46b .G8QRnc .jgXgSe:hover{color: rgba(0,0,0,0.8199999928);}.fOU46b .G8QRnc .M9vuGd{color: rgba(0,0,0,0.8199999928);}.fOU46b .G8QRnc .tCHXDc{color: rgba(0,0,0,0.6399999857);}.fOU46b .G8QRnc .iWs3gf.chg4Jd:focus{background-color: rgba(0,0,0,0.1199999973);}.fOU46b .usN8rf .Mz8gvb{color: rgba(0,0,0,0.8000000119);}.fOU46b .usN8rf .Mz8gvb.chg4Jd:focus:before{border-color: rgba(0,0,0,0.8000000119); display: block;}.fOU46b .usN8rf .ZXW7w{color: rgba(0,0,0,0.8000000119);}.fOU46b .usN8rf .TlfmSc{color: rgba(0,0,0,0.8000000119);}.fOU46b .usN8rf .KJll8d{background-color: rgba(0,0,0,0.8000000119);}.fOU46b .usN8rf .qV4dIc{color: rgba(0,0,0,0.6399999857);}.fOU46b .usN8rf .jgXgSe:hover{color: rgba(0,0,0,0.8199999928);}.fOU46b .usN8rf .M9vuGd{color: rgba(0,0,0,0.8199999928);}.fOU46b .usN8rf .tCHXDc{color: rgba(0,0,0,0.6399999857);}.fOU46b .usN8rf .iWs3gf.chg4Jd:focus{background-color: rgba(0,0,0,0.1199999973);}.fOU46b .aCIEDd .qV4dIc{color: rgba(33,33,33,1);}.fOU46b .aCIEDd .TlfmSc{color: rgba(33,33,33,1);}.fOU46b .aCIEDd .KJll8d{background-color: rgba(33,33,33,1);}.fOU46b .aCIEDd .ZXW7w{color: rgba(33,33,33,1);}.fOU46b .aCIEDd .jgXgSe:hover{color: rgba(33,33,33,1); opacity: 0.82;}.fOU46b .aCIEDd .Mz8gvb{color: rgba(33,33,33,1);}.fOU46b .aCIEDd .tCHXDc{color: rgba(33,33,33,1);}.fOU46b .aCIEDd .iWs3gf.chg4Jd:focus{background-color: rgba(33,33,33,0.1199999973);}.fOU46b .a3ETed .qV4dIc{color: rgba(255,255,255,1);}.fOU46b .a3ETed .TlfmSc{color: rgba(255,255,255,1);}.fOU46b .a3ETed .KJll8d{background-color: rgba(255,255,255,1);}.fOU46b .a3ETed .ZXW7w{color: rgba(255,255,255,1);}.fOU46b .a3ETed .jgXgSe:hover{color: rgba(255,255,255,1); opacity: 0.82;}.fOU46b .a3ETed .Mz8gvb{color: rgba(255,255,255,1);}.fOU46b .a3ETed .tCHXDc{color: rgba(255,255,255,1);}.fOU46b .a3ETed .iWs3gf.chg4Jd:focus{background-color: rgba(255,255,255,0.1199999973);}@media only screen and (min-width: 1280px){.XeSM4.b2Iqye.fOU46b .LBrwzc .tCHXDc{color: rgba(255,255,255,0.8700000048);}}.XeSM4.b2Iqye.fOU46b .LBrwzc .iWs3gf.chg4Jd:focus{background-color: rgba(255,255,255,0.1199999973);}@media only screen and (min-width: 1280px){.KuNac.b2Iqye.fOU46b .tCHXDc{color: rgba(0,0,0,0.6399999857);}}.KuNac.b2Iqye.fOU46b .iWs3gf.chg4Jd:focus{background-color: rgba(0,0,0,0.1199999973);}.fOU46b .zDUgLc{opacity: 0;}.LBrwzc .ZXW7w{color: rgba(0,0,0,1);}.LBrwzc .KJll8d{background-color: rgba(0,0,0,1);}.GBy4H .ZXW7w{color: rgba(255,255,255,1);}.GBy4H .KJll8d{background-color: rgba(255,255,255,1);}.eBSUbc{background-color: rgba(33,33,33,1); color: rgba(0,188,212,0.6999999881);}.BFDQOb:hover{color: rgba(73,170,212,1);}.ImnMyf{background-color: rgba(255,255,255,1); color: rgba(33,33,33,1);}.Vs12Bd{background-color: rgba(242,242,242,1); color: rgba(33,33,33,1);}.S5d9Rd{background-color: rgba(30,108,147,1); color: rgba(255,255,255,1);}.zfr3Q{color: rgba(33,33,33,1); font-family: Lato, sans-serif; font-size: 11pt; font-weight: 400; line-height: 1.6667; margin-top: 12px;}.qnVSj{color: rgba(33,33,33,1);}.Glwbz{color: rgba(33,33,33,1);}.duRjpb{color: rgba(34,110,147,1); font-family: Lato, sans-serif; font-size: 34pt; font-weight: 300; letter-spacing: 0.5px; line-height: 1.2; margin-top: 30px;}.Ap4VC{margin-bottom: -30px;}.qLrapd{color: rgba(34,110,147,1);}.JYVBee{color: rgba(34,110,147,1); font-family: Lato, sans-serif; font-size: 19pt; font-weight: 400; line-height: 1.4; margin-top: 20px;}.CobnVe{margin-bottom: -20px;}.aHM7ed{color: rgba(34,110,147,1);}.OmQG5e{color: rgba(33,33,33,1); font-family: Lato, sans-serif; font-size: 15pt; font-style: normal; font-weight: 400; line-height: 1.25; margin-top: 16px;}.GV3q8e{margin-bottom: -16px;}.NHD4Gf{color: rgba(33,33,33,1);}.LB7kq .duRjpb{font-size: 64pt; letter-spacing: 2px; line-height: 1; margin-top: 40px;}.LB7kq .JYVBee{font-size: 25pt; font-weight: 300; line-height: 1.1; margin-top: 25px;}@media only screen and (max-width: 479px){.LB7kq .duRjpb{font-size: 40pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.LB7kq .duRjpb{font-size: 53pt;}}@media only screen and (max-width: 479px){.LB7kq .JYVBee{font-size: 19pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.LB7kq .JYVBee{font-size: 22pt;}}.O13XJf{height: 340px; padding-bottom: 60px; padding-top: 60px;}@media only screen and (min-width: 480px) and (max-width: 767px){.O13XJf{height: 280px; padding-bottom: 40px; padding-top: 40px;}}@media only screen and (max-width: 479px){.O13XJf{height: 250px; padding-bottom: 30px; padding-top: 30px;}}.SBrW1{height: 520px;}@media only screen and (min-width: 480px) and (max-width: 767px){.SBrW1{height: 520px;}}@media only screen and (max-width: 479px){.SBrW1{height: 400px;}}.Wew9ke{fill: rgba(255,255,255,1);}.gk8rDe{height: 180px; padding-bottom: 32px; padding-top: 60px;}.gk8rDe .zfr3Q{color: rgba(0,0,0,1);}.gk8rDe .duRjpb{color: rgba(34,110,147,1); font-size: 45pt; line-height: 1.1;}.gk8rDe .qLrapd{color: rgba(34,110,147,1);}.gk8rDe .JYVBee{color: rgba(34,110,147,1); font-size: 27pt; line-height: 1.35; margin-top: 15px;}.gk8rDe .aHM7ed{color: rgba(34,110,147,1);}.gk8rDe .OmQG5e{color: rgba(33,33,33,1);}.gk8rDe .NHD4Gf{color: rgba(33,33,33,1);}@media only screen and (max-width: 479px){.gk8rDe .duRjpb{font-size: 30pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.gk8rDe .duRjpb{font-size: 38pt;}}@media only screen and (max-width: 479px){.gk8rDe .JYVBee{font-size: 20pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.gk8rDe .JYVBee{font-size: 24pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.gk8rDe{padding-top: 45px;}}@media only screen and (max-width: 479px){.gk8rDe{padding-bottom: 0px; padding-top: 30px;}}.dhtgD{text-decoration: underline;}.JzO0Vc{background-color: rgba(33,33,33,1); font-family: Lato, sans-serif; width: 250px;}@media only screen and (min-width: 1280px){.JzO0Vc{padding-top: 48.5px;}}.TlfmSc{font-family: Lato, sans-serif; font-size: 15pt; font-weight: 300; line-height: 1.333;}.PsKE7e{font-family: Lato, sans-serif; font-size: 12pt;}.IKA38e{line-height: 1.21;}.hDrhEe{padding-bottom: 11.5px; padding-top: 11.5px;}.zDUgLc{opacity: 1;}.QmpIrf{background-color: rgba(30,108,147,1); border-color: rgba(255,255,255,1); color: rgba(255,255,255,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.xkUom{border-color: rgba(30,108,147,1); color: rgba(30,108,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.xkUom:hover{background-color: rgba(30,108,147,0.1000000015);}.KjwKmc{color: rgba(30,108,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal; line-height: normal;}.KjwKmc:hover{background-color: rgba(30,108,147,0.1000000015);}.lQAHbd .QmpIrf{background-color: rgba(255,255,255,1); border-color: rgba(34,110,147,1); color: rgba(34,110,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.lQAHbd .xkUom{border-color: rgba(242,242,242,1); color: rgba(242,242,242,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.lQAHbd .xkUom:hover{background-color: rgba(255,255,255,0.1000000015);}.lQAHbd .KjwKmc{color: rgba(242,242,242,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.lQAHbd .KjwKmc:hover{background-color: rgba(255,255,255,0.1000000015);}.lQAHbd .Mt0nFe{border-color: rgba(255,255,255,0.200000003);}.cJgDec .QmpIrf{background-color: rgba(255,255,255,1); border-color: rgba(34,110,147,1); color: rgba(34,110,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.cJgDec .xkUom{border-color: rgba(242,242,242,1); color: rgba(242,242,242,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.cJgDec .xkUom:hover{background-color: rgba(255,255,255,0.1000000015);}.cJgDec .KjwKmc{color: rgba(242,242,242,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.cJgDec .KjwKmc:hover{background-color: rgba(255,255,255,0.1000000015);}.tpmmCb .QmpIrf{background-color: rgba(255,255,255,1); border-color: rgba(34,110,147,1); color: rgba(34,110,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.tpmmCb .xkUom{border-color: rgba(30,108,147,1); color: rgba(30,108,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.tpmmCb .xkUom:hover{background-color: rgba(30,108,147,0.1000000015);}.tpmmCb .KjwKmc{color: rgba(30,108,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.tpmmCb .KjwKmc:hover{background-color: rgba(30,108,147,0.1000000015);}.gk8rDe .QmpIrf{background-color: rgba(30,108,147,1); border-color: rgba(255,255,255,1); color: rgba(255,255,255,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.gk8rDe .xkUom{border-color: rgba(30,108,147,1); color: rgba(30,108,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.gk8rDe .xkUom:hover{background-color: rgba(30,108,147,0.1000000015);}.gk8rDe .KjwKmc{color: rgba(30,108,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.gk8rDe .KjwKmc:hover{background-color: rgba(30,108,147,0.1000000015);}.O13XJf .QmpIrf{background-color: rgba(255,255,255,1); border-color: rgba(34,110,147,1); color: rgba(34,110,147,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.O13XJf .xkUom{border-color: rgba(242,242,242,1); color: rgba(242,242,242,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.O13XJf .xkUom:hover{background-color: rgba(255,255,255,0.1000000015);}.O13XJf .KjwKmc{color: rgba(242,242,242,1); font-family: Lato, sans-serif; font-size: 11pt; line-height: normal;}.O13XJf .KjwKmc:hover{background-color: rgba(255,255,255,0.1000000015);}.Y4CpGd{font-family: Lato, sans-serif; font-size: 11pt;}.CMArNe{background-color: rgba(242,242,242,1);}.LBrwzc .TlfmSc{color: rgba(0,0,0,0.8000000119);}.LBrwzc .YTv4We{color: rgba(0,0,0,0.6399999857);}.LBrwzc .YTv4We.chg4Jd:focus:before{border-color: rgba(0,0,0,0.6399999857); display: block;}.LBrwzc .Mz8gvb{color: rgba(0,0,0,0.6399999857);}.LBrwzc .tCHXDc{color: rgba(0,0,0,0.6399999857);}.LBrwzc .iWs3gf.chg4Jd:focus{background-color: rgba(0,0,0,0.1199999973);}.LBrwzc .wgxiMe{background-color: rgba(255,255,255,1);}.LBrwzc .qV4dIc{color: rgba(0,0,0,0.6399999857);}.LBrwzc .M9vuGd{color: rgba(0,0,0,0.8000000119); font-weight: bold;}.LBrwzc .Zjiec{color: rgba(0,0,0,0.8000000119);}.LBrwzc .IKA38e{color: rgba(0,0,0,0.6399999857);}.LBrwzc .lhZOrc.IKA38e{color: rgba(0,0,0,0.8000000119); font-weight: bold;}.LBrwzc .j10yRb:hover{color: rgba(0,0,0,0.8000000119);}.LBrwzc .eBSUbc{color: rgba(0,0,0,0.8000000119);}.LBrwzc .hDrhEe:hover{color: rgba(0,0,0,0.8000000119);}.LBrwzc .jgXgSe:hover{color: rgba(0,0,0,0.8000000119);}.LBrwzc .M9vuGd:hover{color: rgba(0,0,0,0.8000000119);}.LBrwzc .zDUgLc{border-bottom-color: rgba(204,204,204,1); border-bottom-width: 1px; border-bottom-style: solid;}.fOU46b .LBrwzc .M9vuGd{color: rgba(0,0,0,0.8000000119);}.fOU46b .LBrwzc .jgXgSe:hover{color: rgba(0,0,0,0.8000000119);}.fOU46b .LBrwzc .zDUgLc{opacity: 1; border-bottom-style: none;}.fOU46b .LBrwzc .tCHXDc{color: rgba(0,0,0,0.6399999857);}.fOU46b .LBrwzc .iWs3gf.chg4Jd:focus{background-color: rgba(0,0,0,0.1199999973);}.fOU46b .GBy4H .M9vuGd{color: rgba(255,255,255,1);}.fOU46b .GBy4H .jgXgSe:hover{color: rgba(255,255,255,1);}.fOU46b .GBy4H .zDUgLc{opacity: 1;}.fOU46b .GBy4H .tCHXDc{color: rgba(255,255,255,0.8700000048);}.fOU46b .GBy4H .iWs3gf.chg4Jd:focus{background-color: rgba(255,255,255,0.1199999973);}.XeSM4.G9Qloe.fOU46b .LBrwzc .tCHXDc{color: rgba(0,0,0,0.6399999857);}.XeSM4.G9Qloe.fOU46b .LBrwzc .iWs3gf.chg4Jd:focus{background-color: rgba(0,0,0,0.1199999973);}.GBy4H .lhZOrc.IKA38e{color: rgba(255,255,255,1);}.GBy4H .eBSUbc{color: rgba(255,255,255,0.8700000048);}.GBy4H .hDrhEe:hover{color: rgba(255,255,255,1);}.GBy4H .j10yRb:hover{color: rgba(255,255,255,1);}.GBy4H .YTv4We{color: rgba(255,255,255,1);}.GBy4H .YTv4We.chg4Jd:focus:before{border-color: rgba(255,255,255,1); display: block;}.GBy4H .tCHXDc{color: rgba(255,255,255,0.8700000048);}.GBy4H .iWs3gf.chg4Jd:focus{background-color: rgba(255,255,255,0.1199999973);}.GBy4H .jgXgSe:hover{color: rgba(255,255,255,1);}.GBy4H .jgXgSe:hover{color: rgba(255,255,255,1);}.GBy4H .M9vuGd{color: rgba(255,255,255,1);}.GBy4H .M9vuGd:hover{color: rgba(255,255,255,1);}.QcmuFb{padding-left: 20px;}.vDPrib{padding-left: 40px;}.TBDXjd{padding-left: 60px;}.bYeK8e{padding-left: 80px;}.CuqSDe{padding-left: 100px;}.Havqpe{padding-left: 120px;}.JvDrRe{padding-left: 140px;}.o5lrIf{padding-left: 160px;}.yOJW7c{padding-left: 180px;}.rB8cye{padding-left: 200px;}.RuayVd{padding-right: 20px;}.YzcKX{padding-right: 40px;}.reTV0b{padding-right: 60px;}.vSYeUc{padding-right: 80px;}.PxtZIe{padding-right: 100px;}.ahQMed{padding-right: 120px;}.rzhcXb{padding-right: 140px;}.PBhj0b{padding-right: 160px;}.TlN46c{padding-right: 180px;}.GEdNnc{padding-right: 200px;}.TMjjoe{font-family: Lato, sans-serif; font-size: 9pt; line-height: 1.2; margin-top: 0px;}@media only screen and (min-width: 1280px){.yxgWrb{margin-left: 250px;}}@media only screen and (max-width: 479px){.Zjiec{font-size: 15pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.Zjiec{font-size: 17pt;}}@media only screen and (max-width: 479px){.TlfmSc{font-size: 13pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.TlfmSc{font-size: 14pt;}}@media only screen and (max-width: 479px){.PsKE7e{font-size: 12pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.PsKE7e{font-size: 12pt;}}@media only screen and (max-width: 479px){.duRjpb{font-size: 24pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.duRjpb{font-size: 29pt;}}@media only screen and (max-width: 479px){.JYVBee{font-size: 15pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.JYVBee{font-size: 17pt;}}@media only screen and (max-width: 479px){.OmQG5e{font-size: 13pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.OmQG5e{font-size: 14pt;}}@media only screen and (max-width: 479px){.TlfmSc{font-size: 13pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.TlfmSc{font-size: 14pt;}}@media only screen and (max-width: 479px){.PsKE7e{font-size: 12pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.PsKE7e{font-size: 12pt;}}@media only screen and (max-width: 479px){.TMjjoe{font-size: 9pt;}}@media only screen and (min-width: 480px) and (max-width: 767px){.TMjjoe{font-size: 9pt;}}</style><script nonce="jBxyI6YKtm3_mMhcm4hc2Q">_at_config = [null,"AIzaSyChg3MFqzdi1P5J-YvEyakkSA1yU7HRcDI","897606708560-a63d8ia0t9dhtpdt4i3djab2m42see7o.apps.googleusercontent.com",null,null,null,null,null,null,null,null,null,null,null,"SITES_%s",null,null,null,null,null,null,null,null,null,["AHKXmL0CVWjLekkoTA351W4_N-XK2d6jtooJnnjAavfQnc1HhocCeNlMJ9HlD76R7-2AcHRqoKFu",1,"CNH8rvfSlpgDFcADbwYdFXQcFQ",1795181152812624,[5703839,5704621,5706832,5706836,5738513,5738529,5743108,5743124,5776501,5776517,14101306,14101502,14101510,14101534,49472063,49472071,49644015,49644023,49769337,49769345,49822921,49822929,49833462,49833470,49842855,49842863,49924706,49924714,50223641,50223649,50266222,50266230,50273528,50273536,50297076,50297084,50586962,50586970,71079938,71079946,71085241,71085249,71120968,71120976,71387889,71387897,71465947,71465955,71528597,71528605,71530083,71530091,71544834,71544842,71546425,71546433,71658040,71658048,71659813,71659821,71689860,71689868,71710040,71710048,71798420,71798436,71825383,71825391,71855000,71855008,71897827,71897835,71960540,71960548,94327671,94327679,94333153,94333161,94353368,94353376,94386871,94386879,94434257,94434265,94629757,94629765,94692298,94692306,94785229,94785237,94904089,94904097,94918952,94918960,94940194,95087186,95087194,95111985,95111993,95112873,95112881,95314802,95314810,99251983,99251991,99368792,99368800,99402331,99402339,99440853,99440861,99457807,99457815,101492731,101492739,101519280,101519288,101562406,101562414,101575021,101575029,101631191,101631199,101687117,101687125,101836971,101836979,101837416,101837424,101860667,101860675,101887674,101887682,101889043,101889051,101917185,101917193,101922729,101922880,101933491,101933499,102030642,102030650,102059541,102059549,102070930,102070938,102146687,102146695,102161447,102161455,102178402,102178410,102198282,102198290,102244489,102244497,102280628,102280636,102287284,102287292,102343380,102343388,102402679,102402687,102469860,102469868,102517339,102517344,102548521,102548529,102673375,102685384,102685389,102685929,102685934,102718396,102721215,102721220,102727402,102727407,102761474,102761479,102762315,102762323,102783509,102783517,102787563,102807790,102807798,102867835,102867843,102883758,102883766,102902848,102902856,102903660,102903668,102909750,102909755,102925819,102925827,102926523,102926531,102944189,102944194,102944268,102944273,102944503,102944508,102944582,102944587,102944680,102944685,102944785,102944790,102956685,102956693,102972669,102972677,102988272,102988277,102988402,102988407,102988695,102988700,102988929,102988934,103011418,103011426,103163044,103163052,103176010,103176018,103276092,103285966,103285974,103286273,103286281,103286444,103286452,103288306,103288314,103289103,103289108,103289273,103289278,103326407,103326415,103343830,103343838,104530130,104573899,104573907,104575332,104575337,104575491,104575496,104575691,104575696,104575894,104615595,104615603,104699504,104699512,104761751,104761759,104794443,104794451,104842348,104842353,104907811,104907819,104976617,104976625,104983169,104983177,105083748,105083756,105087788,105087796,105125317,105125325,105180894,105180902,105283687,105283695,105292835,105292843,105346285,105346293,105360418,105360426,105373824,105373832,105393811,105393819,105439171,105439179,115511323,115511328,115601129,115601137,115626439,115626447,115669258,115669266,115780458,115780466,115818444,115818449,115821407,115821415,115854768,115854776,115909741,115909749,115955819,115955824,116062710,116062718,116068898,116068906,116176809,116176817,116221334,116221342,116268304,116268309,116276461,116276469,116282976,116282981,116372477,116372485,116400336,116400344,116416034,116416042,116418137,116418145,116425644,116538516,116538524,116567571,116567576,116609471,116609479,116699509,116699517,116756943,116756951,116783822,116783827,116840681,116840686,116901222,116901230,116901303,116901311,116902106,116902114,116902146,116902154,116907270,116907278,116908636,116908644,116908917,116908925,116909050,116909058,116909411,116909419,116909964,116909972,116910125,116910133,116920064,116920072,116920556,116920564,116929413,116929421,116980487,116980495,116982100,116982108,116982191,116982199,116982753,116982761,116984628,116984636,117010933,117010941,117223999,117224007,117268957,117268965,117283949,117283954,117286791,117286799,117290330,117290338,117309374,117309382,117410074,117457958,117457966,117503217,117503225,117504383,117504391,117547661,117547669,117668252,117668260,117848254,117895900,117895908,118094558,118094563,118098249,118098257,118110574,118110582,118171121,118237135,118237143,118281144,118281152,118285275,118291756,118291764,118367937,118367945,118368676,118368684,118417364,118417372,118484679,118484687,118961008,118961016,119022332,119022340,119096461,119096469,119109774,119109782,119208439,119208447,119209377,119346325,119367357,119367362,119528382,119528390,119566028,119566036,119595147,119595155,119605190,119605198,119667272,119667280,119671790,119671798,119770545,119770553,119771791,119771799,119870000,119870008,120049151,120049159,120050650,120050658,120175627,120175635,120305442,120305450,120493132,120493140,120619846,120619851,120650583,120650591,120730671,120730676,120735852,120735857,120773177,120773182,120797077,120797085,120812978,120900452,120900460,120982382,120982390,121110331,121110336,121123431,121123436,121172911,121191812,121191820,121286207,121286215,121307198,121307206,121346120,121346125,121372721,121377918,121377926,121381303,121381308,121381960,121383007,121406244,121406252,121431603,121431611,121442235,121442240,123287377,123287382,123364526,123364613,123364618,123477306,123690974,123690990,123769303,123769311,123948585,123948593,123948921,123948929,123949351,123949359,123949661,123949669,124018937,124018945,124129180,124129246]],null,null,null,null,0,null,null,null,null,null,null,null,null,null,"https://drive.google.com",null,null,null,null,null,null,null,null,null,0,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"v2internal","https://docs.google.com",null,null,null,null,null,null,"https://sites.google.com/new/",null,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,"",null,null,null,null,null,null,null,null,null,null,null,null,6,null,null,"https://accounts.google.com/o/oauth2/auth","https://accounts.google.com/o/oauth2/postmessageRelay",null,null,null,null,78,"https://sites.google.com/new/?usp\u003dviewer_footer",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"https://www.gstatic.com/atari/embeds/bbbac824948cd11ec13ee1bf92d30354/intermediate-frame-minified.html",0,null,"v2beta",null,null,null,null,null,null,null,"https://accounts.google.com/o/oauth2/iframe",null,null,null,null,null,null,"https://786647461-atari-embeds.googleusercontent.com/embeds/a7eacaf78f1e3ba463385dc9185669ab/inner-frame-minified.html",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"https://sites.google.com/view/fupeng715/full-page-embed",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null,null,null,null,null,0,null,"",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,null,null,0,"[]",null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,[1795181152817,"editors.sites-viewer-frontend_20261116.02_p0","1022626162",null,1,1,""],null,null,null,null,0,null,null,0,null,null,null,null,null,null,null,null,null,null,"https://domains.google.com",null,0,null,null,null,null,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null,null,null,null,null,0,null,0,0,0,0,null,null,null,null,null,"https://www.google.com/calendar/embed",null,null,null,null,0,null,null,1,0,null,null,0,null,null,null,0,null,0,null,null,null,null,null,1,null,null,null,null,0,"PROD",null,null,null,0,null,null,0,"wYCZkqoz10fBWirfAym0S1sADKbJ",1,1,0,null,0,0,0,0,0,0,null,1,null,null,null,null,null,0,0,0,0,0,0]; window.globals = {"enableAnalytics":true,"webPropertyId":"","showDebug":false,"hashedSiteId":"a1ce8f34e4103ce7f0bac583cae75f7648d3ad723e02a5f39ffee8e576cbdff8","normalizedPath":"view/fupeng715/full-page-embed","pageTitle":"Full Page Embed"}; function gapiLoaded() {if (globals.gapiLoaded == undefined) {globals.gapiLoaded = true;} else {globals.gapiLoaded();}}window.messages = []; window.addEventListener && window.addEventListener('message', function(e) {if (window.messages && e.data && e.data.magic == 'SHIC') {window.messages.push(e);}});</script><script src="https://apis.google.com/js/client.js?onload=gapiLoaded" nonce="jBxyI6YKtm3_mMhcm4hc2Q"></script><script nonce="jBxyI6YKtm3_mMhcm4hc2Q">(function(){var l=typeof Object.create=="function"?Object.create:function(a){var b=function(){};b.prototype=a;return new b},p=typeof Object.defineProperties=="function"?Object.defineProperty:function(a,b,c){if(a==Array.prototype||a==Object.prototype)return a;a[b]=c.value;return a},aa=function(a){a=["object"==typeof globalThis&&globalThis,a,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var b=0;b<a.length;++b){var c=a[b];if(c&&c.Math==Math)return c}throw Error("Cannot find global object");
+},ba=aa(this),q=function(a,b){if(b)a:{var c=ba;a=a.split(".");for(var d=0;d<a.length-1;d++){var e=a[d];if(!(e in c))break a;c=c[e]}a=a[a.length-1];d=c[a];b=b(d);b!=d&&b!=null&&p(c,a,{configurable:!0,writable:!0,value:b})}},ca;if(typeof Object.setPrototypeOf=="function")ca=Object.setPrototypeOf;else{var da;a:{var ea={a:!0},fa={};try{fa.__proto__=ea;da=fa.a;break a}catch(a){}da=!1}ca=da?function(a,b){a.__proto__=b;if(a.__proto__!==b)throw new TypeError(a+" is not extensible");return a}:null}
+var ha=ca,ia=function(a){var b=0;return function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}}},r=function(a){var b=typeof Symbol!="undefined"&&Symbol.iterator&&a[Symbol.iterator];if(b)return b.call(a);if(typeof a.length=="number")return{next:ia(a)};throw Error(String(a)+" is not an iterable or ArrayLike");},t=function(a){if(!(a instanceof Array)){a=r(a);for(var b,c=[];!(b=a.next()).done;)c.push(b.value);a=c}return a},ja=function(a){return v(a,a)},v=function(a,b){a.raw=b;Object.freeze&&(Object.freeze(a),
+Object.freeze(b));return a},w=function(a,b){var c;b&&!b.done&&(c=a["return"])&&c.call(a)},x=function(a,b){return Object.prototype.hasOwnProperty.call(a,b)},ka=typeof Object.assign=="function"?Object.assign:function(a,b){if(a==null)throw new TypeError("No nullish arg");a=Object(a);for(var c=1;c<arguments.length;c++){var d=arguments[c];if(d)for(var e in d)x(d,e)&&(a[e]=d[e])}return a},la=function(){for(var a=Number(this),b=[],c=a;c<arguments.length;c++)b[c-a]=arguments[c];return b};
+q("globalThis",function(a){return a||ba});q("Symbol",function(a){if(a)return a;var b=function(g,m){this.Y=g;p(this,"description",{configurable:!0,writable:!0,value:m})};b.prototype.toString=function(){return this.Y};var c="jscomp_symbol_"+(Math.random()*1E9>>>0)+"_",d=0,e=function(g){if(this instanceof e)throw new TypeError("Symbol is not a constructor");return new b(c+(g||"")+"_"+d++,g)};return e});
+q("Symbol.iterator",function(a){if(a)return a;a=Symbol("Symbol.iterator");p(Array.prototype,a,{configurable:!0,writable:!0,value:function(){return ma(ia(this))}});return a});q("Symbol.toStringTag",function(a){return a?a:Symbol("Symbol.toStringTag")});var ma=function(a){var b=(typeof Iterator!="undefined"&&Iterator.prototype&&!Iterator.prototype.next?Iterator.prototype:null)||Object.prototype,c=l(b);c.next=a;b[Symbol.iterator]||(c[Symbol.iterator]=function(){return this});return c};
+q("Symbol.dispose",function(a){return a?a:Symbol("Symbol.dispose")});
+q("Iterator",function(a){var b=Object.getPrototypeOf,c=typeof Symbol!="undefined"&&Symbol.iterator&&[][Symbol.iterator]?[][Symbol.iterator]():null;b=(c=c&&b?b(c):null)&&b?b(c):null;b===Object.prototype&&(b=null);if(a&&b&&a.prototype===b)return a;var d=function(){if(!(this instanceof d)||this.constructor===d)throw new TypeError("Abstract Iterator not directly constructable");};b&&(d.prototype=b);p(d.prototype,"constructor",{configurable:!0,writable:!0,value:d});d.prototype[Symbol.iterator]||(d.prototype[Symbol.iterator]=
+function(){return this});return d});
+var y=function(a){if(Object(a)!==a)throw new TypeError("Expected an object");return a},na=function(a){try{var b=a["return"];typeof b=="function"&&b.call(a)}catch(c){}},oa=function(a,b){b==null&&(b=!0);return{value:a,done:b}},pa=null,qa=function(a,b){var c=pa;if(!c){var d=function(e,g){if(!e||e.ia!==e)throw new TypeError("Method called on incompatible object");var m=e.B;if(m===3)throw new TypeError("Generator is already running");if(m!=4){e.B=g&&m==1?4:3;try{if(g){var f=e.W,h=f["return"];if(h!=null){if(typeof h!=
+"function")throw new TypeError("Iterator return is not a function");y(h.call(f))}}else{var k=e.X();if(k)return e.B=2,k}}finally{e.B!=2&&(e.B=4,e.X=e.W=null)}}return oa()};c=pa=l(Iterator.prototype);c.next=function(){return d(this,!1)};c.return=function(){return d(this,!0)};c[Symbol.toStringTag]="Iterator Helper"}c=l(c);c.ia=c;c.B=1;c.W=a;c.X=b;return c},ra=function(a,b){y(a);if(typeof b!="function")throw na(a),new TypeError("callback must be a function");},sa=function(a,b,c){ra(a,b);b=a.next;for(var d=
+0,e;!(e=y(b.call(a))).done;){try{var g=c(e.value,d++)}catch(m){try{w(a,e)}catch(f){}throw m;}if(g){c=a["return"];c!=null&&y(c.call(a));break}}};q("Iterator.prototype.forEach",function(a){return a||function(b){sa(this,b,function(c,d){b(c,d)})}});var ta=function(a,b,c){ra(a,b);var d=a.next,e=0;return qa(a,function(){for(;;){var g=y(d.call(a));if(g.done)break;g=g.value;try{var m=b(g,e++)}catch(f){throw na(a),f;}if(!c||m)return oa(c?g:m,!1)}})};
+q("Iterator.prototype.map",function(a){return a||function(b){return ta(this,b,!1)}});var ua=function(a,b){a instanceof String&&(a+="");var c=0,d=!1;return ma(function(){if(!d&&c<a.length){var e=c++;return{value:b(e,a[e]),done:!1}}d=!0;return{done:!0,value:void 0}})};q("Array.prototype.keys",function(a){return a?a:function(){return ua(this,function(b){return b})}});
+q("WeakMap",function(a){function b(){}function c(h){var k=typeof h;return k==="object"&&h!==null||k==="function"}function d(h){if(!x(h,g)){var k=new b;p(h,g,{value:k})}}function e(h){var k=Object[h];k&&(Object[h]=function(n){if(n instanceof b)return n;Object.isExtensible(n)&&d(n);return k(n)})}if(function(){if(!a||!Object.seal)return!1;try{var h=Object.seal({}),k=Object.seal({}),n=new a([[h,2],[k,3]]);if(n.get(h)!=2||n.get(k)!=3)return!1;n.delete(h);n.set(k,4);return!n.has(h)&&n.get(k)==4}catch(u){return!1}}())return a;
+var g="$jscomp_hidden_"+Math.random();e("freeze");e("preventExtensions");e("seal");var m=0,f=function(h){this.v=(m+=Math.random()+1).toString();if(h){h=r(h);for(var k;!(k=h.next()).done;)k=k.value,this.set(k[0],k[1])}};f.prototype.set=function(h,k){if(!c(h))throw Error("Invalid WeakMap key");d(h);if(!x(h,g))throw Error("WeakMap key fail: "+h);h[g][this.v]=k;return this};f.prototype.get=function(h){return c(h)&&x(h,g)?h[g][this.v]:void 0};f.prototype.has=function(h){return c(h)&&x(h,g)&&x(h[g],this.v)};
+f.prototype.delete=function(h){return c(h)&&x(h,g)&&x(h[g],this.v)?delete h[g][this.v]:!1};return f});
+q("Map",function(a){if(function(){if(!a||typeof a!="function"||!a.prototype.entries||typeof Object.seal!="function")return!1;try{var f=Object.seal({x:4}),h=new a(r([[f,"s"]]));if(h.get(f)!="s"||h.size!=1||h.get({x:4})||h.set({x:4},"t")!=h||h.size!=2)return!1;var k=h.entries(),n=k.next();if(n.done||n.value[0]!=f||n.value[1]!="s")return!1;n=k.next();return!(n.done||n.value[0].x!=4||n.value[1]!="t"||!k.next().done)}catch(u){return!1}}())return a;var b=new WeakMap,c=function(f){this[0]={};this[1]=g();
+this.size=0;if(f){f=r(f);for(var h;!(h=f.next()).done;)h=h.value,this.set(h[0],h[1])}};c.prototype.set=function(f,h){f=f===0?0:f;var k=d(this,f);k.list||(k.list=this[0][k.id]=[]);k.entry?k.entry.value=h:(k.entry={next:this[1],l:this[1].l,head:this[1],key:f,value:h},k.list.push(k.entry),this[1].l.next=k.entry,this[1].l=k.entry,this.size++);return this};c.prototype.delete=function(f){f=d(this,f);return f.entry&&f.list?(f.list.splice(f.index,1),f.list.length||delete this[0][f.id],f.entry.l.next=f.entry.next,
+f.entry.next.l=f.entry.l,f.entry.head=null,this.size--,!0):!1};c.prototype.clear=function(){this[0]={};this[1]=this[1].l=g();this.size=0};c.prototype.has=function(f){return!!d(this,f).entry};c.prototype.get=function(f){return(f=d(this,f).entry)&&f.value};c.prototype.entries=function(){return e(this,function(f){return[f.key,f.value]})};c.prototype.keys=function(){return e(this,function(f){return f.key})};c.prototype.values=function(){return e(this,function(f){return f.value})};c.prototype.forEach=
+function(f,h){for(var k=this.entries(),n;!(n=k.next()).done;)n=n.value,f.call(h,n[1],n[0],this)};c.prototype[Symbol.iterator]=c.prototype.entries;var d=function(f,h){var k=h&&typeof h;k=="object"||k=="function"?b.has(h)?k=b.get(h):(k=""+ ++m,b.set(h,k)):k="p_"+h;var n=f[0][k];if(n&&x(f[0],k))for(f=0;f<n.length;f++){var u=n[f];if(h!==h&&u.key!==u.key||h===u.key)return{id:k,list:n,index:f,entry:u}}return{id:k,list:n,index:-1,entry:void 0}},e=function(f,h){var k=f[1];return ma(function(){if(k){for(;k.head!=
+f[1];)k=k.l;for(;k.next!=k.head;)return k=k.next,{done:!1,value:h(k)};k=null}return{done:!0,value:void 0}})},g=function(){var f={};return f.l=f.next=f.head=f},m=0;return c});
+q("Set",function(a){if(function(){if(!a||typeof a!="function"||!a.prototype.entries||typeof Object.seal!="function")return!1;try{var c=Object.seal({x:4}),d=new a(r([c]));if(!d.has(c)||d.size!=1||d.add(c)!=d||d.size!=1||d.add({x:4})!=d||d.size!=2)return!1;var e=d.entries(),g=e.next();if(g.done||g.value[0]!=c||g.value[1]!=c)return!1;g=e.next();return g.done||g.value[0]==c||g.value[0].x!=4||g.value[1]!=g.value[0]?!1:e.next().done}catch(m){return!1}}())return a;var b=function(c){this.j=new Map;if(c){c=
+r(c);for(var d;!(d=c.next()).done;)this.add(d.value)}this.size=this.j.size};b.prototype.add=function(c){c=c===0?0:c;this.j.set(c,c);this.size=this.j.size;return this};b.prototype.delete=function(c){c=this.j.delete(c);this.size=this.j.size;return c};b.prototype.clear=function(){this.j.clear();this.size=0};b.prototype.has=function(c){return this.j.has(c)};b.prototype.entries=function(){return this.j.entries()};b.prototype.values=function(){return this.j.values()};b.prototype.keys=b.prototype.values;
+b.prototype[Symbol.iterator]=b.prototype.values;b.prototype.forEach=function(c,d){var e=this;this.j.forEach(function(g){return c.call(d,g,g,e)})};return b});q("Array.prototype.entries",function(a){return a?a:function(){return ua(this,function(b,c){return[b,c]})}});q("Object.entries",function(a){return a?a:function(b){var c=[],d;for(d in b)x(b,d)&&c.push([d,b[d]]);return c}});q("Iterator.prototype.filter",function(a){return a||function(b){return ta(this,b,!0)}});
+q("Array.from",function(a){return a?a:function(b,c,d){c=c!=null?c:function(f){return f};var e=[],g=typeof Symbol!="undefined"&&Symbol.iterator&&b[Symbol.iterator];if(typeof g=="function"){b=g.call(b);for(var m=0;!(g=b.next()).done;)e.push(c.call(d,g.value,m++))}else for(g=b.length,m=0;m<g;m++)e.push(c.call(d,b[m],m));return e}});q("Number.isFinite",function(a){return a?a:function(b){return typeof b!=="number"?!1:!isNaN(b)&&b!==Infinity&&b!==-Infinity}});
+q("String.prototype.startsWith",function(a){return a?a:function(b,c){if(this==null)throw new TypeError("The 'this' value for String.prototype.startsWith must not be null or undefined");if(b instanceof RegExp)throw new TypeError("First argument to String.prototype.startsWith must not be a regular expression");var d=this+"";b+="";var e=d.length,g=b.length;c=Math.max(0,Math.min(c|0,d.length));for(var m=0;m<g&&c<e;)if(d[c++]!=b[m++])return!1;return m>=g}});
+q("Object.hasOwn",function(a){return a?a:function(b,c){return Object.prototype.hasOwnProperty.call(b,c)}});q("Object.values",function(a){return a?a:function(b){var c=[],d;for(d in b)x(b,d)&&c.push(b[d]);return c}});q("Math.log2",function(a){return a?a:function(b){return Math.log(b)/Math.LN2}});q("Array.prototype.values",function(a){return a?a:function(){return ua(this,function(b,c){return c})}});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+var z=this||self,va=function(a){a:{var b=["CLOSURE_FLAGS"];for(var c=z,d=0;d<b.length;d++)if(c=c[b[d]],c==null){b=null;break a}b=c}a=b&&b[a];return a!=null?a:!0},wa=function(a){var b=typeof a;return b!="object"?b:a?Array.isArray(a)?"array":b:"null"},xa=function(a,b){function c(){}c.prototype=b.prototype;a.ja=b.prototype;a.prototype=new c;a.prototype.constructor=a;a.nb=function(d,e,g){for(var m=Array(arguments.length-2),f=2;f<arguments.length;f++)m[f-2]=arguments[f];return b.prototype[e].apply(d,m)}};/*
+
+ Copyright Google LLC
+ SPDX-License-Identifier: Apache-2.0
+*/
+var ya="src srcdoc codebase data href rel action formaction sandbox icon".split(" ");var za={};function Aa(){if(za!==za)throw Error("Bad secret");};var Ba=function(a){Aa();this.ga=a};Ba.prototype.toString=function(){return this.ga};var Ca=ja([""]),Da=v(["\x00"],["\\0"]),Ea=v(["\n"],["\\n"]),Fa=v(["\x00"],["\\u0000"]),Ga=ja([""]),Ha=v(["\x00"],["\\0"]),Ia=v(["\n"],["\\n"]),Ja=v(["\x00"],["\\u0000"]);function A(a){return Object.isFrozen(a)&&Object.isFrozen(a.raw)}function B(a){return a.toString().indexOf("`")===-1}var Ka=B(function(a){return a(Ca)})||B(function(a){return a(Da)})||B(function(a){return a(Ea)})||B(function(a){return a(Fa)}),La=A(Ga)&&A(Ha)&&A(Ia)&&A(Ja);var Ma=function(a){Aa();this.ha=a};Ma.prototype.toString=function(){return this.ha};new Ma("about:blank");new Ma("about:invalid#zClosurez");var Na=[],Oa=function(a){console.warn("A URL with content '"+a+"' was sanitized away.")};Na.indexOf(Oa)===-1&&Na.push(Oa);var Pa=ja(["mica-"]);
+(function(a){if(!Array.isArray(a)||!Array.isArray(a.raw)||a.length!==a.raw.length||!Ka&&a===a.raw||!(Ka&&!La||A(a))||1!==a.length)throw new TypeError("\n    ############################## ERROR ##############################\n\n    It looks like you are trying to call a template tag function (fn`...`)\n    using the normal function syntax (fn(...)), which is not supported.\n\n    The functions in the safevalues library are not designed to be called\n    like normal functions, and doing so invalidates the security guarantees\n    that safevalues provides.\n\n    If you are stuck and not sure how to proceed, please reach out to us\n    instead through:\n     - go/ise-hardening-yaqs (preferred) // LINE-INTERNAL\n     - g/ise-hardening // LINE-INTERNAL\n     - https://github.com/google/safevalues/issues\n\n    ############################## ERROR ##############################");var b=
+a[0].toLowerCase();if(b.indexOf("on")===0||"on".indexOf(b)===0)throw Error("Prefix '"+a[0]+"' does not guarantee the attribute to be safe as it is also a prefix for event handler attributesPlease use 'addEventListener' to set event handlers.");ya.forEach(function(c){if(c.indexOf(b)===0)throw Error("Prefix '"+a[0]+"' does not guarantee the attribute to be safe as it is also a prefix for the security sensitive attribute '"+(c+"'. Please use native or safe DOM APIs to set the attribute."));});return new Ba(b)})(Pa);function C(a,b){if(Error.captureStackTrace)Error.captureStackTrace(this,C);else{var c=Error().stack;c&&(this.stack=c)}a&&(this.message=String(a));b!==void 0&&(this.cause=b)}xa(C,Error);C.prototype.name="CustomError";function D(a,b){a=a.split("%s");for(var c="",d=a.length-1,e=0;e<d;e++)c+=a[e]+(e<b.length?b[e]:"%s");C.call(this,c+a[d])}xa(D,C);D.prototype.name="AssertionError";function E(a,b,c,d){var e="Assertion failed";if(c){e+=": "+c;var g=d}else a&&(e+=": "+a,g=b);throw new D(""+e,g||[]);}
+var F=function(a,b,c){a||E("",null,b,Array.prototype.slice.call(arguments,2));return a},Qa=function(a,b,c){a==null&&E("Expected to exist: %s.",[a],b,Array.prototype.slice.call(arguments,2));return a},Ra=function(a,b){throw new D("Failure"+(a?": "+a:""),Array.prototype.slice.call(arguments,1));},Sa=function(a,b,c){typeof a!=="string"&&E("Expected string but got %s: %s.",[wa(a),a],b,Array.prototype.slice.call(arguments,2))},Ta=function(a,b,c){Array.isArray(a)||E("Expected array but got %s: %s.",[wa(a),
+a],b,Array.prototype.slice.call(arguments,2));return a};var Ua;function G(a){var b;((b=Ua)!=null?b:Ua=[]).push(a)};var H=function(a,b,c,d){d=d===void 0?!1:d;F(a,"Invalid service id + "+a);c=c||[];for(var e=0;e<c.length;e++)F(c[e],"Invalid dependency "+c[e]+" (index in dependency array: "+e+") for service "+a);this.N=a;this.m=b||null;this.F=[];Va(this,c,d);this.S=!1};H.prototype.toString=function(){return this.N};
+var Va=function(a,b,c){c=c===void 0?!1:c;F(!a.S,"Error while adding dependencies. The dependencies cannot be changed after they were read.");a.F=a.F.concat(b);if(c){if(!a.m)throw Error("A module ID must be set on the Fava ServiceId "+a.N+" in order to modify extra edges.");b.map(function(d){return d.m}).filter(Boolean).forEach(function(d){G(function(e){e.O(F(a.m),d)})})}},Xa=function(){var a=I.o,b=[I.D],c=Wa;c=c===void 0?!1:c;F(!a.S,"Error while removing dependencies. The dependencies cannot be changed after they were read.");
+if(c){if(!a.m)throw Error("A module ID must be set on the Fava ServiceId "+a.N+" in order to modify extra edges.");b.map(function(d){return d.m}).filter(Boolean).forEach(function(d){G(function(e){e.Ab(F(a.m),d)})})}a.F=a.F.filter(function(d){return b.indexOf(d)===-1})};new H("n73qwf","n73qwf");new H("MpJwZc","MpJwZc");function J(){this.G=this.G;this.H=this.H}J.prototype.G=!1;J.prototype.dispose=function(){this.G||(this.G=!0,this.da())};J.prototype[Symbol.dispose]=function(){this.dispose()};J.prototype.da=function(){if(this.H)for(;this.H.length;)this.H.shift()()};function Ya(a){var b=Za,c;for(c in b)a.call(void 0,b[c],c,b)};function K(a,b){b=b===void 0?new Set:b;if(b.has(a))return"(Recursive reference)";switch(typeof a){case "object":if(a){var c=Object.getPrototypeOf(a);switch(c){case Map.prototype:case Set.prototype:case Array.prototype:b.add(a);var d="["+Array.from(a,function(e){return K(e,b)}).join(", ")+"]";b.delete(a);c!==Array.prototype&&(d=$a(c.constructor)+"("+d+")");return d;case Object.prototype:return b.add(a),c="{"+Object.entries(a).map(function(e){var g=r(e);e=g.next().value;g=g.next().value;return e+": "+
+K(g,b)}).join(", ")+"}",b.delete(a),c;default:return d="Object",c&&c.constructor&&(d=$a(c.constructor)),typeof a.toString==="function"&&a.toString!==Object.prototype.toString?d+"("+String(a)+")":"(object "+d+")"}}break;case "function":return"function "+$a(a);case "number":if(!Number.isFinite(a))return String(a);break;case "bigint":return a.toString(10)+"n";case "symbol":return a.toString()}return JSON.stringify(a)}
+function $a(a){var b=a.displayName;return b&&typeof b==="string"||(b=a.name)&&typeof b==="string"?b:(a=/function\s+([^\(]+)/m.exec(String(a)))?a[1]:"(Anonymous)"};function ab(a,b){var c=bb,d=[];cb(b,a,d)||db.apply(null,[void 0,c,"Guard "+b.T().trim()+" failed:"].concat(t(d.reverse())))}function L(a,b){var c=bb;a||db("Guard truthy failed:",b||c||"Expected truthy, got "+K(a))}function eb(a,b){a.yb=!0;a.T=typeof b==="function"?b:function(){return b};return a}function cb(a,b,c){var d=a(b,c);d||fb(c,function(){var e="";e.length>0&&(e+=": ");return e+"Expected "+a.T().trim()+", got "+K(b)});return d}
+function fb(a,b){a==null||a.push((typeof b==="function"?b():b).trim())}var bb=void 0;function gb(a){return typeof a==="function"?a():a}function db(){throw Error(la.apply(0,arguments).map(gb).filter(Boolean).join("\n").trim().replace(/:$/,""));};var hb=eb(function(a){return typeof a==="boolean"},"boolean");function ib(){var a=jb;return eb(function(b){return b===a},function(){return K(a)})};var jb=Symbol(),M=function(){var a=jb;this.L=new Map([[kb,!0]]);ab(a,ib())};M.prototype.get=function(a){return this.L.get(a)};M.prototype.has=function(a){return this.L.has(a)};M.prototype.keys=function(a){ab(a,ib());return this.L.keys()};var lb=function(){this.U=hb};lb.prototype.check=function(a){this.U!=null&&ab(a,this.U)};var kb=new lb,mb=new Set;function nb(){return["No root trace was ever created in this execution context; There are ",mb.size," other active traces."]}var ob=globalThis;Object.hasOwn(ob,"traceContext")||Object.defineProperty(ob,"traceContext",{get:nb});try{var pb,qb,rb=(qb=(pb=window)==null?void 0:pb.top)!=null?qb:z;rb.U3bHHf!=null||(rb.U3bHHf=0);rb.U3bHHf++}catch(a){z.U3bHHf!=null||(z.U3bHHf=0),z.U3bHHf++};var sb=function(a,b){this.name=a;this.value=b};sb.prototype.toString=function(){return this.name};var tb=new sb("OFF",Infinity),ub=new sb("WARNING",900),vb=new sb("CONFIG",700),wb=function(){this.C=0;this.clear()},xb;wb.prototype.clear=function(){this.P=Array(this.C);this.R=-1;this.V=!1};var Bb=function(){this.reset(yb||tb,zb,Ab,void 0,void 0)};Bb.prototype.reset=function(){};
+var Cb=function(a,b){b=b===void 0?null:b;this.level=null;this.ea=[];this.parent=b||null;this.children=[];this.M={getName:function(){return a}}},Db=function(a){if(a.level)return a.level;if(a.parent)return Db(a.parent);Ra("Root logger has no level set.");return tb},Gb=function(){for(var a=Eb,b=Fb;b;)b.ea.forEach(function(c){c(a)}),b=b.parent},Hb=function(){this.entries={};var a=new Cb("");a.level=vb;this.entries[""]=a},Ib,Jb=function(a,b){var c=a.entries[b];if(c)return c;c=Jb(a,b.slice(0,Math.max(b.lastIndexOf("."),
+0)));var d=new Cb(b,c);a.entries[b]=d;c.children.push(d);return d},Kb=function(){Ib||(Ib=new Hb);return Ib},N=function(a){return Jb(Kb(),a).M};var Lb;if(z==null?0:(Lb=z.Symbol)==null?0:Lb.for){var Mb=Symbol.for("google.goem");z[Mb]||(z[Mb]=new WeakMap)};var O=new Set;L(!0,"Event name <wZVHld> may not contain ':' or ';'");if(O.has("wZVHld"))throw Error("Event <wZVHld> has already been declared.");O.add("wZVHld");L(!0,"Event name <nDa8ic> may not contain ':' or ';'");if(O.has("nDa8ic"))throw Error("Event <nDa8ic> has already been declared.");O.add("nDa8ic");L(!0,"Event name <o07HZc> may not contain ':' or ';'");if(O.has("o07HZc"))throw Error("Event <o07HZc> has already been declared.");O.add("o07HZc");L(!0,"Event name <UjQMac> may not contain ':' or ';'");
+if(O.has("UjQMac"))throw Error("Event <UjQMac> has already been declared.");O.add("UjQMac");L(!0,"Event name <ti6hGc> may not contain ':' or ';'");if(O.has("ti6hGc"))throw Error("Event <ti6hGc> has already been declared.");O.add("ti6hGc");L(!0,"Event name <ZYIfFd> may not contain ':' or ';'");if(O.has("ZYIfFd"))throw Error("Event <ZYIfFd> has already been declared.");O.add("ZYIfFd");L(!0,"Event name <TGB85e> may not contain ':' or ';'");if(O.has("TGB85e"))throw Error("Event <TGB85e> has already been declared.");O.add("TGB85e");L(!0,"Event name <RXQi4b> may not contain ':' or ';'");
+if(O.has("RXQi4b"))throw Error("Event <RXQi4b> has already been declared.");O.add("RXQi4b");L(!0,"Event name <sn54Q> may not contain ':' or ';'");if(O.has("sn54Q"))throw Error("Event <sn54Q> has already been declared.");O.add("sn54Q");L(!0,"Event name <eQsQB> may not contain ':' or ';'");if(O.has("eQsQB"))throw Error("Event <eQsQB> has already been declared.");O.add("eQsQB");L(!0,"Event name <CGLD0d> may not contain ':' or ';'");
+if(O.has("CGLD0d"))throw Error("Event <CGLD0d> has already been declared.");O.add("CGLD0d");L(!0,"Event name <ZpywWb> may not contain ':' or ';'");if(O.has("ZpywWb"))throw Error("Event <ZpywWb> has already been declared.");O.add("ZpywWb");L(!0,"Event name <O1htCb> may not contain ':' or ';'");if(O.has("O1htCb"))throw Error("Event <O1htCb> has already been declared.");O.add("O1htCb");L(!0,"Event name <k9KYye> may not contain ':' or ';'");
+if(O.has("k9KYye"))throw Error("Event <k9KYye> has already been declared.");O.add("k9KYye");L(!0,"Event name <g6cJHd> may not contain ':' or ';'");if(O.has("g6cJHd"))throw Error("Event <g6cJHd> has already been declared.");O.add("g6cJHd");L(!0,"Event name <otb29e> may not contain ':' or ';'");if(O.has("otb29e"))throw Error("Event <otb29e> has already been declared.");O.add("otb29e");L(!0,"Event name <FNFY6c> may not contain ':' or ';'");
+if(O.has("FNFY6c"))throw Error("Event <FNFY6c> has already been declared.");O.add("FNFY6c");L(!0,"Event name <TvD9Pc> may not contain ':' or ';'");if(O.has("TvD9Pc"))throw Error("Event <TvD9Pc> has already been declared.");O.add("TvD9Pc");L(!0,"Event name <AHmuwe> may not contain ':' or ';'");if(O.has("AHmuwe"))throw Error("Event <AHmuwe> has already been declared.");O.add("AHmuwe");L(!0,"Event name <O22p3e> may not contain ':' or ';'");
+if(O.has("O22p3e"))throw Error("Event <O22p3e> has already been declared.");O.add("O22p3e");L(!0,"Event name <JIbuQc> may not contain ':' or ';'");if(O.has("JIbuQc"))throw Error("Event <JIbuQc> has already been declared.");O.add("JIbuQc");L(!0,"Event name <ih4XEb> may not contain ':' or ';'");if(O.has("ih4XEb"))throw Error("Event <ih4XEb> has already been declared.");O.add("ih4XEb");L(!0,"Event name <sPvj8e> may not contain ':' or ';'");
+if(O.has("sPvj8e"))throw Error("Event <sPvj8e> has already been declared.");O.add("sPvj8e");L(!0,"Event name <GvneHb> may not contain ':' or ';'");if(O.has("GvneHb"))throw Error("Event <GvneHb> has already been declared.");O.add("GvneHb");L(!0,"Event name <rcuQ6b> may not contain ':' or ';'");if(O.has("rcuQ6b"))throw Error("Event <rcuQ6b> has already been declared.");O.add("rcuQ6b");L(!0,"Event name <dyRcpb> may not contain ':' or ';'");
+if(O.has("dyRcpb"))throw Error("Event <dyRcpb> has already been declared.");O.add("dyRcpb");L(!0,"Event name <u0pjoe> may not contain ':' or ';'");if(O.has("u0pjoe"))throw Error("Event <u0pjoe> has already been declared.");O.add("u0pjoe");"#".replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g,"\\$1").replace(/\x08/g,"\\x08");/*
+
+ Copyright 2024 Google, Inc
+ SPDX-License-Identifier: MIT
+*/
+Object.create(null);var Nb=[];var P=function(){this.K={}};P.prototype.register=function(a,b){L(a,"registerInterface() or atInterface() was called with a ServiceId that doesn't exist. The first parameter to this function must exactly match the class name which was passed to goog.module / goog.provide, but in ALL_CAPS and without the suffix. \nFor example, goog.module('ns.FooBarInterface') creates FOO_BAR as its ServiceId.\nSee http://go/wiz-ids");L(!this.K[a.toString()],"<"+a+"> is already registered.");this.K[a.toString()]=b};
+var Pb=function(a){var b=Ob().K[a.toString()];if(!b)throw L(b,"Could not find interface "+a+".Interface ServiceIds must exactly match the class name which was passed to goog.module / goog.provide, but with the Wiz.id suffix without the suffix.\nFor example, goog.module('ns.FooBarInterface') creates 'ns.FooBarInterfaceWiz.id' as its ServiceId.\nSee http://go/wiz-ids"),Error("Interface "+a+" cannot be retrieved.");return b},Ob=function(){F(!Object.isSealed(P),"Cannot use getInstance() with a sealed constructor.");
+var a="J";if(P.J&&P.hasOwnProperty(a))a=P.J;else{Nb.push(P);var b=new P;P.J=b;F(P.hasOwnProperty(a),"Could not instantiate singleton.");a=b}return a};var Qb=va(513659523),Rb=va(928875398);var Sb=new Map,Tb=new Map,Ub=new Map,Vb=new Map;function Wb(a,b){b=Xb(a,b);(a=b.m)&&Yb(Vb,a,function(){return new Set}).add(b);return b}function Yb(a,b,c){var d=a.get(b);d||(d=c(b),a.set(b,d));return d}function Xb(a,b){var c=Ub.get(a);c||(c=b,Ub.set(a,c));return c};var Zb=["jscontroller","jsmodel","jsowner"];function $b(a){a=a===void 0?"":a;return Zb.map(function(b){return a+" ["+b+"]"}).join(",")+","+(a+' [jsaction*="trigger."]')}$b();["[jsname=coFSxe]","[mica-app-id]"].map(function(a){return $b(a)});(function(){try{if(typeof window.EventTarget==="function")return new EventTarget}catch(a){}try{return document.createElement("div")}catch(a){}return null})();var ac=RegExp("^(?:([^:/?#.]+):)?(?://(?:([^\\\\/?#]*)@)?([^\\\\/?#]*?)(?::([0-9]+))?(?=[\\\\/?#]|$))?([^?#]+)?(?:\\?([^#]*))?(?:#([\\s\\S]*))?$");function bc(a,b){if(a){a=a.split("&");for(var c=0;c<a.length;c++){var d=a[c].indexOf("="),e=null;if(d>=0){var g=a[c].substring(0,d);e=a[c].substring(d+1)}else g=a[c];b(g,e?decodeURIComponent(e.replace(/\+/g," ")):"")}}}
+function cc(a,b,c){Sa(a);if(Array.isArray(b)){Ta(b);for(var d=0;d<b.length;d++)cc(a,String(b[d]),c)}else b!=null&&c.push(a+(b===""?"":"="+encodeURIComponent(String(b))))};var Q=function(){J.call(this)};Q.prototype=l(J.prototype);Q.prototype.constructor=Q;if(ha)ha(Q,J);else for(var R in J)if(R!="prototype")if(Object.defineProperties){var dc=Object.getOwnPropertyDescriptor(J,R);dc&&Object.defineProperty(Q,R,dc)}else Q[R]=J[R];Q.ja=J.prototype;Q.prototype.init=function(){};N("fava.debug.ErrorReporter");new Q;var ec=typeof Symbol==="function"&&typeof Symbol()==="symbol";function fc(a,b,c){return typeof Symbol==="function"&&typeof Symbol()==="symbol"?(c===void 0?0:c)&&Symbol.for&&a?Symbol.for(a):a!=null?Symbol(a):Symbol():b}var hc=fc("jas",void 0,!0),ic=fc("destroyedStructure","destroyedStructure");F(Math.round(Math.log2(Math.max.apply(Math,t(Object.values({Oa:1,Na:2,Ma:4,Va:8,hb:16,Ta:32,qa:64,Ga:128,Da:256,gb:512,Ea:1024,Ha:2048,Ua:4096,Pa:8192})))))===13);var jc=ec?Qa(hc):"xb",kc=Object.getOwnPropertyDescriptor(Array.prototype,"fa");Object.defineProperties(Array.prototype,{fa:{get:function(){var a=lc(this);return kc?kc.get.call(this)+"|"+a:a},configurable:!0,enumerable:!1}});
+function lc(a){function b(e,g){e&c&&d.push(g)}var c=Ta(a,"state is only maintained on arrays.")[jc]|0,d=[];b(1,"IS_REPEATED_FIELD");b(2,"IS_IMMUTABLE_ARRAY");b(4,"IS_API_FORMATTED");b(512,"STRING_FORMATTED");b(1024,"GBIGINT_FORMATTED");b(1024,"BINARY");b(8,"ONLY_MUTABLE_VALUES");b(16,"UNFROZEN_SHARED");b(32,"MUTABLE_REFERENCES_ARE_OWNED");b(64,"CONSTRUCTED");b(128,"HAS_MESSAGE_ID");b(256,"FROZEN_ARRAY");b(2048,"HAS_WRAPPER");b(4096,"MUTABLE_SUBSTRUCTURES");b(8192,"KNOWN_MAP_ARRAY");c&64&&(F(c&64),
+a=c>>14&1023||536870912,a!==536870912&&d.push("pivot: "+a));return d.join(",")};var mc=typeof Symbol!="undefined"&&typeof Symbol.hasInstance!="undefined";Object.freeze({});var nc=function(){throw Error("please construct maps as mutable then call toImmutable");};if(mc){var oc=function(){throw Error("Cannot perform instanceof checks on ImmutableMap: please use isImmutableMap or isMutableMap to assert on the mutability of a map. See go/jspb-api-gotchas#immutable-classes for more information");},pc={};Object.defineProperties(nc,(pc[Symbol.hasInstance]={value:oc,configurable:!1,writable:!1,enumerable:!1},pc));F(nc[Symbol.hasInstance]===oc,"defineProperties did not work: was it monkey-patched?")};if(typeof Proxy!=="undefined"){var S=qc;new Proxy({},{getPrototypeOf:S,setPrototypeOf:S,isExtensible:S,preventExtensions:S,getOwnPropertyDescriptor:S,defineProperty:S,has:S,get:S,set:S,deleteProperty:S,apply:S,construct:S})}function qc(a,b){if(b===ic)return!0;throw Error("this array or object is owned by JSPB and should not be reused, did you mean to copy it with copyJspbArray? See go/jspb-api-gotchas#construct_from_array");};F(!0);new M;new M;Object.create(null);var rc=[].concat(t("click dblclick focus focusin blur error focusout keydown keyup keypress load mouseover mouseout mouseenter mouseleave mousemove submit toggle touchstart touchend touchmove touchcancel auxclick change compositionstart compositionupdate compositionend beforeinput input select selectstart textinput copy cut paste mousedown mouseup wheel contextmenu dragover dragenter dragleave drop dragstart dragend pointerdown pointermove pointerup pointercancel pointerenter pointerleave pointerover pointerout gotpointercapture lostpointercapture ended loadedmetadata pagehide pageshow visibilitychange beforematch".split(" ")),
+["transitionend","animationend","animationstart"]);Object.freeze(rc);function sc(a){return Yb(Sb,a.toString(),function(){return new Set})};sc("GmEyCb").add("qTnoBf");function tc(a,b,c,d){d=d===void 0?!1:d;b=new H(a,(b!=null?b:null)||void 0,c,d===void 0?!1:d);return Wb(a,b)};function uc(a){return tc(a,a,[])};var vc=new Set;function wc(a){if(vc.has(a.toString()))throw Error("ID "+a.toString()+" is already registered as a synchronous Wiz object.");vc.add(a.toString())};var T=uc("qTnoBf");wc(T);sc("GmEyCb").add("yGfSdd");var xc=uc("yGfSdd");wc(xc);var U=function(){this.i={};this.I="";this.A={}};U.prototype.toString=function(){var a=this.I+yc(this);var b=this.A;var c=[],d;for(d in b)cc(d,b[d],c);b=c.join("&");c="";b!=""&&(c="?"+b);return a+c};
+var zc=function(a){a=V(a,"md");return!!a&&a!=="0"},yc=function(a){var b=[];F(a.i.k!==void 0,"An SCS JS URL must have a row key.");var c=function(d){a.i[d]!==void 0&&b.push(d+"="+a.i[d])};zc(a)?(c("md"),c("k"),c("ck"),c("am"),c("slk"),c("sm"),c("rs"),c("gssmodulesetproto"),c("dti"),c("dbwh")):(c("sdch"),c("k"),c("ck"),c("am"),c("amc"),c("slk"),c("rt"),"d"in a.i||(a.i.d="0"),c("d"),c("exm"),c("excm"),(a.i.excm||a.i.exm)&&b.push("ed=1"),c("im"),c("dg"),c("sm"),V(a,"br")!="1"&&V(a,"br")!="0"||c("br"),
+c("br-d"),V(a,"rb")=="1"&&c("rb"),V(a,"zs")!=="0"&&c("zs"),Ac(a)!==""&&c("wt"),c("gssmodulesetproto"),c("ujg"),c("sp"),c("ichc"),c("rs"),c("cb"),c("ccb"),c("ee"),c("dti"),c("dbwh"),c("ic"),a.i.cb&&c("pc"),c("m"));return b.join("/")},V=function(a,b){return a.i[b]?a.i[b]:null};U.prototype.getQueryParameter=function(a){return this.A[a]};
+var Ac=function(a){switch(V(a,"wt")){case "0":return"0";case "1":return"1";case "2":return"2";default:return""}},Bc=function(a){a=V(a,"ee");if(Rb){if(!a)return new Map;var b=new Map,c=r(a.split(";")),d=c.next();try{for(;!d.done;d=c.next()){var e=r(d.value.split(":")),g=e.next().value,m=e.next().value,f=new Set;b.set(g,f);var h=r(m.split(",")),k=h.next();try{for(;!k.done;k=h.next())f.add(k.value)}finally{w(h,k)}}}finally{w(c,d)}return b}if(!a)return{};e={};g=r(a.split(";"));m=g.next();try{for(;!m.done;m=
+g.next()){b=r(m.value.split(":"));c=b.next().value;d=b.next().value;e[c]={};var n=r(d.split(",")),u=n.next();try{for(;!u.done;u=n.next())e[c][u.value]=!0}finally{w(n,u)}}}finally{w(g,m)}return e};U.prototype.clone=function(){var a=new U;a.i=ka({},this.i);a.I=this.I;a.A=ka({},this.A);return a};
+var Ec=function(a){var b=b===void 0?!0:b;var c=Cc(a);F(Dc(c),"URL is not a valid SCS JS URL.");var d=new U,e=c.match(ac)[5];Ya(function(m){var f=e.match("/"+m+"=([^/]+)");f&&((f=f[1])?d.i[m]=f:delete d.i[m])});var g="";g=a.indexOf("_/ss/")!=-1?"_/ss/":"_/js/";d.I=a.substr(0,a.indexOf(g)+g.length);if(!b)return d;(a=c.match(ac)[6]||null)&&bc(a,function(m,f){d.A[m]=f});return d},Dc=function(a){a=(a=Cc(a).match(ac)[5]||null)?decodeURI(a):a;return a===null?!1:RegExp("(/_/js/)|(/_/ss/)","g").test(a)?/\/k=/.test(a):
+!1},Cc=function(a){return a.startsWith("https://uberproxy-pen-redirect.corp.google.com/uberproxy/pen?url=")?a.substr(65):a},Za={Ya:"k",ra:"ck",Sa:"m",Ba:"exm",za:"excm",la:"am",ma:"amc",Qa:"mm",Xa:"rt",Ja:"d",Aa:"ed",fb:"sv",sa:"deob",na:"cb",pa:"ccb",oa:"cbi",bb:"rs",Za:"sdch",Ka:"im",ta:"dg",xa:"br",wa:"br-d",ya:"rb",lb:"zs",kb:"wt",Ca:"ee",eb:"sm",Ra:"md",Fa:"gssmodulesetproto",jb:"ujg",ib:"sp",Ia:"ichc",ab:"slk",va:"dti",ua:"dbwh",La:"ic",Wa:"pc"};function Fc(){var a=z._F_jsUrl?"":"base-js";a=a===void 0?"":a;var b="";var c=z._F_jsUrl;a:{if(typeof document!=="undefined"&&document&&document.getElementById&&(a=document.getElementById(a))){var d=a.tagName.toUpperCase();if(d=="SCRIPT"||d=="LINK")break a}a=null}a&&(b=a.src?a.src:a.getAttribute("href"));if(c&&b){if(c!=b)throw Error("Ambiguous base-js URL: found both _F_jsUrl "+c+" and base-js tag "+b);b=c}else b=c||b;if(!Dc(b))throw Error("Unable to determine JS module path parameters.");return b}
+;var Gc=!1,Hc=!1;var Wa=!function(){if(Gc)return Hc;Gc=!0;try{var a=Fc()}catch(d){return!1}var b=Bc(Ec(a));if(b instanceof Map){if(b.size===0)return!1;G(function(d){var e=r(b.entries()),g=e.next();try{for(;!g.done;g=e.next()){var m=r(g.value),f=m.next().value,h=m.next().value,k=f,n=r(h),u=n.next();try{for(;!u.done;u=n.next())d.O(k,u.value)}finally{w(n,u)}}}finally{w(e,g)}})}else{var c=Object.keys(b);if(c.length===0)return!1;G(function(d){var e=r(c),g=e.next();try{for(;!g.done;g=e.next()){var m=g.value,f=r(Object.keys(b[m])),
+h=f.next();try{for(;!h.done;h=f.next())d.O(m,h.value)}finally{w(f,h)}}}finally{w(e,g)}})}return Hc=!0}();var Ic=[],Jc=function(a,b){if((new Set([].concat(t(a.Z),t(a.aa)))).has(b.toString()))return!0;a=new Set([].concat(t(a.ba),t(a.ca)));a=r(a);var c=a.next();try{for(;!c.done;c=a.next())if(Jc(Pb(c.value),b))return!0}finally{w(a,c)}return!1};var W=tc("GmEyCb","NJ1rfe",xc?[xc]:void 0,Wa&&!0);Ob().register(W,new function(a,b,c,d,e,g){var m=this;g=g===void 0?null:g;this.o=a;this.Z=b;this.aa=c;this.ba=d;this.ca=e;this.D=g;this.u=null;this.ka=!1;this.M=N("wiz.interface.Interface");Ic.push(this);this.toString=function(){var f,h,k=(h=(f=m.u)!=null?f:m.D)!=null?h:"no default implementation";return m.o+" <"+k+">"}}(W,sc(W),new Set,Yb(Tb,W.toString(),function(){return new Set}),new Set,xc));wc(W);var I=Pb(W),Kc=Wa&&!0;
+if(I.u!==T){if(I.u!==T){L(!I.u,"Failed to set the default implementation to <"+T+">: The default implementation of a wiz.atInterface may only be overridden once, and it was already overridden by <"+(I.u+">"));L(!I.ka,"The defaultImplementationId for <"+I.o+"> was already read. Make sure to only set it from your base module. It is currently set to <"+(I.D+">"));L(T instanceof H,"serviceId <"+T+"> should be a fava.services.ServiceId");if(vc.has(I.o.toString())){var Lc=vc.has(T.toString());L(Lc,"The default implementation ("+
+T+") passed to setDefaultImplementationId is not a synchronous Wiz object and cannot be used with a synchronously instantiable interface ("+(I.o+")."))}if(!Jc(I,T)){var X=I.M,Mc="serviceId <"+T+"> doesn't implement <"+I.o+">";if(X){var Nc=Mc,Y=ub,Oc;if(Oc=X){var Pc;if(Pc=X&&Y){var Qc=Y.value,Rc;Rc=X?Db(Jb(Kb(),X.getName())):tb;Pc=Qc>=Rc.value}Oc=Pc}if(Oc){Y=Y||tb;var Fb=Jb(Kb(),X.getName());typeof Nc==="function"&&(Nc=Nc());var Z;xb||(xb=new wb);Z=xb;var Eb;var yb=Y,zb=Nc,Ab=X.getName();if(Z.C>0){var Sc=
+(Z.R+1)%Z.C;Z.R=Sc;if(Z.V){var Tc=Z.P[Sc];Tc.reset(yb,zb,Ab);Eb=Tc}else Z.V=Sc==Z.C-1,Eb=Z.P[Sc]=new Bb}else Eb=new Bb;Gb()}}}I.D&&Xa();I.u=T}Va(I.o,[T],Kc)};N("goog.net.XhrIo");N("goog.debug.ErrorReporter");N("fava.debug.DebugService");ka({},{attributes:{},handleError:function(a){throw a;}},{pb:!0,rb:!1,sb:Qb,tb:Qb,ub:!1,mb:!1,qb:!0,wb:!1,zb:!1,ob:!1});new H("a");}).call(this);
+</script><script nonce="jBxyI6YKtm3_mMhcm4hc2Q">const imageUrl =  null ;
+      function bgImgLoaded() {
+        if (!globals.headerBgImgLoaded) {
+          globals.headerBgImgLoaded = new Date().getTime();
+        } else {
+          globals.headerBgImgLoaded();
+        }
+      }
+      if (imageUrl) {
+        const img = new Image();
+        img.src = imageUrl;
+        img.onload = bgImgLoaded;
+        globals.headerBgImgExists = true;
+      } else {
+        globals.headerBgImgExists = false;
+      }
+      </script></head><body dir="ltr" class="" itemscope itemtype="http://schema.org/WebPage" id="yDmH0d" css="yDmH0d"><div jscontroller="pc62j" jsmodel="iTeaXe" jsaction="rcuQ6b:WYd;GvneHb:og1FDd;vbaUQc:uAM5ec;"><div jscontroller="X4BaPc" jsaction="rcuQ6b:WYd;o6xM5b:Pg9eo;HuL2Hd:mHeCvf;VMhF5:FFYy5e;sk3Qmb:HI1Mdd;JIbuQc:rSzFEd(z2EeY),aSaF6e(ilzYPe);"><div jscontroller="o1L5Wb" data-sitename="fupeng715" data-search-scope="1" data-universe="1" jsmodel="fNFZH" jsaction="Pe9H6d:cZFEp;O0t7nc:cC5KLb;WyADff:AQk9Jb;WMZaJ:VsGN3;hJluRd:UADL7b;zuqEgd:HI9w0;tr6QDd:Y8aXB;MxH79b:xDkBfb;JIbuQc:SPXMTb(uxAMZ),LjG1Ed(a6mxbb);BNPLhd:TbIyBd;fGqJod:Tb1xee;" jsname="G0jgYd"><div jsname="gYwusb" class="p9b27"></div><div jscontroller="RrXLpc" jsname="XeeWQc" role="banner" jsaction="keydown:uiKYid(OH0EC);rcuQ6b:WYd;zuqEgd:ufqpf;JIbuQc:XfTnxb(lfEfFf),AlTiYc(GeGHKb),AlTiYc(m1xNUe),zZlNMe(pZn8Oc);YqO5N:ELcyfe;"><div jsname="bF1uUb" class="BuY5Fd" jsaction="click:xVuwSc;"></div><div jsname="MVsrn" class="TbNlJb "><div role="button" class="U26fgb mUbCce fKz7Od h3nfre M9Bg4d" jscontroller="VXdfxd" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventDefault=true); touchcancel:JMtRjd;" jsshadow jsname="GeGHKb" aria-label="Back to site" aria-disabled="false" tabindex="0" data-tooltip="Back to site" data-tooltip-vertical-offset="-12" data-tooltip-horizontal-offset="0"><div class="VTBa7b MbhUzd" jsname="ksKsZd"></div><span jsslot class="xjKiLb"><span class="Ce1Y1c" style="top: -12px"><svg class="V4YR2c" viewBox="0 0 24 24" focusable="false"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></span></span></div><div class="E2UJ5" jsname="M6JdT"><div class="rFrNMe b7AJhc zKHdkd" jscontroller="pxq3x" jsaction="clickonly:KjsqPd; focus:Jt1EX; blur:fpfTEe; input:Lg5SV" jsshadow jsname="OH0EC" aria-expanded="true"><div class="aCsJod oJeWuf"><div class="aXBtI I0VJ4d Wic03c"><span jsslot class="A37UZe qgcB3c iHd5yb"><div role="button" class="U26fgb mUbCce fKz7Od i3PoXe M9Bg4d" jscontroller="VXdfxd" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventDefault=true); touchcancel:JMtRjd;" jsshadow jsname="lfEfFf" aria-label="Search" aria-disabled="false" tabindex="0" data-tooltip="Search" data-tooltip-vertical-offset="-12" data-tooltip-horizontal-offset="0"><div class="VTBa7b MbhUzd" jsname="ksKsZd"></div><span jsslot class="xjKiLb"><span class="Ce1Y1c" style="top: -12px"><svg class="vu8Pwe" viewBox="0 0 24 24" focusable="false"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></span></div><div class="EmVfjc SKShhf" data-loadingmessage="Loading…" jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" jsname="aZ2wEe"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"></div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><div role="button" class="U26fgb mUbCce fKz7Od JyJRXe M9Bg4d" jscontroller="VXdfxd" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventDefault=true); touchcancel:JMtRjd;" jsshadow jsname="m1xNUe" aria-label="Back to site" aria-disabled="false" tabindex="0" data-tooltip="Back to site" data-tooltip-vertical-offset="-12" data-tooltip-horizontal-offset="0"><div class="VTBa7b MbhUzd" jsname="ksKsZd"></div><span jsslot class="xjKiLb"><span class="Ce1Y1c" style="top: -12px"><svg class="V4YR2c" viewBox="0 0 24 24" focusable="false"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></span></span></div></span><div class="Xb9hP"><input type="search" class="whsOnd zHQkBf" jsname="YPqjbf" autocomplete="off" tabindex="0" aria-label="Search this site" value="" aria-disabled="false" autofocus role="combobox" data-initial-value=""/><div jsname="LwH6nd" class="ndJi5d snByac" aria-hidden="true">Search this site</div></div><span jsslot class="A37UZe sxyYjd MQL3Ob"><div role="button" class="U26fgb mUbCce fKz7Od Kk06A M9Bg4d" jscontroller="VXdfxd" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventDefault=true); touchcancel:JMtRjd;" jsshadow jsname="pZn8Oc" aria-label="Clear search" aria-disabled="false" tabindex="0" data-tooltip="Clear search" data-tooltip-vertical-offset="-12" data-tooltip-horizontal-offset="0"><div class="VTBa7b MbhUzd" jsname="ksKsZd"></div><span jsslot class="xjKiLb"><span class="Ce1Y1c" style="top: -12px"><svg class="fAUEUd" viewBox="0 0 24 24" focusable="false"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></span></div></span><div class="i9lrp mIZh1c"></div><div jsname="XmnwAc" class="OabDMe cXrdqd"></div></div></div><div class="LXRPh"><div jsname="ty6ygf" class="ovnfwe Is7Fhb"></div></div></div><div class="InHK7" jsname="aN0umc"><div class="GG9xTc" jsaction="click:wTqBkf;" jsname="e7EaC" tabindex="0" aria-label="Embedded Files"><svg class="vu8Pwe KYLCw" viewBox="0 0 24 24" focusable="false"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg><span class="HCIIgf">Embedded Files</span></div></div></div></div></div></div><div jsname="tiN4bf"><style nonce="55HBsr-KqQginqJMyDskvw">.rrJNTc{opacity: 0;}.bKy5e{pointer-events: none; position: absolute; top: 0;}</style><div class="bKy5e"><div class="rrJNTc" tabindex="-1"><div class="VfPpkd-dgl2Hf-ppHlrf-sM5MNb" data-is-touch-wrapper='true'><button class="VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-dgl2Hf LjDxcd XhPA0b LQeN7 WsSUlf jz7fPb" jscontroller="soHxf" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc; touchcancel:JMtRjd; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;mlnRJb:fLiPzd;" data-idom-class="LjDxcd XhPA0b LQeN7 WsSUlf jz7fPb" jsname="z2EeY" tabindex="0"><div class="VfPpkd-Jh9lGc"></div><div class="VfPpkd-J1Ukfc-LhBDec"></div><div class="VfPpkd-RLmnJb"></div><span jsname="V67aGc" class="VfPpkd-vQzf8d">Skip to main content</span></button></div><div class="VfPpkd-dgl2Hf-ppHlrf-sM5MNb" data-is-touch-wrapper='true'><button class="VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-dgl2Hf LjDxcd XhPA0b LQeN7 WsSUlf br90J" jscontroller="soHxf" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc; touchcancel:JMtRjd; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;mlnRJb:fLiPzd;" data-idom-class="LjDxcd XhPA0b LQeN7 WsSUlf br90J" jsname="ilzYPe" tabindex="0"><div class="VfPpkd-Jh9lGc"></div><div class="VfPpkd-J1Ukfc-LhBDec"></div><div class="VfPpkd-RLmnJb"></div><span jsname="V67aGc" class="VfPpkd-vQzf8d">Skip to navigation</span></button></div></div></div><div class="M63kCb N63NQ"></div><div class="QZ3zWd"><div class="fktJzd AKpWA fOU46b yMcSQd Ly6Unf G9Qloe XeSM4 XxIgdb" jsname="UzWXSb" data-uses-custom-theme="false" data-legacy-theme-name="QualityBasics" data-legacy-theme-font-kit="Light" data-legacy-theme-color-kit="Blue" jscontroller="Md9ENb" jsaction="gsiSmd:Ffcznf;yj5fUd:cpPetb;HNXL3:q0Vyke;e2SXKd:IPDu5e;BdXpgd:nhk7K;rcuQ6b:WYd;"><header id="atIdViewHeader"><div style="position:fixed; width: 100%; z-index: 100;"><div id="docs-banner-container"><div id="docs-banners"><div id="HB1eCd-mzNpsf-r8s4j-ORHb"></div><div id="HB1eCd-TZk80d-r8s4j-ORHb" aria-live="assertive" aria-atomic="true"></div><div id="HB1eCd-Vkfede-rJCtOc-b3rLgd-ORHb" aria-live="assertive" aria-atomic="true"></div></div><div class="HB1eCd-Vkfede-NBtyUd-PvRhvb-LwH6nd"></div></div></div><div class="BbxBP G8QRnc K5Zlne" jsname="WA9qLc" jscontroller="RQOkef" jsaction="rcuQ6b:ywL4Jf;VbOlFf:ywL4Jf;FaOgy:ywL4Jf; keydown:Hq2uPe; wheel:Ut4Ahc;" data-top-navigation="true" data-is-preview="false"><div class="VLoccc K5Zlne ELAV1d U8eYrb" jsname="rtFGi"><div class="Pvc6xe"><div jsname="I8J07e" class="TlfmSc YSH9J"><a class="GAuSPc" jsname="jIujaf" href="/view/fupeng715/full-page-embed"><span class="QTKDff">美股期权微观结构与流动性踩踏监控仪表盘</span></a></div></div><div jsname="mADGA" class="zDUgLc"></div></div></div></header><div jsname="ZBtY8b" tabindex="-1" class="UtePc RCETm kz4BIe Tw5Lhf" dir="ltr"><div class="DUndBc "><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;" class="Pe0Cwb GMX0Ib"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 52.7148128624%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://633909811-atari-embeds.googleusercontent.com/embeds/a7eacaf78f1e3ba463385dc9185669ab/inner-frame-minified.html" data-code="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot; /&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+  &lt;title&gt;美股期权微观结构与流动性踩踏监控仪表盘&lt;/title&gt;
+  &lt;!-- Tailwind CSS CDN --&gt;
+  &lt;script src=&quot;https://cdn.tailwindcss.com&quot;&gt;&lt;/script&gt;
+  &lt;!-- Chart.js CDN --&gt;
+  &lt;script src=&quot;https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js&quot;&gt;&lt;/script&gt;
+  &lt;!-- Google Fonts: Inter &amp; Noto Sans SC --&gt;
+  &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot; /&gt;
+  &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin /&gt;
+  &lt;link href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+SC:wght@400;500;600;700&amp;display=swap&quot; rel=&quot;stylesheet&quot; /&gt;
+
+  &lt;script&gt;
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: [&#39;Inter&#39;, &#39;Noto Sans SC&#39;, &#39;-apple-system&#39;, &#39;BlinkMacSystemFont&#39;, &#39;sans-serif&#39;],
+          },
+          colors: {
+            inst: {
+              bg: &#39;#F8FAFC&#39;,
+              card: &#39;#FFFFFF&#39;,
+              border: &#39;#E2E8F0&#39;,
+              navy: &#39;#0F172A&#39;,
+              blue: &#39;#1E3A8A&#39;,
+              muted: &#39;#64748B&#39;,
+            }
+          }
+        }
+      }
+    };
+  &lt;/script&gt;
+
+  &lt;style&gt;
+    /* 机构极简风定制样式：保证数字等宽防抖动、滑块细腻可控 */
+    body {
+      background-color: #F8FAFC;
+      color: #0F172A;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 细边框定制 Range 滑块 */
+    input[type=&quot;range&quot;].inst-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: #E2E8F0;
+      border-radius: 9999px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=&quot;range&quot;].inst-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #1E3A8A;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+      transition: transform 0.12s ease, background-color 0.12s ease;
+    }
+
+    input[type=&quot;range&quot;].inst-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #0F172A;
+    }
+
+    input[type=&quot;range&quot;].inst-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #1E3A8A;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+      cursor: pointer;
+    }
+
+    /* 去除数字输入框默认上下箭头 */
+    input[type=&quot;number&quot;]::-webkit-inner-spin-button,
+    input[type=&quot;number&quot;]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=&quot;number&quot;] {
+      -moz-appearance: textfield;
+    }
+
+    /* 轻量级 Toast 提示动画 */
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-anim {
+      animation: fadeInSlide 0.2s ease-out forwards;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body class=&quot;min-h-screen font-sans text-slate-900&quot;&gt;
+
+  &lt;!-- 顶部轻提示条（替代 alert） --&gt;
+  &lt;div id=&quot;toast-container&quot; class=&quot;fixed top-4 right-4 z-50 pointer-events-none flex flex-col gap-2&quot;&gt;&lt;/div&gt;
+
+  &lt;!-- 顶部状态栏与情景切换 --&gt;
+  &lt;header class=&quot;bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm&quot;&gt;
+    &lt;div class=&quot;max-w-[1440px] mx-auto px-4 sm:px-6 py-3.5&quot;&gt;
+      &lt;!-- 第一行：标题 + 综合压力指数 + 阶段判定 --&gt;
+      &lt;div class=&quot;flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;flex flex-wrap items-center gap-2.5&quot;&gt;
+            &lt;span class=&quot;inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase bg-slate-900 text-white&quot;&gt;
+              INSTITUTIONAL MONITOR
+            &lt;/span&gt;
+            &lt;h1 class=&quot;text-lg sm:text-xl font-bold tracking-tight text-slate-900&quot;&gt;
+              美股期权微观结构与流动性踩踏监控仪表盘
+            &lt;/h1&gt;
+          &lt;/div&gt;
+          &lt;p class=&quot;text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1&quot;&gt;
+            &lt;span&gt;数据基准：&lt;strong class=&quot;text-slate-700 font-medium&quot;&gt;2026-11-18/19（月度 OPEX 交割日前）&lt;/strong&gt;&lt;/span&gt;
+            &lt;span class=&quot;hidden sm:inline text-slate-300&quot;&gt;|&lt;/span&gt;
+            &lt;span&gt;口径参考：LSEG Datastream / CBOE / SpotGamma / Squeezemetrics&lt;/span&gt;
+          &lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;!-- 右侧核心仪表读数：综合压力指数 + 自动阶段徽章 --&gt;
+        &lt;div class=&quot;flex flex-wrap items-center gap-3&quot;&gt;
+          &lt;div class=&quot;flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2&quot;&gt;
+            &lt;div&gt;
+              &lt;div class=&quot;text-[11px] text-slate-500 font-medium leading-none&quot;&gt;综合压力指数&lt;/div&gt;
+              &lt;div class=&quot;flex items-baseline gap-1 mt-1&quot;&gt;
+                &lt;span id=&quot;stress-score&quot; class=&quot;text-2xl font-bold tabular-nums leading-none text-red-600&quot;&gt;--&lt;/span&gt;
+                &lt;span class=&quot;text-xs text-slate-400 font-medium&quot;&gt;/ 100&lt;/span&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;w-20 sm:w-24 h-2 bg-slate-200 rounded-full overflow-hidden&quot;&gt;
+              &lt;div id=&quot;stress-bar&quot; class=&quot;h-full bg-red-600 transition-all duration-300 rounded-full&quot; style=&quot;width: 0%;&quot;&gt;&lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;div id=&quot;regime-badge-box&quot; class=&quot;border rounded-lg px-3.5 py-2 bg-red-50 border-red-200&quot;&gt;
+            &lt;div class=&quot;text-[11px] font-medium text-slate-500 leading-none&quot;&gt;系统自动判定阶段&lt;/div&gt;
+            &lt;div class=&quot;flex items-center gap-2 mt-1&quot;&gt;
+              &lt;span id=&quot;regime-dot&quot; class=&quot;w-2 h-2 rounded-full bg-red-600&quot;&gt;&lt;/span&gt;
+              &lt;span id=&quot;regime-title&quot; class=&quot;text-sm font-bold text-red-700 leading-none&quot;&gt;阶段三：负反馈翻转与 Vanna 踩踏加速期&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- 第二行：5个预设情景按钮 + 重置按钮 --&gt;
+      &lt;div class=&quot;mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2&quot;&gt;
+        &lt;div class=&quot;flex flex-wrap items-center gap-1.5&quot; id=&quot;scenario-buttons&quot;&gt;
+          &lt;span class=&quot;text-xs font-medium text-slate-500 mr-1&quot;&gt;情景推演：&lt;/span&gt;
+          &lt;button data-scenario=&quot;current&quot; class=&quot;scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors&quot;&gt;
+            当前实盘 (11/19 OPEX前)
+          &lt;/button&gt;
+          &lt;button data-scenario=&quot;stage1&quot; class=&quot;scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors&quot;&gt;
+            阶段一：离散繁荣稳态
+          &lt;/button&gt;
+          &lt;button data-scenario=&quot;stage2&quot; class=&quot;scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors&quot;&gt;
+            阶段二：偏度与个股预警
+          &lt;/button&gt;
+          &lt;button data-scenario=&quot;stage3_ext&quot; class=&quot;scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors&quot;&gt;
+            阶段三升级：宏观全面防御
+          &lt;/button&gt;
+          &lt;button data-scenario=&quot;stage4&quot; class=&quot;scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border transition-colors&quot;&gt;
+            阶段四：OPEX重置/反向Vanna
+          &lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;button id=&quot;btn-reset&quot; class=&quot;inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 transition-colors&quot;&gt;
+          &lt;svg class=&quot;w-3.5 h-3.5 text-slate-500&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+            &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; d=&quot;M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15&quot; /&gt;
+          &lt;/svg&gt;
+          重置为 11/19 实盘数据
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/header&gt;
+
+  &lt;!-- 主内容容器 --&gt;
+  &lt;main class=&quot;max-w-[1440px] mx-auto px-4 sm:px-6 py-5 space-y-5&quot;&gt;
+
+    &lt;!-- 模块 1：四阶段反馈机制流程图 + 核心传导链条 --&gt;
+    &lt;section class=&quot;bg-white border border-slate-200 rounded-lg p-4&quot;&gt;
+      &lt;div class=&quot;flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3&quot;&gt;
+        &lt;h2 class=&quot;text-sm font-bold text-slate-900 flex items-center gap-2&quot;&gt;
+          &lt;span class=&quot;w-1 h-4 bg-blue-900 rounded-full&quot;&gt;&lt;/span&gt;
+          期权微观结构四阶段演化与负反馈闭环
+        &lt;/h2&gt;
+        &lt;span id=&quot;macro-defense-pill&quot; class=&quot;hidden inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300&quot;&gt;
+          &lt;span class=&quot;w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse&quot;&gt;&lt;/span&gt;
+          已触发：宏观全面防御升级警报
+        &lt;/span&gt;
+      &lt;/div&gt;
+
+      &lt;!-- 四阶段横向卡片 --&gt;
+      &lt;div class=&quot;grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3&quot; id=&quot;stage-cards&quot;&gt;
+        &lt;div data-stage=&quot;1&quot; class=&quot;stage-card rounded-lg border p-3 transition-all&quot;&gt;
+          &lt;div class=&quot;flex items-center justify-between&quot;&gt;
+            &lt;span class=&quot;text-[11px] font-bold uppercase tracking-wider text-slate-500&quot;&gt;STAGE 01&lt;/span&gt;
+            &lt;span class=&quot;stage-pill text-[11px] font-semibold px-2 py-0.5 rounded&quot;&gt;待机&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;text-sm font-bold text-slate-900 mt-1&quot;&gt;缩圈与离散稳态期&lt;/div&gt;
+          &lt;p class=&quot;text-xs text-slate-500 mt-1 leading-relaxed&quot;&gt;
+            卖指数波 + 买个股波压低相关性；做市商正 Gamma 充当阻尼器，机械买盘托举权重股。
+          &lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div data-stage=&quot;2&quot; class=&quot;stage-card rounded-lg border p-3 transition-all&quot;&gt;
+          &lt;div class=&quot;flex items-center justify-between&quot;&gt;
+            &lt;span class=&quot;text-[11px] font-bold uppercase tracking-wider text-slate-500&quot;&gt;STAGE 02&lt;/span&gt;
+            &lt;span class=&quot;stage-pill text-[11px] font-semibold px-2 py-0.5 rounded&quot;&gt;待机&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;text-sm font-bold text-slate-900 mt-1&quot;&gt;拥挤见顶与先遣撤退期&lt;/div&gt;
+          &lt;p class=&quot;text-xs text-slate-500 mt-1 leading-relaxed&quot;&gt;
+            CBOE SKEW 飙升至 160~170 抢买尾部险；个股 P/C 率先筑底抬头，龙头上升通道松动。
+          &lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div data-stage=&quot;3&quot; class=&quot;stage-card rounded-lg border p-3 transition-all&quot;&gt;
+          &lt;div class=&quot;flex items-center justify-between&quot;&gt;
+            &lt;span class=&quot;text-[11px] font-bold uppercase tracking-wider text-slate-500&quot;&gt;STAGE 03&lt;/span&gt;
+            &lt;span class=&quot;stage-pill text-[11px] font-semibold px-2 py-0.5 rounded&quot;&gt;待机&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;text-sm font-bold text-slate-900 mt-1&quot;&gt;负反馈翻转与 Vanna 踩踏加速期&lt;/div&gt;
+          &lt;p class=&quot;text-xs text-slate-500 mt-1 leading-relaxed&quot;&gt;
+            离散平仓、VIX &gt; 28 且期限倒挂、VVIX 破红线；负 Gamma 与 Vanna 双重逼迫做市商砸盘。
+          &lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div data-stage=&quot;4&quot; class=&quot;stage-card rounded-lg border p-3 transition-all&quot;&gt;
+          &lt;div class=&quot;flex items-center justify-between&quot;&gt;
+            &lt;span class=&quot;text-[11px] font-bold uppercase tracking-wider text-slate-500&quot;&gt;STAGE 04&lt;/span&gt;
+            &lt;span class=&quot;stage-pill text-[11px] font-semibold px-2 py-0.5 rounded&quot;&gt;待机&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;text-sm font-bold text-slate-900 mt-1&quot;&gt;极端出清与反向 Vanna 修复期&lt;/div&gt;
+          &lt;p class=&quot;text-xs text-slate-500 mt-1 leading-relaxed&quot;&gt;
+            月度 OPEX 交割重置叠加 Put 获利了结；VVIX 回落与倒挂收窄触发反向 Vanna 空头回补。
+          &lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- 核心负反馈传导链条条幅 --&gt;
+      &lt;div class=&quot;mt-3 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 flex flex-wrap items-center gap-y-1.5 text-xs&quot;&gt;
+        &lt;span class=&quot;font-bold text-slate-800 mr-2 shrink-0&quot;&gt;核心负反馈传导链：&lt;/span&gt;
+        &lt;div class=&quot;flex flex-wrap items-center gap-1.5 text-slate-700 font-medium&quot;&gt;
+          &lt;span class=&quot;px-2 py-0.5 bg-white border border-slate-200 rounded&quot;&gt;相关性抬升&lt;/span&gt;
+          &lt;span class=&quot;text-slate-400&quot;&gt;→&lt;/span&gt;
+          &lt;span class=&quot;px-2 py-0.5 bg-white border border-slate-200 rounded&quot;&gt;离散交易亏损平仓&lt;/span&gt;
+          &lt;span class=&quot;text-slate-400&quot;&gt;→&lt;/span&gt;
+          &lt;span class=&quot;px-2 py-0.5 bg-white border border-slate-200 rounded&quot;&gt;机械买盘消失 &amp;amp; 负Gamma/负Delta挤压&lt;/span&gt;
+          &lt;span class=&quot;text-slate-400&quot;&gt;→&lt;/span&gt;
+          &lt;span class=&quot;px-2 py-0.5 bg-white border border-slate-200 rounded&quot;&gt;VIX/VVIX跳升 &amp;amp; 期限倒挂&lt;/span&gt;
+          &lt;span class=&quot;text-slate-400&quot;&gt;→&lt;/span&gt;
+          &lt;span class=&quot;px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-800 rounded font-semibold&quot;&gt;Vanna触发&lt;/span&gt;
+          &lt;span class=&quot;text-slate-400&quot;&gt;→&lt;/span&gt;
+          &lt;span class=&quot;px-2 py-0.5 bg-red-50 border border-red-200 text-red-700 rounded font-semibold&quot;&gt;机械式砸盘加速器&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- 模块 2：交互式可视化图表区（3栏紧凑布局） --&gt;
+    &lt;section class=&quot;grid grid-cols-1 lg:grid-cols-3 gap-4&quot;&gt;
+      &lt;!-- 图表 1：波动率期限结构曲线 --&gt;
+      &lt;div class=&quot;bg-white border border-slate-200 rounded-lg p-4 flex flex-col&quot;&gt;
+        &lt;div class=&quot;flex items-start justify-between gap-2 mb-3&quot;&gt;
+          &lt;div&gt;
+            &lt;h3 class=&quot;text-sm font-bold text-slate-900&quot;&gt;波动率期限结构曲线&lt;/h3&gt;
+            &lt;p class=&quot;text-[11px] text-slate-500 mt-0.5&quot;&gt;VIX9D / VIX 30D / VXV 3M 实时推算（虚线为 28.0 Vanna 阈值）&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;span id=&quot;term-structure-badge&quot; class=&quot;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border&quot;&gt;
+            Backwardation 倒挂
+          &lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;relative h-52 w-full flex-1&quot;&gt;
+          &lt;canvas id=&quot;termStructureChart&quot;&gt;&lt;/canvas&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;mt-2 pt-2 border-t border-slate-100 grid grid-cols-3 gap-2 text-center&quot;&gt;
+          &lt;div&gt;
+            &lt;div class=&quot;text-[11px] text-slate-400&quot;&gt;VIX9D (推算)&lt;/div&gt;
+            &lt;div id=&quot;calc-vix9d&quot; class=&quot;text-xs font-bold tabular-nums text-slate-800&quot;&gt;--&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div&gt;
+            &lt;div class=&quot;text-[11px] text-slate-400&quot;&gt;VIX (30D基准)&lt;/div&gt;
+            &lt;div id=&quot;calc-vix30&quot; class=&quot;text-xs font-bold tabular-nums text-slate-800&quot;&gt;--&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div&gt;
+            &lt;div class=&quot;text-[11px] text-slate-400&quot;&gt;VXV (3M推算)&lt;/div&gt;
+            &lt;div id=&quot;calc-vxv&quot; class=&quot;text-xs font-bold tabular-nums text-slate-800&quot;&gt;--&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- 图表 2：期权流量扩散对比柱状图 --&gt;
+      &lt;div class=&quot;bg-white border border-slate-200 rounded-lg p-4 flex flex-col&quot;&gt;
+        &lt;div class=&quot;flex items-start justify-between gap-2 mb-3&quot;&gt;
+          &lt;div&gt;
+            &lt;h3 class=&quot;text-sm font-bold text-slate-900&quot;&gt;期权流量扩散对比（CBOE Put/Call）&lt;/h3&gt;
+            &lt;p class=&quot;text-[11px] text-slate-500 mt-0.5&quot;&gt;当前量能比 vs 风险扩散红线阈值（0.80 / 1.25 / 1.25）&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;span id=&quot;flow-status-badge&quot; class=&quot;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border&quot;&gt;
+            个股率先发力
+          &lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;relative h-52 w-full flex-1&quot;&gt;
+          &lt;canvas id=&quot;orderFlowChart&quot;&gt;&lt;/canvas&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500&quot;&gt;
+          &lt;span&gt;结构特征：&lt;strong id=&quot;flow-pattern-text&quot; class=&quot;text-slate-700&quot;&gt;接近 2022 年初个股先行扩散&lt;/strong&gt;&lt;/span&gt;
+          &lt;span class=&quot;tabular-nums&quot;&gt;基准红线：1.25&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- 图表 3：做市商 Gamma 历史底线水位条 --&gt;
+      &lt;div class=&quot;bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;flex items-start justify-between gap-2 mb-3&quot;&gt;
+            &lt;div&gt;
+              &lt;h3 class=&quot;text-sm font-bold text-slate-900&quot;&gt;做市商库存与历史底线水位&lt;/h3&gt;
+              &lt;p class=&quot;text-[11px] text-slate-500 mt-0.5&quot;&gt;Dealer Agg Gamma (-8.6B 底线) / SPX GEX / Net Delta&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;span id=&quot;dealer-status-badge&quot; class=&quot;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border&quot;&gt;
+              深度负 Gamma
+            &lt;/span&gt;
+          &lt;/div&gt;
+
+          &lt;!-- 水位条 1：Dealer Agg Gamma --&gt;
+          &lt;div class=&quot;space-y-1.5 mb-4&quot;&gt;
+            &lt;div class=&quot;flex items-center justify-between text-xs&quot;&gt;
+              &lt;span class=&quot;font-semibold text-slate-700&quot;&gt;SPX Dealer Agg Gamma&lt;/span&gt;
+              &lt;span id=&quot;gauge-dealer-val&quot; class=&quot;font-bold tabular-nums text-red-600&quot;&gt;-7.3 $B&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;relative h-5 bg-slate-100 border border-slate-200 rounded overflow-hidden&quot;&gt;
+              &lt;!-- 负值区底色与正值区底色 --&gt;
+              &lt;div class=&quot;absolute inset-y-0 left-0 w-1/2 bg-red-50/70&quot;&gt;&lt;/div&gt;
+              &lt;div class=&quot;absolute inset-y-0 right-0 w-1/2 bg-emerald-50/60&quot;&gt;&lt;/div&gt;
+              &lt;!-- 历史底线 -8.6B 标记（区间 -10B 到 +10B，-8.6B 在 7% 处） --&gt;
+              &lt;div class=&quot;absolute inset-y-0 border-l-2 border-dashed border-red-600 z-10&quot; style=&quot;left: 7%;&quot; title=&quot;历史底线 -8.6B&quot;&gt;&lt;/div&gt;
+              &lt;!-- 零轴 Gamma Flip 标记（50% 处） --&gt;
+              &lt;div class=&quot;absolute inset-y-0 border-l-2 border-slate-800 z-10&quot; style=&quot;left: 50%;&quot; title=&quot;Gamma Flip 0B&quot;&gt;&lt;/div&gt;
+              &lt;!-- 当前值动态填充条 --&gt;
+              &lt;div id=&quot;gauge-dealer-bar&quot; class=&quot;absolute inset-y-0.5 bg-red-600/85 transition-all duration-300 rounded-sm&quot;&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;flex justify-between text-[10px] text-slate-500 tabular-nums&quot;&gt;
+              &lt;span class=&quot;text-red-700 font-semibold&quot;&gt;底线 -8.6B&lt;/span&gt;
+              &lt;span&gt;零轴翻转 0.0B&lt;/span&gt;
+              &lt;span class=&quot;text-emerald-700&quot;&gt;正Gamma +10B&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;!-- 水位条 2：SPX GEX --&gt;
+          &lt;div class=&quot;space-y-1.5 mb-4&quot;&gt;
+            &lt;div class=&quot;flex items-center justify-between text-xs&quot;&gt;
+              &lt;span class=&quot;font-semibold text-slate-700&quot;&gt;SPX Gamma Exposure (GEX)&lt;/span&gt;
+              &lt;span id=&quot;gauge-gex-val&quot; class=&quot;font-bold tabular-nums text-red-600&quot;&gt;-$100.5B&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;relative h-5 bg-slate-100 border border-slate-200 rounded overflow-hidden&quot;&gt;
+              &lt;div class=&quot;absolute inset-y-0 left-0 w-1/2 bg-red-50/70&quot;&gt;&lt;/div&gt;
+              &lt;div class=&quot;absolute inset-y-0 right-0 w-1/2 bg-emerald-50/60&quot;&gt;&lt;/div&gt;
+              &lt;!-- 零轴 50% --&gt;
+              &lt;div class=&quot;absolute inset-y-0 border-l-2 border-slate-800 z-10&quot; style=&quot;left: 50%;&quot;&gt;&lt;/div&gt;
+              &lt;!-- 极值参考区间 -$97B ~ -$104B（区间 -130 到 +130） --&gt;
+              &lt;div id=&quot;gauge-gex-bar&quot; class=&quot;absolute inset-y-0.5 bg-red-600/85 transition-all duration-300 rounded-sm&quot;&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;flex justify-between text-[10px] text-slate-500 tabular-nums&quot;&gt;
+              &lt;span&gt;-$130B (极值)&lt;/span&gt;
+              &lt;span&gt;零轴 0B&lt;/span&gt;
+              &lt;span&gt;+$130B&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;!-- 水位条 3：Estimated Net Delta Flow --&gt;
+          &lt;div class=&quot;space-y-1.5&quot;&gt;
+            &lt;div class=&quot;flex items-center justify-between text-xs&quot;&gt;
+              &lt;span class=&quot;font-semibold text-slate-700&quot;&gt;Estimated Net Delta Flow&lt;/span&gt;
+              &lt;span id=&quot;gauge-delta-val&quot; class=&quot;font-bold tabular-nums text-red-600&quot;&gt;-110&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;relative h-5 bg-slate-100 border border-slate-200 rounded overflow-hidden&quot;&gt;
+              &lt;div class=&quot;absolute inset-y-0 left-0 w-1/2 bg-red-50/70&quot;&gt;&lt;/div&gt;
+              &lt;div class=&quot;absolute inset-y-0 right-0 w-1/2 bg-emerald-50/60&quot;&gt;&lt;/div&gt;
+              &lt;div class=&quot;absolute inset-y-0 border-l-2 border-slate-800 z-10&quot; style=&quot;left: 50%;&quot;&gt;&lt;/div&gt;
+              &lt;div id=&quot;gauge-delta-bar&quot; class=&quot;absolute inset-y-0.5 bg-red-600/85 transition-all duration-300 rounded-sm&quot;&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;flex justify-between text-[10px] text-slate-500 tabular-nums&quot;&gt;
+              &lt;span&gt;-150 (持续卖出)&lt;/span&gt;
+              &lt;span&gt;零轴平衡点&lt;/span&gt;
+              &lt;span&gt;+150 (买回对冲)&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between&quot;&gt;
+          &lt;span&gt;距离 -8.6B 历史底线缓冲：&lt;/span&gt;
+          &lt;strong id=&quot;dealer-buffer-text&quot; class=&quot;tabular-nums text-red-700&quot;&gt;1.3 $B&lt;/strong&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- 模块 3：五大维度核心指标监控面板（支持输入与滑块实时联动） --&gt;
+    &lt;section class=&quot;space-y-3&quot;&gt;
+      &lt;div class=&quot;flex flex-col sm:flex-row sm:items-center justify-between gap-2&quot;&gt;
+        &lt;h2 class=&quot;text-sm font-bold text-slate-900 flex items-center gap-2&quot;&gt;
+          &lt;span class=&quot;w-1 h-4 bg-blue-900 rounded-full&quot;&gt;&lt;/span&gt;
+          五大维度核心指标实时监控与压力测试（支持直接输入或拖动滑块推演）
+        &lt;/h2&gt;
+        &lt;div class=&quot;flex items-center gap-3 text-[11px] text-slate-500&quot;&gt;
+          &lt;span class=&quot;inline-flex items-center gap-1&quot;&gt;&lt;span class=&quot;w-2 h-2 rounded-full bg-emerald-500&quot;&gt;&lt;/span&gt;正常&lt;/span&gt;
+          &lt;span class=&quot;inline-flex items-center gap-1&quot;&gt;&lt;span class=&quot;w-2 h-2 rounded-full bg-amber-500&quot;&gt;&lt;/span&gt;警戒&lt;/span&gt;
+          &lt;span class=&quot;inline-flex items-center gap-1&quot;&gt;&lt;span class=&quot;w-2 h-2 rounded-full bg-red-600&quot;&gt;&lt;/span&gt;触发红线&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- 动态渲染 5 个维度分组卡片 --&gt;
+      &lt;div id=&quot;indicators-grid&quot; class=&quot;grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4&quot;&gt;&lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- 模块 4：底部每日复盘 Checklist --&gt;
+    &lt;section class=&quot;bg-white border border-slate-200 rounded-lg p-4&quot;&gt;
+      &lt;div class=&quot;flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-100&quot;&gt;
+        &lt;div&gt;
+          &lt;h2 class=&quot;text-sm font-bold text-slate-900 flex items-center gap-2&quot;&gt;
+            &lt;span class=&quot;w-1 h-4 bg-blue-900 rounded-full&quot;&gt;&lt;/span&gt;
+            每日复盘 Checklist（支持人工勾选 + 指标自动高亮触发状态）
+          &lt;/h2&gt;
+          &lt;p class=&quot;text-[11px] text-slate-500 mt-0.5&quot;&gt;左侧监控“踩踏向宏观全面防御扩散”，右侧监控“OPEX 交割重置与反向 Vanna 修复”&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;flex items-center gap-2 text-xs&quot;&gt;
+          &lt;span id=&quot;checklist-risk-count&quot; class=&quot;px-2.5 py-1 rounded bg-red-50 text-red-700 border border-red-200 font-semibold tabular-nums&quot;&gt;风险触发: 0/4&lt;/span&gt;
+          &lt;span id=&quot;checklist-reset-count&quot; class=&quot;px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold tabular-nums&quot;&gt;修复触发: 0/4&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class=&quot;grid grid-cols-1 lg:grid-cols-2 gap-4&quot;&gt;
+        &lt;!-- 左侧：风险升级确认项 --&gt;
+        &lt;div class=&quot;border border-red-200/80 bg-red-50/20 rounded-lg p-3.5&quot;&gt;
+          &lt;div class=&quot;flex items-center justify-between mb-2.5&quot;&gt;
+            &lt;h3 class=&quot;text-xs font-bold text-red-800 uppercase tracking-wide flex items-center gap-1.5&quot;&gt;
+              &lt;span class=&quot;w-2 h-2 rounded-full bg-red-600&quot;&gt;&lt;/span&gt;
+              风险升级确认项（向全市场扩散）
+            &lt;/h3&gt;
+            &lt;span class=&quot;text-[11px] text-red-600/80 font-medium&quot;&gt;满足越多，下行加速风险越高&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div id=&quot;checklist-risk&quot; class=&quot;space-y-2&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- 右侧：止跌与 OPEX 重置确认项 --&gt;
+        &lt;div class=&quot;border border-emerald-200/80 bg-emerald-50/20 rounded-lg p-3.5&quot;&gt;
+          &lt;div class=&quot;flex items-center justify-between mb-2.5&quot;&gt;
+            &lt;h3 class=&quot;text-xs font-bold text-emerald-800 uppercase tracking-wide flex items-center gap-1.5&quot;&gt;
+              &lt;span class=&quot;w-2 h-2 rounded-full bg-emerald-600&quot;&gt;&lt;/span&gt;
+              止跌与 OPEX 重置确认项（反向 Vanna 修复）
+            &lt;/h3&gt;
+            &lt;span class=&quot;text-[11px] text-emerald-700/80 font-medium&quot;&gt;满足越多，空头回补概率越高&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div id=&quot;checklist-reset&quot; class=&quot;space-y-2&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+
+  &lt;/main&gt;
+
+  &lt;footer class=&quot;max-w-[1440px] mx-auto px-4 sm:px-6 py-4 text-center text-[11px] text-slate-400&quot;&gt;
+    美股期权微观结构与流动性踩踏监控仪表盘 · 仅用于机构微观结构逻辑推演与复盘参考，不构成投资建议
+  &lt;/footer&gt;
+
+  &lt;script&gt;
+    /**
+     * ============================================================================
+     * 美股期权微观结构与流动性踩踏监控仪表盘 - 核心状态与交互逻辑
+     * ============================================================================
+     */
+
+    // 1. 预设情景数据集
+    const SCENARIOS = {
+      current: {
+        label: &#39;当前实盘 (11/19 OPEX前)&#39;,
+        values: {
+          vixeqVix: 1.60,
+          dspx: 37.2,
+          nvda: 146.0,
+          vix: 28.4,
+          vvix: 122.0,
+          vixVxv: 1.05,
+          vix9dVix: 1.03,
+          skew: 141.0,
+          pcEquity: 0.72,
+          pcTotal: 1.05,
+          pcIndex: 1.15,
+          spxGex: -100.5,
+          dealerGamma: -7.3,
+          netDelta: -110
+        }
+      },
+      stage1: {
+        label: &#39;阶段一：离散繁荣稳态&#39;,
+        values: {
+          vixeqVix: 2.65,
+          dspx: 44.5,
+          nvda: 178.0,
+          vix: 14.2,
+          vvix: 84.0,
+          vixVxv: 0.86,
+          vix9dVix: 0.88,
+          skew: 146.0,
+          pcEquity: 0.52,
+          pcTotal: 0.82,
+          pcIndex: 1.05,
+          spxGex: 85.0,
+          dealerGamma: 4.8,
+          netDelta: 65
+        }
+      },
+      stage2: {
+        label: &#39;阶段二：偏度与个股预警&#39;,
+        values: {
+          vixeqVix: 2.12,
+          dspx: 41.0,
+          nvda: 162.0,
+          vix: 18.8,
+          vvix: 102.0,
+          vixVxv: 0.96,
+          vix9dVix: 0.98,
+          skew: 166.0,
+          pcEquity: 0.71,
+          pcTotal: 1.01,
+          pcIndex: 1.12,
+          spxGex: 12.0,
+          dealerGamma: 0.4,
+          netDelta: -15
+        }
+      },
+      stage3_ext: {
+        label: &#39;阶段三升级：宏观全面防御&#39;,
+        values: {
+          vixeqVix: 1.35,
+          dspx: 31.5,
+          nvda: 132.0,
+          vix: 35.8,
+          vvix: 142.0,
+          vixVxv: 1.14,
+          vix9dVix: 1.11,
+          skew: 132.0,
+          pcEquity: 0.88,
+          pcTotal: 1.34,
+          pcIndex: 1.42,
+          spxGex: -118.0,
+          dealerGamma: -9.1,
+          netDelta: -138
+        }
+      },
+      stage4: {
+        label: &#39;阶段四：OPEX重置/反向Vanna&#39;,
+        values: {
+          vixeqVix: 1.72,
+          dspx: 36.0,
+          nvda: 151.5,
+          vix: 22.6,
+          vvix: 101.0,
+          vixVxv: 0.96,
+          vix9dVix: 0.94,
+          skew: 134.0,
+          pcEquity: 0.74,
+          pcTotal: 1.08,
+          pcIndex: 1.22,
+          spxGex: -18.0,
+          dealerGamma: -1.4,
+          netDelta: 15
+        }
+      }
+    };
+
+    // 2. 五大维度指标元数据配置
+    const INDICATOR_GROUPS = [
+      {
+        id: &#39;dispersion&#39;,
+        title: &#39;一、离散与相关性&#39;,
+        subtitle: &#39;衡量权重股分化与离散交易平仓压力&#39;,
+        items: [
+          {
+            key: &#39;vixeqVix&#39;,
+            name: &#39;VIXEQ / VIX 比值&#39;,
+            unit: &#39;x&#39;,
+            min: 1.0, max: 3.5, step: 0.05, decimals: 2,
+            thresholdText: &#39;红线 &lt; 2.00（高位断崖回落）&#39;,
+            evalStatus: (v) =&gt; v &lt; 1.85 ? &#39;red&#39; : (v &lt; 2.15 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;dspx&#39;,
+            name: &#39;DSPX 官方离散度指数&#39;,
+            unit: &#39;&#39;,
+            min: 15, max: 60, step: 0.5, decimals: 1,
+            thresholdText: &#39;相关性飙升时高位回落&#39;,
+            evalStatus: (v, s) =&gt; (v &lt; 35 &amp;&amp; s.vix &gt; 25) ? &#39;red&#39; : (v &lt; 39 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;nvda&#39;,
+            name: &#39;NVIDIA 股价风向标&#39;,
+            unit: &#39;$&#39;,
+            min: 90, max: 220, step: 0.5, decimals: 1,
+            thresholdText: &#39;上升通道考验位 ~150&#39;,
+            evalStatus: (v) =&gt; v &lt; 148 ? &#39;red&#39; : (v &lt; 160 ? &#39;amber&#39; : &#39;green&#39;)
+          }
+        ]
+      },
+      {
+        id: &#39;volatility&#39;,
+        title: &#39;二、波动率与流动性挤兑&#39;,
+        subtitle: &#39;监测基准恐慌与对冲工具爆炒红灯&#39;,
+        items: [
+          {
+            key: &#39;vix&#39;,
+            name: &#39;30天基准 VIX&#39;,
+            unit: &#39;&#39;,
+            min: 10, max: 55, step: 0.2, decimals: 1,
+            thresholdText: &#39;红线 &gt; 28.0（触发 Vanna）&#39;,
+            evalStatus: (v) =&gt; v &gt;= 28.0 ? &#39;red&#39; : (v &gt;= 20.0 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;vvix&#39;,
+            name: &#39;VVIX（波动率的波动率）&#39;,
+            unit: &#39;&#39;,
+            min: 70, max: 170, step: 1, decimals: 1,
+            thresholdText: &#39;红线 110 ~ 120（流动性挤兑）&#39;,
+            evalStatus: (v) =&gt; v &gt;= 115 ? &#39;red&#39; : (v &gt;= 100 ? &#39;amber&#39; : &#39;green&#39;)
+          }
+        ]
+      },
+      {
+        id: &#39;term_skew&#39;,
+        title: &#39;三、期限结构与结构性偏度&#39;,
+        subtitle: &#39;近远端倒挂斜率与尾部保护成本&#39;,
+        items: [
+          {
+            key: &#39;vixVxv&#39;,
+            name: &#39;VIX / VXV（近远端倒挂比率）&#39;,
+            unit: &#39;x&#39;,
+            min: 0.75, max: 1.35, step: 0.01, decimals: 2,
+            thresholdText: &#39;红线 &gt; 1.00（Backwardation）&#39;,
+            evalStatus: (v) =&gt; v &gt; 1.00 ? &#39;red&#39; : (v &gt;= 0.95 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;vix9dVix&#39;,
+            name: &#39;VIX9D / VIX（短端爆发斜率）&#39;,
+            unit: &#39;x&#39;,
+            min: 0.75, max: 1.35, step: 0.01, decimals: 2,
+            thresholdText: &#39;红线 &gt; 1.00（超短端反超）&#39;,
+            evalStatus: (v) =&gt; v &gt; 1.00 ? &#39;red&#39; : (v &gt;= 0.95 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;skew&#39;,
+            name: &#39;CBOE SKEW 偏度指数&#39;,
+            unit: &#39;&#39;,
+            min: 115, max: 185, step: 1, decimals: 1,
+            thresholdText: &#39;警戒区 160~170；见顶回落切入去杠杆&#39;,
+            evalStatus: (v, s) =&gt; {
+              if (v &gt;= 160) return &#39;amber&#39;;
+              if (s.vix &gt;= 25 &amp;&amp; v &lt; 150) return &#39;red&#39;;
+              return &#39;green&#39;;
+            }
+          }
+        ]
+      },
+      {
+        id: &#39;order_flow&#39;,
+        title: &#39;四、期权流量（CBOE Put/Call）&#39;,
+        subtitle: &#39;追踪防御需求从个股向全市场扩散&#39;,
+        items: [
+          {
+            key: &#39;pcEquity&#39;,
+            name: &#39;个股 P/C（灰线）&#39;,
+            unit: &#39;&#39;,
+            min: 0.35, max: 1.20, step: 0.01, decimals: 2,
+            thresholdText: &#39;红线 &gt; 0.80（2022式个股去杠杆）&#39;,
+            evalStatus: (v) =&gt; v &gt;= 0.80 ? &#39;red&#39; : (v &gt;= 0.68 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;pcTotal&#39;,
+            name: &#39;全市场综合 P/C（橙线）&#39;,
+            unit: &#39;&#39;,
+            min: 0.60, max: 1.60, step: 0.01, decimals: 2,
+            thresholdText: &#39;红线 &gt; 1.25（全市场扩散）&#39;,
+            evalStatus: (v) =&gt; v &gt;= 1.25 ? &#39;red&#39; : (v &gt;= 1.00 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;pcIndex&#39;,
+            name: &#39;指数 P/C（蓝线）&#39;,
+            unit: &#39;&#39;,
+            min: 0.70, max: 1.80, step: 0.01, decimals: 2,
+            thresholdText: &#39;红线 &gt; 1.25 站稳（宏观全面防御）&#39;,
+            evalStatus: (v) =&gt; v &gt;= 1.25 ? &#39;red&#39; : (v &gt;= 1.12 ? &#39;amber&#39; : &#39;green&#39;)
+          }
+        ]
+      },
+      {
+        id: &#39;dealer_flow&#39;,
+        title: &#39;五、做市商敞口（Hedging Flow）&#39;,
+        subtitle: &#39;监控 Gamma Flip 翻转与机械抛压极值&#39;,
+        items: [
+          {
+            key: &#39;spxGex&#39;,
+            name: &#39;SPX GEX 敞口&#39;,
+            unit: &#39; $B&#39;,
+            min: -130, max: 130, step: 0.5, decimals: 1,
+            thresholdText: &#39;零轴翻转（当前极值 -$97B~-$104B）&#39;,
+            evalStatus: (v) =&gt; v &lt;= -50 ? &#39;red&#39; : (v &lt; 0 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;dealerGamma&#39;,
+            name: &#39;SPX Dealer Agg Gamma&#39;,
+            unit: &#39; $B&#39;,
+            min: -10.0, max: 10.0, step: 0.1, decimals: 1,
+            thresholdText: &#39;历史底线 -8.6 $B / 零轴翻转&#39;,
+            evalStatus: (v) =&gt; v &lt;= -5.0 ? &#39;red&#39; : (v &lt; 0 ? &#39;amber&#39; : &#39;green&#39;)
+          },
+          {
+            key: &#39;netDelta&#39;,
+            name: &#39;Estimated Net Delta Flow&#39;,
+            unit: &#39;&#39;,
+            min: -150, max: 150, step: 1, decimals: 0,
+            thresholdText: &#39;零轴平衡点（负值=机械卖出对冲）&#39;,
+            evalStatus: (v) =&gt; v &lt;= -60 ? &#39;red&#39; : (v &lt; 0 ? &#39;amber&#39; : &#39;green&#39;)
+          }
+        ]
+      }
+    ];
+
+    // 3. 每日复盘 Checklist 配置
+    const CHECKLIST_RISK = [
+      {
+        id: &#39;risk_1&#39;,
+        text: &#39;个股 P/C 突破 0.80 且全市场 P/C 冲击 1.25&#39;,
+        sub: &#39;确认高估值/拥挤个股去杠杆向全市场扩散&#39;,
+        checkAuto: (s) =&gt; s.pcEquity &gt;= 0.80 &amp;&amp; s.pcTotal &gt;= 1.25
+      },
+      {
+        id: &#39;risk_2&#39;,
+        text: &#39;指数 P/C 放量站稳 1.25 上方（机构全面宏观防御）&#39;,
+        sub: &#39;蓝线突破基准线，标志宏观恐慌对冲全面打满&#39;,
+        checkAuto: (s) =&gt; s.pcIndex &gt;= 1.25
+      },
+      {
+        id: &#39;risk_3&#39;,
+        text: &#39;SPX Dealer Agg Gamma 有效跌穿 -8.6B 历史底线&#39;,
+        sub: &#39;做市商流动性缓冲彻底击穿历史极值区间&#39;,
+        checkAuto: (s) =&gt; s.dealerGamma &lt;= -8.6
+      },
+      {
+        id: &#39;risk_4&#39;,
+        text: &#39;VIX &gt; 28、VIX/VXV &gt; 1.00 且 VVIX 拒绝跌回 110 下方&#39;,
+        sub: &#39;Vanna 螺旋持续强化，对冲工具维持挤兑状态&#39;,
+        checkAuto: (s) =&gt; s.vix &gt; 28.0 &amp;&amp; s.vixVxv &gt; 1.00 &amp;&amp; s.vvix &gt;= 110
+      }
+    ];
+
+    const CHECKLIST_RESET = [
+      {
+        id: &#39;reset_1&#39;,
+        text: &#39;月度 OPEX 交割日落地，Net Delta 与 GEX 出现周期性重置回拉&#39;,
+        sub: &#39;SPX GEX 收窄至 -30B 以上或 Net Delta 回升至零轴上方&#39;,
+        checkAuto: (s) =&gt; s.spxGex &gt; -30 &amp;&amp; s.netDelta &gt;= 0
+      },
+      {
+        id: &#39;reset_2&#39;,
+        text: &#39;VVIX 率先跌回 110 红线下方（尾部挤兑降温）&#39;,
+        sub: &#39;对 VIX 看涨期权的非理性抢筹退潮&#39;,
+        checkAuto: (s) =&gt; s.vvix &lt; 110
+      },
+      {
+        id: &#39;reset_3&#39;,
+        text: &#39;VIX/VXV 与 VIX9D/VIX 双双回落至 1.00 以下（解除 Vanna 倒挂条件）&#39;,
+        sub: &#39;波动率期限结构由 Backwardation 恢复至 Contango&#39;,
+        checkAuto: (s) =&gt; s.vixVxv &lt; 1.00 &amp;&amp; s.vix9dVix &lt; 1.00
+      },
+      {
+        id: &#39;reset_4&#39;,
+        text: &#39;VIXEQ/VIX 在 1.6 附近止跌企稳，隐含相关性停止飙升&#39;,
+        sub: &#39;离散交易平仓止血（VIXEQ/VIX &gt;= 1.70 且 VIX &lt; 25）&#39;,
+        checkAuto: (s) =&gt; s.vixeqVix &gt;= 1.70 &amp;&amp; s.vix &lt; 25.0
+      }
+    ];
+
+    // 全局运行状态
+    let state = { ...SCENARIOS.current.values };
+    let activeScenarioKey = &#39;current&#39;;
+    let manualChecklistState = {};
+    let termChart = null;
+    let flowChart = null;
+
+    // 轻量提示函数（严禁使用 alert）
+    function showToast(msg) {
+      try {
+        const container = document.getElementById(&#39;toast-container&#39;);
+        const el = document.createElement(&#39;div&#39;);
+        el.className = &#39;toast-anim bg-slate-900 text-white text-xs font-medium px-3.5 py-2 rounded-md shadow-lg border border-slate-700&#39;;
+        el.textContent = msg;
+        container.appendChild(el);
+        setTimeout(() =&gt; {
+          el.style.opacity = &#39;0&#39;;
+          el.style.transition = &#39;opacity 0.25s ease&#39;;
+          setTimeout(() =&gt; el.remove(), 250);
+        }, 2000);
+      } catch (e) {
+        console.error(&#39;Toast error:&#39;, e);
+      }
+    }
+
+    // 工具函数：数值限幅
+    function clamp(val, min, max) {
+      return Math.min(Math.max(val, min), max);
+    }
+
+    // 4. 计算综合压力指数 (0 - 100)
+    function computeStressIndex(s) {
+      // 波动率与挤兑 (25分)
+      const vixScore = clamp(((s.vix - 14) / (36 - 14)) * 15, 0, 15);
+      const vvixScore = clamp(((s.vvix - 85) / (135 - 85)) * 10, 0, 10);
+
+      // 期限结构倒挂 (15分)
+      const termScore1 = clamp(((s.vixVxv - 0.88) / (1.12 - 0.88)) * 9, 0, 9);
+      const termScore2 = clamp(((s.vix9dVix - 0.88) / (1.12 - 0.88)) * 6, 0, 6);
+
+      // 做市商负敞口 (30分)
+      const gexScore = clamp(((20 - s.spxGex) / 140) * 12, 0, 12);
+      const dealerScore = clamp(((1 - s.dealerGamma) / 10) * 10, 0, 10);
+      const deltaScore = clamp(((20 - s.netDelta) / 160) * 8, 0, 8);
+
+      // 离散平仓 (15分)
+      const dispScore = clamp(((2.5 - s.vixeqVix) / (2.5 - 1.35)) * 15, 0, 15);
+
+      // 期权流量扩散 (15分)
+      const pcEqScore = clamp(((s.pcEquity - 0.50) / (0.90 - 0.50)) * 6, 0, 6);
+      const pcTotScore = clamp(((s.pcTotal - 0.80) / (1.35 - 0.80)) * 5, 0, 5);
+      const pcIdxScore = clamp(((s.pcIndex - 1.00) / (1.40 - 1.00)) * 4, 0, 4);
+
+      const total = vixScore + vvixScore + termScore1 + termScore2 + gexScore + dealerScore + deltaScore + dispScore + pcEqScore + pcTotScore + pcIdxScore;
+      return Math.round(clamp(total, 0, 100));
+    }
+
+    // 5. 自动判定当前所处四阶段
+    function detectRegime(s) {
+      const macroDefense = (s.pcIndex &gt;= 1.25 &amp;&amp; s.pcEquity &gt;= 0.80) || s.dealerGamma &lt;= -8.6;
+
+      // 阶段三：深度负 Gamma 或 VIX 破 26 且伴随期限倒挂/VVIX 飙升
+      if (
+        (s.vix &gt;= 26.0 &amp;&amp; (s.vixVxv &gt;= 1.00 || s.vvix &gt;= 110)) ||
+        (s.dealerGamma &lt;= -4.5 &amp;&amp; s.spxGex &lt;= -50)
+      ) {
+        return {
+          stage: 3,
+          title: macroDefense
+            ? &#39;阶段三升级：Vanna 踩踏与宏观全面防御&#39;
+            : &#39;阶段三：负反馈翻转与 Vanna 踩踏加速期&#39;,
+          color: &#39;red&#39;,
+          macroDefense
+        };
+      }
+
+      // 阶段一：正 Gamma 稳态、低波、低流量防御
+      if (
+        s.dealerGamma &gt;= 1.5 &amp;&amp;
+        s.spxGex &gt;= 25 &amp;&amp;
+        s.vix &lt; 18.0 &amp;&amp;
+        s.skew &lt; 158
+      ) {
+        return {
+          stage: 1,
+          title: &#39;阶段一：缩圈与离散稳态期&#39;,
+          color: &#39;green&#39;,
+          macroDefense: false
+        };
+      }
+
+      // 阶段四：OPEX 重置与反向 Vanna 修复（倒挂解除、VVIX 回落至 110 下方、Delta 回正且 GEX 已从深度负值收敛，且非高 SKEW 预警）
+      if (
+        s.vixVxv &lt; 1.00 &amp;&amp;
+        s.vvix &lt; 110 &amp;&amp;
+        s.skew &lt; 155 &amp;&amp;
+        s.netDelta &gt;= 0 &amp;&amp;
+        s.spxGex &lt; 25 &amp;&amp;
+        s.vixeqVix &lt; 2.0
+      ) {
+        return {
+          stage: 4,
+          title: &#39;阶段四：极端出清与反向 Vanna 修复期&#39;,
+          color: &#39;blue&#39;,
+          macroDefense: false
+        };
+      }
+
+      // 阶段二：偏度飙升预警 / 个股 P/C 率先抬头 / 临近 Gamma Flip
+      return {
+        stage: 2,
+        title: &#39;阶段二：拥挤见顶与先遣撤退期&#39;,
+        color: &#39;amber&#39;,
+        macroDefense: false
+      };
+    }
+
+    // 6. 初始化渲染五大维度指标卡片 DOM
+    function buildIndicatorPanels() {
+      const container = document.getElementById(&#39;indicators-grid&#39;);
+      container.innerHTML = &#39;&#39;;
+
+      INDICATOR_GROUPS.forEach((group) =&gt; {
+        const card = document.createElement(&#39;div&#39;);
+        card.className = &#39;bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between&#39;;
+
+        let itemsHtml = &#39;&#39;;
+        group.items.forEach((item) =&gt; {
+          itemsHtml += `
+            &lt;div class=&quot;py-2.5 border-t border-slate-100 first:border-t-0 first:pt-0 last:pb-0&quot;&gt;
+              &lt;div class=&quot;flex items-center justify-between gap-2 mb-1.5&quot;&gt;
+                &lt;div class=&quot;min-w-0&quot;&gt;
+                  &lt;div class=&quot;flex items-center gap-1.5&quot;&gt;
+                    &lt;span id=&quot;dot-${item.key}&quot; class=&quot;w-2 h-2 rounded-full shrink-0 bg-slate-300&quot;&gt;&lt;/span&gt;
+                    &lt;label for=&quot;num-${item.key}&quot; class=&quot;text-xs font-semibold text-slate-800 truncate&quot;&gt;${item.name}&lt;/label&gt;
+                  &lt;/div&gt;
+                  &lt;div class=&quot;text-[11px] text-slate-400 mt-0.5 truncate&quot;&gt;${item.thresholdText}&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;flex items-center gap-1.5 shrink-0&quot;&gt;
+                  &lt;input
+                    id=&quot;num-${item.key}&quot;
+                    data-key=&quot;${item.key}&quot;
+                    type=&quot;number&quot;
+                    min=&quot;${item.min}&quot;
+                    max=&quot;${item.max}&quot;
+                    step=&quot;${item.step}&quot;
+                    class=&quot;indicator-num w-18 sm:w-20 text-right text-xs font-bold tabular-nums px-2 py-1 rounded border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-800 focus:outline-none text-slate-900&quot;
+                  /&gt;
+                  ${item.unit ? `&lt;span class=&quot;text-[11px] font-medium text-slate-500 w-6&quot;&gt;${item.unit.trim()}&lt;/span&gt;` : &#39;&lt;span class=&quot;w-1&quot;&gt;&lt;/span&gt;&#39;}
+                  &lt;span id=&quot;badge-${item.key}&quot; class=&quot;text-[10px] font-semibold px-1.5 py-0.5 rounded border whitespace-nowrap w-14 text-center&quot;&gt;--&lt;/span&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+              &lt;input
+                id=&quot;range-${item.key}&quot;
+                data-key=&quot;${item.key}&quot;
+                type=&quot;range&quot;
+                min=&quot;${item.min}&quot;
+                max=&quot;${item.max}&quot;
+                step=&quot;${item.step}&quot;
+                class=&quot;indicator-range inst-slider&quot;
+              /&gt;
+            &lt;/div&gt;
+          `;
+        });
+
+        card.innerHTML = `
+          &lt;div&gt;
+            &lt;div class=&quot;mb-3&quot;&gt;
+              &lt;h3 class=&quot;text-xs font-bold text-slate-900 tracking-wide&quot;&gt;${group.title}&lt;/h3&gt;
+              &lt;p class=&quot;text-[11px] text-slate-400 mt-0.5&quot;&gt;${group.subtitle}&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div&gt;${itemsHtml}&lt;/div&gt;
+          &lt;/div&gt;
+        `;
+        container.appendChild(card);
+      });
+
+      // 绑定滑块与数字输入事件
+      document.querySelectorAll(&#39;.indicator-range&#39;).forEach((el) =&gt; {
+        el.addEventListener(&#39;input&#39;, (e) =&gt; {
+          const key = e.target.dataset.key;
+          const val = parseFloat(e.target.value);
+          if (!isNaN(val)) {
+            state[key] = val;
+            activeScenarioKey = null;
+            updateDashboard();
+          }
+        });
+      });
+
+      document.querySelectorAll(&#39;.indicator-num&#39;).forEach((el) =&gt; {
+        el.addEventListener(&#39;change&#39;, (e) =&gt; {
+          const key = e.target.dataset.key;
+          const meta = findIndicatorMeta(key);
+          let val = parseFloat(e.target.value);
+          if (isNaN(val)) val = state[key];
+          if (meta) val = clamp(val, meta.min, meta.max);
+          state[key] = val;
+          activeScenarioKey = null;
+          updateDashboard();
+        });
+      });
+    }
+
+    function findIndicatorMeta(key) {
+      for (const g of INDICATOR_GROUPS) {
+        const found = g.items.find((i) =&gt; i.key === key);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    // 7. 初始化 Checklist DOM
+    function buildChecklists() {
+      const renderList = (containerId, list, theme) =&gt; {
+        const box = document.getElementById(containerId);
+        box.innerHTML = &#39;&#39;;
+        list.forEach((item) =&gt; {
+          const row = document.createElement(&#39;label&#39;);
+          row.id = `row-${item.id}`;
+          row.className = &#39;flex items-start gap-2.5 p-2.5 rounded-md border bg-white border-slate-200 cursor-pointer transition-colors hover:bg-slate-50&#39;;
+          row.innerHTML = `
+            &lt;input type=&quot;checkbox&quot; id=&quot;chk-${item.id}&quot; data-id=&quot;${item.id}&quot; class=&quot;mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-900 focus:ring-blue-800 cursor-pointer&quot; /&gt;
+            &lt;div class=&quot;flex-1 min-w-0&quot;&gt;
+              &lt;div class=&quot;flex flex-wrap items-center justify-between gap-1.5&quot;&gt;
+                &lt;span class=&quot;text-xs font-semibold text-slate-800 leading-snug&quot;&gt;${item.text}&lt;/span&gt;
+                &lt;span id=&quot;auto-${item.id}&quot; class=&quot;text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0&quot;&gt;未触发&lt;/span&gt;
+              &lt;/div&gt;
+              &lt;div class=&quot;text-[11px] text-slate-500 mt-0.5&quot;&gt;${item.sub}&lt;/div&gt;
+            &lt;/div&gt;
+          `;
+          box.appendChild(row);
+
+          const chk = row.querySelector(&#39;input[type=&quot;checkbox&quot;]&#39;);
+          chk.addEventListener(&#39;change&#39;, (e) =&gt; {
+            manualChecklistState[item.id] = e.target.checked;
+          });
+        });
+      };
+
+      renderList(&#39;checklist-risk&#39;, CHECKLIST_RISK, &#39;red&#39;);
+      renderList(&#39;checklist-reset&#39;, CHECKLIST_RESET, &#39;green&#39;);
+    }
+
+    // 8. 初始化 Chart.js 图表
+    function initCharts() {
+      try {
+        // 图表 1：波动率期限结构曲线
+        const ctx1 = document.getElementById(&#39;termStructureChart&#39;).getContext(&#39;2d&#39;);
+        termChart = new Chart(ctx1, {
+          type: &#39;line&#39;,
+          data: {
+            labels: [&#39;VIX9D (9天超短端)&#39;, &#39;VIX (30天基准)&#39;, &#39;VXV (3个月季度端)&#39;],
+            datasets: [
+              {
+                label: &#39;当前期限结构&#39;,
+                data: [29.3, 28.4, 27.0],
+                borderColor: &#39;#DC2626&#39;,
+                backgroundColor: &#39;rgba(220, 38, 38, 0.08)&#39;,
+                borderWidth: 2.5,
+                pointRadius: 5,
+                pointHoverRadius: 6,
+                pointBackgroundColor: &#39;#FFFFFF&#39;,
+                pointBorderColor: &#39;#DC2626&#39;,
+                pointBorderWidth: 2,
+                fill: true,
+                tension: 0.18
+              },
+              {
+                label: &#39;Vanna 触发阈值 (28.0)&#39;,
+                data: [28.0, 28.0, 28.0],
+                borderColor: &#39;#94A3B8&#39;,
+                borderWidth: 1.5,
+                borderDash: [5, 4],
+                pointRadius: 0,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: &#39;index&#39;, intersect: false },
+            plugins: {
+              legend: {
+                display: true,
+                position: &#39;bottom&#39;,
+                labels: {
+                  boxWidth: 12,
+                  font: { size: 11, family: &#39;Inter, Noto Sans SC&#39; },
+                  color: &#39;#475569&#39;
+                }
+              },
+              tooltip: {
+                backgroundColor: &#39;#0F172A&#39;,
+                titleFont: { size: 11 },
+                bodyFont: { size: 11 },
+                padding: 8
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 11 }, color: &#39;#475569&#39; }
+              },
+              y: {
+                suggestedMin: 10,
+                suggestedMax: 40,
+                grid: { color: &#39;#F1F5F9&#39; },
+                ticks: { font: { size: 11 }, color: &#39;#64748B&#39; }
+              }
+            }
+          }
+        });
+
+        // 图表 2：期权流量扩散对比柱状图
+        const ctx2 = document.getElementById(&#39;orderFlowChart&#39;).getContext(&#39;2d&#39;);
+        flowChart = new Chart(ctx2, {
+          type: &#39;bar&#39;,
+          data: {
+            labels: [&#39;个股 P/C (灰线)&#39;, &#39;全市场 P/C (橙线)&#39;, &#39;指数 P/C (蓝线)&#39;],
+            datasets: [
+              {
+                label: &#39;当前数值&#39;,
+                data: [0.72, 1.05, 1.15],
+                backgroundColor: [&#39;#64748B&#39;, &#39;#EA580C&#39;, &#39;#1D4ED8&#39;],
+                borderRadius: 4,
+                barPercentage: 0.65,
+                categoryPercentage: 0.65
+              },
+              {
+                label: &#39;红线阈值&#39;,
+                data: [0.80, 1.25, 1.25],
+                backgroundColor: [&#39;rgba(220,38,38,0.16)&#39;, &#39;rgba(220,38,38,0.16)&#39;, &#39;rgba(220,38,38,0.16)&#39;],
+                borderColor: [&#39;#DC2626&#39;, &#39;#DC2626&#39;, &#39;#DC2626&#39;],
+                borderWidth: 1.5,
+                borderDash: [3, 3],
+                borderRadius: 4,
+                barPercentage: 0.65,
+                categoryPercentage: 0.65
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: &#39;bottom&#39;,
+                labels: {
+                  boxWidth: 12,
+                  font: { size: 11, family: &#39;Inter, Noto Sans SC&#39; },
+                  color: &#39;#475569&#39;
+                }
+              },
+              tooltip: {
+                backgroundColor: &#39;#0F172A&#39;,
+                titleFont: { size: 11 },
+                bodyFont: { size: 11 },
+                padding: 8
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 11 }, color: &#39;#475569&#39; }
+              },
+              y: {
+                min: 0,
+                suggestedMax: 1.6,
+                grid: { color: &#39;#F1F5F9&#39; },
+                ticks: { font: { size: 11 }, color: &#39;#64748B&#39; }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error(&#39;Chart initialization error:&#39;, err);
+        showToast(&#39;图表渲染出现异常，请刷新重试&#39;);
+      }
+    }
+
+    // 9. 更新水位条几何位置（以 50% 为零轴）
+    function updateZeroCenteredBar(barId, value, maxAbs) {
+      const bar = document.getElementById(barId);
+      if (!bar) return;
+      const clamped = clamp(value, -maxAbs, maxAbs);
+      const pct = (Math.abs(clamped) / maxAbs) * 50;
+
+      if (clamped &lt; 0) {
+        bar.style.left = `${50 - pct}%`;
+        bar.style.width = `${pct}%`;
+        bar.className = &#39;absolute inset-y-0.5 bg-red-600/85 transition-all duration-300 rounded-l-sm&#39;;
+      } else {
+        bar.style.left = &#39;50%&#39;;
+        bar.style.width = `${pct}%`;
+        bar.className = &#39;absolute inset-y-0.5 bg-emerald-600/85 transition-all duration-300 rounded-r-sm&#39;;
+      }
+    }
+
+    // 10. 全局状态同步与 UI 刷新引擎
+    function updateDashboard() {
+      try {
+        const s = state;
+
+        // A. 更新情景按钮激活态
+        document.querySelectorAll(&#39;.scenario-btn&#39;).forEach((btn) =&gt; {
+          const isAct = btn.dataset.scenario === activeScenarioKey;
+          if (isAct) {
+            btn.className = &#39;scenario-btn px-3 py-1.5 rounded-md text-xs font-semibold border bg-slate-900 text-white border-slate-900 shadow-sm transition-colors&#39;;
+          } else {
+            btn.className = &#39;scenario-btn px-3 py-1.5 rounded-md text-xs font-medium border bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors&#39;;
+          }
+        });
+
+        // B. 更新综合压力指数与阶段徽章
+        const stress = computeStressIndex(s);
+        const regime = detectRegime(s);
+
+        const scoreEl = document.getElementById(&#39;stress-score&#39;);
+        const barEl = document.getElementById(&#39;stress-bar&#39;);
+        scoreEl.textContent = stress;
+        barEl.style.width = `${stress}%`;
+
+        if (stress &gt;= 70) {
+          scoreEl.className = &#39;text-2xl font-bold tabular-nums leading-none text-red-600&#39;;
+          barEl.className = &#39;h-full bg-red-600 transition-all duration-300 rounded-full&#39;;
+        } else if (stress &gt;= 40) {
+          scoreEl.className = &#39;text-2xl font-bold tabular-nums leading-none text-amber-600&#39;;
+          barEl.className = &#39;h-full bg-amber-500 transition-all duration-300 rounded-full&#39;;
+        } else {
+          scoreEl.className = &#39;text-2xl font-bold tabular-nums leading-none text-emerald-600&#39;;
+          barEl.className = &#39;h-full bg-emerald-600 transition-all duration-300 rounded-full&#39;;
+        }
+
+        const badgeBox = document.getElementById(&#39;regime-badge-box&#39;);
+        const badgeDot = document.getElementById(&#39;regime-dot&#39;);
+        const badgeTitle = document.getElementById(&#39;regime-title&#39;);
+        badgeTitle.textContent = regime.title;
+
+        const colorMap = {
+          red: { box: &#39;bg-red-50 border-red-200&#39;, dot: &#39;bg-red-600&#39;, text: &#39;text-red-700&#39; },
+          amber: { box: &#39;bg-amber-50 border-amber-200&#39;, dot: &#39;bg-amber-500&#39;, text: &#39;text-amber-800&#39; },
+          green: { box: &#39;bg-emerald-50 border-emerald-200&#39;, dot: &#39;bg-emerald-600&#39;, text: &#39;text-emerald-800&#39; },
+          blue: { box: &#39;bg-blue-50 border-blue-200&#39;, dot: &#39;bg-blue-700&#39;, text: &#39;text-blue-900&#39; }
+        };
+        const c = colorMap[regime.color];
+        badgeBox.className = `border rounded-lg px-3.5 py-2 ${c.box}`;
+        badgeDot.className = `w-2 h-2 rounded-full ${c.dot}`;
+        badgeTitle.className = `text-sm font-bold leading-none ${c.text}`;
+
+        // 宏观全面防御提示胶囊
+        const macroPill = document.getElementById(&#39;macro-defense-pill&#39;);
+        if (regime.macroDefense) {
+          macroPill.classList.remove(&#39;hidden&#39;);
+        } else {
+          macroPill.classList.add(&#39;hidden&#39;);
+        }
+
+        // C. 高亮四阶段流程卡片
+        document.querySelectorAll(&#39;.stage-card&#39;).forEach((card) =&gt; {
+          const stNum = parseInt(card.dataset.stage, 10);
+          const pill = card.querySelector(&#39;.stage-pill&#39;);
+          if (stNum === regime.stage) {
+            const activeStyles = {
+              1: &#39;border-emerald-500 bg-emerald-50/40 ring-1 ring-emerald-500/30&#39;,
+              2: &#39;border-amber-500 bg-amber-50/40 ring-1 ring-amber-500/30&#39;,
+              3: &#39;border-red-600 bg-red-50/40 ring-1 ring-red-600/30&#39;,
+              4: &#39;border-blue-700 bg-blue-50/40 ring-1 ring-blue-700/30&#39;
+            };
+            const pillStyles = {
+              1: &#39;bg-emerald-600 text-white&#39;,
+              2: &#39;bg-amber-500 text-white&#39;,
+              3: &#39;bg-red-600 text-white&#39;,
+              4: &#39;bg-blue-800 text-white&#39;
+            };
+            card.className = `stage-card rounded-lg border p-3 transition-all ${activeStyles[stNum]}`;
+            pill.className = `stage-pill text-[11px] font-semibold px-2 py-0.5 rounded ${pillStyles[stNum]}`;
+            pill.textContent = &#39;当前激活&#39;;
+          } else {
+            card.className = &#39;stage-card rounded-lg border border-slate-200 bg-white p-3 opacity-75 transition-all&#39;;
+            pill.className = &#39;stage-pill text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500&#39;;
+            pill.textContent = stNum &lt; regime.stage ? &#39;已演进&#39; : &#39;观察中&#39;;
+          }
+        });
+
+        // D. 同步所有指标输入框、滑块与状态灯
+        INDICATOR_GROUPS.forEach((group) =&gt; {
+          group.items.forEach((item) =&gt; {
+            const val = s[item.key];
+            const numEl = document.getElementById(`num-${item.key}`);
+            const rangeEl = document.getElementById(`range-${item.key}`);
+            const dotEl = document.getElementById(`dot-${item.key}`);
+            const badgeEl = document.getElementById(`badge-${item.key}`);
+
+            if (numEl &amp;&amp; document.activeElement !== numEl) {
+              numEl.value = val.toFixed(item.decimals);
+            }
+            if (rangeEl) {
+              rangeEl.value = val;
+            }
+
+            const status = item.evalStatus(val, s);
+            if (status === &#39;red&#39;) {
+              dotEl.className = &#39;w-2 h-2 rounded-full shrink-0 bg-red-600&#39;;
+              badgeEl.className = &#39;text-[10px] font-semibold px-1.5 py-0.5 rounded border whitespace-nowrap w-14 text-center bg-red-50 text-red-700 border-red-200&#39;;
+              badgeEl.textContent = &#39;触发红线&#39;;
+            } else if (status === &#39;amber&#39;) {
+              dotEl.className = &#39;w-2 h-2 rounded-full shrink-0 bg-amber-500&#39;;
+              badgeEl.className = &#39;text-[10px] font-semibold px-1.5 py-0.5 rounded border whitespace-nowrap w-14 text-center bg-amber-50 text-amber-800 border-amber-200&#39;;
+              badgeEl.textContent = &#39;警戒&#39;;
+            } else {
+              dotEl.className = &#39;w-2 h-2 rounded-full shrink-0 bg-emerald-500&#39;;
+              badgeEl.className = &#39;text-[10px] font-semibold px-1.5 py-0.5 rounded border whitespace-nowrap w-14 text-center bg-emerald-50 text-emerald-700 border-emerald-200&#39;;
+              badgeEl.textContent = &#39;正常&#39;;
+            }
+          });
+        });
+
+        // E. 更新图表 1：波动率期限结构
+        const vix9d = Number((s.vix * s.vix9dVix).toFixed(1));
+        const vix30 = Number(s.vix.toFixed(1));
+        const vxv = Number((s.vix / s.vixVxv).toFixed(1));
+
+        document.getElementById(&#39;calc-vix9d&#39;).textContent = vix9d.toFixed(1);
+        document.getElementById(&#39;calc-vix30&#39;).textContent = vix30.toFixed(1);
+        document.getElementById(&#39;calc-vxv&#39;).textContent = vxv.toFixed(1);
+
+        const isBackwardation = s.vixVxv &gt; 1.0 || s.vix9dVix &gt; 1.0;
+        const termBadge = document.getElementById(&#39;term-structure-badge&#39;);
+        if (isBackwardation) {
+          termBadge.textContent = &#39;Backwardation 倒挂&#39;;
+          termBadge.className = &#39;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-red-50 text-red-700 border-red-200&#39;;
+        } else {
+          termBadge.textContent = &#39;Contango 升水&#39;;
+          termBadge.className = &#39;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-200&#39;;
+        }
+
+        if (termChart) {
+          const lineColor = isBackwardation ? &#39;#DC2626&#39; : &#39;#059669&#39;;
+          const fillColor = isBackwardation ? &#39;rgba(220, 38, 38, 0.08)&#39; : &#39;rgba(5, 150, 105, 0.08)&#39;;
+          termChart.data.datasets[0].data = [vix9d, vix30, vxv];
+          termChart.data.datasets[0].borderColor = lineColor;
+          termChart.data.datasets[0].pointBorderColor = lineColor;
+          termChart.data.datasets[0].backgroundColor = fillColor;
+          termChart.update(&#39;none&#39;);
+        }
+
+        // F. 更新图表 2：期权流量扩散对比
+        if (flowChart) {
+          flowChart.data.datasets[0].data = [s.pcEquity, s.pcTotal, s.pcIndex];
+          flowChart.update(&#39;none&#39;);
+        }
+
+        const flowBadge = document.getElementById(&#39;flow-status-badge&#39;);
+        const flowPattern = document.getElementById(&#39;flow-pattern-text&#39;);
+        if (s.pcIndex &gt;= 1.25 &amp;&amp; s.pcEquity &gt;= 0.80) {
+          flowBadge.textContent = &#39;宏观全面防御&#39;;
+          flowBadge.className = &#39;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-red-50 text-red-700 border-red-200&#39;;
+          flowPattern.textContent = &#39;个股与机构指数共振，全面防御模式落地&#39;;
+        } else if (s.pcEquity &gt;= 0.68 || s.pcTotal &gt;= 1.00) {
+          flowBadge.textContent = &#39;个股率先发力&#39;;
+          flowBadge.className = &#39;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-amber-50 text-amber-800 border-amber-200&#39;;
+          flowPattern.textContent = &#39;接近 2022 年初个股率先抬头特征&#39;;
+        } else {
+          flowBadge.textContent = &#39;结构平稳&#39;;
+          flowBadge.className = &#39;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-200&#39;;
+          flowPattern.textContent = &#39;个股 Call 拥挤，指数常规对冲&#39;;
+        }
+
+        // G. 更新图表 3：做市商库存水位条
+        const dealerValEl = document.getElementById(&#39;gauge-dealer-val&#39;);
+        const gexValEl = document.getElementById(&#39;gauge-gex-val&#39;);
+        const deltaValEl = document.getElementById(&#39;gauge-delta-val&#39;);
+        const dealerBadge = document.getElementById(&#39;dealer-status-badge&#39;);
+        const bufferEl = document.getElementById(&#39;dealer-buffer-text&#39;);
+
+        dealerValEl.textContent = `${s.dealerGamma &gt; 0 ? &#39;+&#39; : &#39;&#39;}${s.dealerGamma.toFixed(1)} $B`;
+        dealerValEl.className = `font-bold tabular-nums ${s.dealerGamma &lt; 0 ? &#39;text-red-600&#39; : &#39;text-emerald-600&#39;}`;
+
+        gexValEl.textContent = `${s.spxGex &lt; 0 ? &#39;-$&#39; : &#39;+$&#39;}${Math.abs(s.spxGex).toFixed(1)}B`;
+        gexValEl.className = `font-bold tabular-nums ${s.spxGex &lt; 0 ? &#39;text-red-600&#39; : &#39;text-emerald-600&#39;}`;
+
+        deltaValEl.textContent = `${s.netDelta &gt; 0 ? &#39;+&#39; : &#39;&#39;}${Math.round(s.netDelta)}`;
+        deltaValEl.className = `font-bold tabular-nums ${s.netDelta &lt; 0 ? &#39;text-red-600&#39; : &#39;text-emerald-600&#39;}`;
+
+        updateZeroCenteredBar(&#39;gauge-dealer-bar&#39;, s.dealerGamma, 10);
+        updateZeroCenteredBar(&#39;gauge-gex-bar&#39;, s.spxGex, 130);
+        updateZeroCenteredBar(&#39;gauge-delta-bar&#39;, s.netDelta, 150);
+
+        const buffer = s.dealerGamma - (-8.6);
+        if (buffer &lt;= 0) {
+          bufferEl.textContent = `已跌穿底线 ${Math.abs(buffer).toFixed(1)} $B`;
+          bufferEl.className = &#39;tabular-nums text-red-700 font-bold&#39;;
+        } else {
+          bufferEl.textContent = `+${buffer.toFixed(1)} $B`;
+          bufferEl.className = `tabular-nums font-bold ${buffer &lt; 2.0 ? &#39;text-red-600&#39; : &#39;text-slate-700&#39;}`;
+        }
+
+        if (s.dealerGamma &lt;= -8.6) {
+          dealerBadge.textContent = &#39;击穿历史底线&#39;;
+          dealerBadge.className = &#39;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-red-100 text-red-800 border-red-300&#39;;
+        } else if (s.dealerGamma &lt; 0) {
+          dealerBadge.textContent = &#39;负 Gamma 加速区&#39;;
+          dealerBadge.className = &#39;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-red-50 text-red-700 border-red-200&#39;;
+        } else {
+          dealerBadge.textContent = &#39;正 Gamma 阻尼区&#39;;
+          dealerBadge.className = &#39;shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-200&#39;;
+        }
+
+        // H. 更新每日复盘 Checklist 自动触发高亮
+        let riskTriggeredCount = 0;
+        CHECKLIST_RISK.forEach((item) =&gt; {
+          const triggered = item.checkAuto(s);
+          if (triggered) riskTriggeredCount++;
+          const row = document.getElementById(`row-${item.id}`);
+          const autoBadge = document.getElementById(`auto-${item.id}`);
+          const chk = document.getElementById(`chk-${item.id}`);
+
+          // 若用户未手动干预，默认跟随自动触发态勾选方便复盘
+          if (manualChecklistState[item.id] === undefined) {
+            chk.checked = triggered;
+          }
+
+          if (triggered) {
+            row.className = &#39;flex items-start gap-2.5 p-2.5 rounded-md border bg-red-50/70 border-red-300 cursor-pointer transition-colors&#39;;
+            autoBadge.className = &#39;text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0 bg-red-600 text-white border-red-600&#39;;
+            autoBadge.textContent = &#39;指标已触发&#39;;
+          } else {
+            row.className = &#39;flex items-start gap-2.5 p-2.5 rounded-md border bg-white border-slate-200 cursor-pointer transition-colors hover:bg-slate-50&#39;;
+            autoBadge.className = &#39;text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 bg-slate-100 text-slate-500 border-slate-200&#39;;
+            autoBadge.textContent = &#39;未触发&#39;;
+          }
+        });
+
+        let resetTriggeredCount = 0;
+        CHECKLIST_RESET.forEach((item) =&gt; {
+          const triggered = item.checkAuto(s);
+          if (triggered) resetTriggeredCount++;
+          const row = document.getElementById(`row-${item.id}`);
+          const autoBadge = document.getElementById(`auto-${item.id}`);
+          const chk = document.getElementById(`chk-${item.id}`);
+
+          if (manualChecklistState[item.id] === undefined) {
+            chk.checked = triggered;
+          }
+
+          if (triggered) {
+            row.className = &#39;flex items-start gap-2.5 p-2.5 rounded-md border bg-emerald-50/70 border-emerald-300 cursor-pointer transition-colors&#39;;
+            autoBadge.className = &#39;text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0 bg-emerald-600 text-white border-emerald-600&#39;;
+            autoBadge.textContent = &#39;条件满足&#39;;
+          } else {
+            row.className = &#39;flex items-start gap-2.5 p-2.5 rounded-md border bg-white border-slate-200 cursor-pointer transition-colors hover:bg-slate-50&#39;;
+            autoBadge.className = &#39;text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 bg-slate-100 text-slate-500 border-slate-200&#39;;
+            autoBadge.textContent = &#39;未满足&#39;;
+          }
+        });
+
+        document.getElementById(&#39;checklist-risk-count&#39;).textContent = `风险触发: ${riskTriggeredCount}/4`;
+        document.getElementById(&#39;checklist-reset-count&#39;).textContent = `修复触发: ${resetTriggeredCount}/4`;
+
+      } catch (err) {
+        console.error(&#39;Update dashboard error:&#39;, err);
+      }
+    }
+
+    // 11. 加载预设情景
+    function applyScenario(key) {
+      const preset = SCENARIOS[key];
+      if (!preset) return;
+      state = { ...preset.values };
+      activeScenarioKey = key;
+      manualChecklistState = {}; // 切换情景时恢复自动勾选联动
+      updateDashboard();
+      showToast(`已切换至：${preset.label}`);
+    }
+
+    // 12. 绑定全局事件与启动入口
+    window.addEventListener(&#39;DOMContentLoaded&#39;, () =&gt; {
+      buildIndicatorPanels();
+      buildChecklists();
+      initCharts();
+
+      // 情景按钮点击
+      document.querySelectorAll(&#39;.scenario-btn&#39;).forEach((btn) =&gt; {
+        btn.addEventListener(&#39;click&#39;, () =&gt; {
+          applyScenario(btn.dataset.scenario);
+        });
+      });
+
+      // 重置按钮点击
+      document.getElementById(&#39;btn-reset&#39;).addEventListener(&#39;click&#39;, () =&gt; {
+        applyScenario(&#39;current&#39;);
+      });
+
+      // 首次渲染（默认加载 11/19 OPEX 前实盘数据）
+      updateDashboard();
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;" data-tile-id="content_0" data-enable-html-sites-gen-ai="false" data-is-liquid-artifact="false" data-enable-liquid-apps-vertical-scrolling="false" data-is-interactive-full-page-embed="true" data-in-editor="false" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="content_0" name="content_0" scrolling="auto" title="Custom embed" aria-label="Custom embed"></iframe></div></div></div></div></div></div><div jscontroller="j1RDQb" jsaction="rcuQ6b:rcuQ6b;MxH79b:JdcaS;FaOgy:XuHpsb;" class="dZA9kd ynRLnc" data-last-updated-at-time="1795155364522" data-is-preview="false"><div role="button" class="U26fgb JRtysb WzwrXb I12f0b K2mXPb zXBiaf ynRLnc" jscontroller="iSvg6e" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventDefault=true); touchcancel:JMtRjd;;keydown:I481le;" jsshadow jsname="Bg3gkf" aria-label="Site actions" aria-disabled="false" tabindex="0" aria-haspopup="true" aria-expanded="false" data-menu-corner="bottom-start" data-anchor-corner="top-start"><div class="NWlf3e MbhUzd" jsname="ksKsZd"></div><span jsslot class="MhXXcc oJeWuf"><span class="Lw7GHd snByac"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class=" NMm5M"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg></span></span><div jsname="xl07Ob" style="display:none" aria-hidden="true"><div class="JPdR6b hVNH5c" jscontroller="uY3Nvd" jsaction="IpSVtb:TvD9Pc;fEN2Ze:xzS4ub;frq95c:LNeFm;cFpp9e:J9oOtd; click:H8nU8b; mouseup:H8nU8b; keydown:I481le; keypress:Kr2w4b; blur:O22p3e; focus:H8nU8b" role="menu" tabindex="0" style="position:fixed"><div class="XvhY1d" jsaction="mousedown:p8EH2c; touchstart:p8EH2c;"><div class="JAPqpe K0NPx"><span jsslot class="z80M1 FeRvI" jsaction="click:o6ZaF(preventDefault=true); mousedown:lAhnzb; mouseup:Osgxgf; mouseenter:SKyDAe; mouseleave:xq3APb;touchstart:jJiBRc; touchmove:kZeBdd; touchend:VfAz8" jsname="j7LFlb" aria-label="Google Sites" role="menuitem" tabindex="-1"><div class="aBBjbd MbhUzd" jsname="ksKsZd"></div><div class="uyYuVb oJeWuf" jsaction="JIbuQc:Toy3n;" jsname="V2zOu"><div class="jO7h3c">Google Sites</div></div></span><span jsslot class="z80M1 FeRvI" jsaction="click:o6ZaF(preventDefault=true); mousedown:lAhnzb; mouseup:Osgxgf; mouseenter:SKyDAe; mouseleave:xq3APb;touchstart:jJiBRc; touchmove:kZeBdd; touchend:VfAz8" jsname="j7LFlb" aria-label="Report abuse" role="menuitem" tabindex="-1"><div class="aBBjbd MbhUzd" jsname="ksKsZd"></div><div class="uyYuVb oJeWuf" jscontroller="HYv29e" jsaction="JIbuQc:dQ6O0c;" jsname="lV5oke" data-abuse-reporting-widget-proto="%.@.null,&quot;https://sites.google.com/view/fupeng715/full-page-embed&quot;]"><div class="jO7h3c">Report abuse</div></div></span><span jsslot class="z80M1 FeRvI" jsaction="click:o6ZaF(preventDefault=true); mousedown:lAhnzb; mouseup:Osgxgf; mouseenter:SKyDAe; mouseleave:xq3APb;touchstart:jJiBRc; touchmove:kZeBdd; touchend:VfAz8" jsname="j7LFlb" aria-label="Page details" role="menuitem" tabindex="-1"><div class="aBBjbd MbhUzd" jsname="ksKsZd"></div><div class="uyYuVb oJeWuf" jsaction="JIbuQc:hriXLd;" jsname="Rg8K2c"><div class="jO7h3c">Page details</div></div></span></div></div></div></div></div></div><div jscontroller="j1RDQb" jsaction="focusin:gBxDVb(srlkmf); focusout:zvXhGb(srlkmf); click:ro2KTd(psdQ5e);JIbuQc:DSypkd(Bg3gkf);MxH79b:JdcaS;rcuQ6b:rcuQ6b;" class="LqzjUe ynRLnc" data-last-updated-at-time="1795155364522" data-is-preview="false"><div jsname="psdQ5e" class="Q0cSn"></div><div jsname="bN97Pc" class="hBW7Hb"><div role="button" class="U26fgb mUbCce fKz7Od kpPxtd QMuaBc M9Bg4d" jscontroller="VXdfxd" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventDefault=true); touchcancel:JMtRjd;" jsshadow jsname="Bg3gkf" aria-label="Site actions" aria-disabled="false" tabindex="-1" aria-hidden="true"><div class="VTBa7b MbhUzd" jsname="ksKsZd"></div><span jsslot class="xjKiLb"><span class="Ce1Y1c" style="top: -12px"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class=" NMm5M"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg></span></span></div><div jsname="srlkmf" class="hUphyc"><div class="YkaBSd"><div class="iBkmkf"><span>Page updated</span> <span jsname="CFIm1b" class="dji00c" jsaction="AHmuwe:eGiyHb; mouseover:eGiyHb;" tabindex="0" role="contentinfo"></span></div></div><div class="YkaBSd" jsaction="click:Toy3n;"><div role="button" class="U26fgb kpPxtd J7BuEb" jsshadow jsname="V2zOu" aria-disabled="false" tabindex="0">Google Sites</div></div><div class="YkaBSd" jscontroller="HYv29e" jsaction="click:dQ6O0c;" data-abuse-reporting-widget-proto="%.@.null,&quot;https://sites.google.com/view/fupeng715/full-page-embed&quot;]"><div role="button" class="U26fgb kpPxtd J7BuEb" jsshadow aria-label="Report abuse" aria-disabled="false" tabindex="0">Report abuse</div></div></div></div></div></div></div></div><script nonce="jBxyI6YKtm3_mMhcm4hc2Q">DOCS_timing['cov']=new Date().getTime();</script><script src="https://www.gstatic.com/_/atari/_/js/k=atari.vw.en_US.9EQfYOKEiqo.O/am=AAAAAAYAAQ/d=1/rs=AGEqA5kq5U9LUq4OrF6fAPll3n5X7YyI5g/m=view" id="base-js" nonce="jBxyI6YKtm3_mMhcm4hc2Q"></script></div></div><div jscontroller="YV8yqd" jsaction="rcuQ6b:npT2md"></div></body></html>

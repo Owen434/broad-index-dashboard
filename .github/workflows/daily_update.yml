@@ -191,6 +191,7 @@ jobs:
             -maxdepth 3 \
             -name "*.html" \
             -not -path "./docs/*" \
+            -not -path "./options/reference/*" \
             -exec cp {} docs/ \;
 
           ls -la docs/

@@ -1,0 +1,68 @@
+name: Options dashboard update
+
+on:
+  schedule:
+    # 21:30 UTC = 美东 16:30（冬令时）/ 17:30（夏令时），美股收盘后的定版数据
+    - cron: '30 21 * * 1-5'
+  workflow_dispatch:
+
+concurrency:
+  group: options-update
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      TZ: Asia/Shanghai
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 与 daily_update 相同：先同步远程分支，避免推送冲突
+      - name: Sync with remote before generating
+        run: |
+          set -e
+
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      # 本模块仅依赖 yfinance/requests（版本与 requirements.txt 锁定一致）
+      - name: Install dependencies
+        run: pip install yfinance==1.8.0 requests==2.34.2
+
+      - name: Run options dashboard build
+        run: python options/build_options_dashboard.py
+
+      - name: Collect HTML into docs
+        run: |
+          set -e
+
+          mkdir -p docs
+          cp options/options_microstructure_dashboard.html docs/
+
+      - name: Resolve Beijing time
+        id: bjt
+        run: |
+          echo "stamp=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: 自动更新美股期权仪表盘 ${{ steps.bjt.outputs.stamp }}"
+          file_pattern: "options/** docs/options_microstructure_dashboard.html"
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_author: Owen434 <128884918+Owen434@users.noreply.github.com

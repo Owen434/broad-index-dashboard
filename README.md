@@ -178,6 +178,9 @@ etf/      45只宽基ETF的申赎资金流看板 + 净申赎金额日历
 gold/     COMEX黄金多周期均线与斜率分析
 futures/  中金所股指期货会员净持仓（中信期货 / 前20会员，四个宽基品种）
           含 cffex_net_position.py（抓取+计算+出图三合一，output_cffex/ 下存缓存和历史文件）
+options/  美股期权微观结构与流动性踩踏监控仪表盘（复刻 Google Sites 原版，数据改为真实抓取）
+          含 build_options_dashboard.py（Yahoo VIX 家族 + Cboe P/C + SPX 期权链自算 GEX → 单文件看板）
+          reference/ 存原版页面备份，data/ 存每日指标快照（netDelta 日环比与阈值校准用）
 docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅供预览，不建议手动改）
 ```
 
@@ -200,6 +203,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | **③ 回撤与信号回测** |宽基指数 + 基金回撤/过热信号回测|  <img src="docs/回撤与信号回测.png" width="360"> | https://owen434.github.io/broad-index-dashboard/drawdown_dashboard.html |
 | **④ 股指期货持仓** |中信期货 / 前20会员净持仓|<img src="docs/cffex_net_position.png" width="360"> | https://owen434.github.io/broad-index-dashboard/cffex_net_position.html |
 | **⑤ 黄金** | 多周期均线与斜率 | <img src="docs/黄金多周期均线及动能斜率分析系统.png" width="360"> | https://owen434.github.io/broad-index-dashboard/gold_ma_slopes_interactive.html |
+| **⑥ 美股期权** | 微观结构与流动性踩踏监控 | （无截图） | https://owen434.github.io/broad-index-dashboard/options_microstructure_dashboard.html |
 
 （链接对应 `docs/` 目录下 GitHub Actions 每个交易日自动重新生成的 HTML，首次运行前打开会 404。收益日历、股指期货持仓页面手机打开也能正常看：布局会自动收窄到单列，表格支持横向滑动。）
 
@@ -236,6 +240,7 @@ python a_share_market_dashboard.py \
   --no-score
 cd ../drawdown && python drawdown_backtest.py --funds-csv ../funds/funds_universe_example.csv --nav-csv ../funds/fund_nav_history.csv --out drawdown_dashboard.html --plotly-js cdn
 cd ../futures && python cffex_net_position.py --start 20240101   # 首次回填历史，之后不加参数增量更新即可
+cd .. && python options/build_options_dashboard.py   # 美股期权仪表盘（需 yfinance）
 ```
 
 跑完直接双击打开对应目录下生成的 `.html` 文件即可。
