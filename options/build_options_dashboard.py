@@ -29,7 +29,7 @@ import re
 import sys
 import time
 import warnings
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -94,7 +94,8 @@ def fetch_yahoo_quotes() -> tuple[dict, datetime]:
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?range=1d&interval=1d"
         meta = get_json(url)["chart"]["result"][0]["meta"]
         price = meta.get("regularMarketPrice")
-        if price is None or price <= 0:  # ^VXV 等停更符号会返回 0
+        # ^VXV 等停更符号会返回 0；NaN 价格（NaN <= 0 为 False）也必须拦下
+        if price is None or not math.isfinite(price) or price <= 0:
             raise RuntimeError(f"{sym} 无有效报价: {price}")
         out[key] = float(price)
         t = meta.get("regularMarketTime")
@@ -118,6 +119,15 @@ def fetch_cboe_pc() -> dict:
 
 
 # ---------------------------------------------------------------- data: SPX chain
+def _valid_row(k, oi, iv) -> bool:
+    """行级有效性：NaN 会穿透 not oi / iv < 0.01 这类比较（结果为 False），必须显式
+    isfinite；周末拉链时会有大量 NaN OI 行（无持仓报价）。"""
+    if k is None or oi is None or iv is None:
+        return False
+    return (math.isfinite(k) and math.isfinite(oi) and math.isfinite(iv)
+            and k > 0 and oi > 0 and iv >= 0.01)
+
+
 def fetch_dealer_metrics(spot: float, rate: float) -> tuple[dict, dict]:
     """抓 ^SPX 期权链（≤90DTE），自算 BS Greeks 聚合。
 
@@ -142,7 +152,7 @@ def fetch_dealer_metrics(spot: float, rate: float) -> tuple[dict, dict]:
         cg = pg = cd = pd = 0.0  # gamma×OI×100 / delta×OI×100（客户侧口径）
         for df, is_call in ((ch.calls, True), (ch.puts, False)):
             for k, oi, iv in zip(df.strike, df.openInterest, df.impliedVolatility, strict=True):
-                if not oi or iv is None or iv < 0.01 or k is None or k <= 0:
+                if not _valid_row(k, oi, iv):
                     continue
                 d1 = (math.log(spot / k) + (rate + iv * iv / 2.0) * T) / (iv * math.sqrt(T))
                 gamma = math.exp(-d1 * d1 / 2.0) / SQRT2PI / (spot * iv * math.sqrt(T))
@@ -334,6 +344,32 @@ def _monthly_opex_note(data_date: str) -> str:
     return ""
 
 
+def _chain_fallback(hist: dict, data_date: str, raw: dict) -> tuple[dict, dict | None, str]:
+    """链退化时沿用最近快照（含同日）的 raw。返回 (raw, 兑底 dealer 或 None, 页面注记)。
+
+    周末数据源大面积缺失 put 侧 IV（IV<0.01 被过滤），聚合近乎归零；真实市场即使
+    Gamma 翻零，delta 聚合仍是 ±千万股量级——两者同时归零只可能是链退化。"""
+    if abs(raw["gex90_b"]) >= 1.0 or abs(raw["delta_shares_m"]) >= 5.0:
+        return raw, None, ""
+    if data_date in hist:
+        cand_date, candidate = data_date, hist[data_date]
+    else:
+        keys = sorted(k for k in hist if k < data_date)
+        cand_date = keys[-1] if keys else None
+        candidate = hist[cand_date] if cand_date is not None else None
+    if candidate is None or candidate.get("raw", {}).get("gex90_b") is None:
+        raise RuntimeError("期权链数据退化且无历史快照可兑底（疑似周末数据源未更新）")
+    fb_raw = dict(candidate["raw"])
+    dealer = {
+        "spxGex": round(fb_raw["gex90_b"], 1),
+        "dealerGamma": round(fb_raw["gex9_b"] * 0.4, 1),
+        "netDelta": candidate.get("values", {}).get("netDelta", 0.0),
+    }
+    note = f" · 做市商指标沿用 {cand_date} 快照（本日链数据退化：疑似周末 IV 未更新）"
+    log(f"链数据退化，做市商指标沿用 {cand_date} 快照: {fb_raw}")
+    return fb_raw, dealer, note
+
+
 def main() -> int:
     quotes, quoted_at = fetch_yahoo_quotes()
     log(f"Yahoo 报价 OK: VIX={quotes['vix']} VIXEQ={quotes['vixeq']} DSPX={quotes['dspx']} "
@@ -346,10 +382,23 @@ def main() -> int:
     dealer, raw = fetch_dealer_metrics(quotes["spx"], rate)
     log(f"期权链自算 OK: {raw}")
 
-    # 数据日期：以最新报价时间（ET 日期）为准，周末/节假日自动落到上一交易日
-    data_date = quoted_at.astimezone(ET).strftime("%Y-%m-%d")
+    # 数据日期：以最新报价时间（ET 日期）为准；周末运行时个别符号的时间戳来自隔夜期货
+    # 会话（落在周六/周日），回退到最近的周五——数据本体仍是上一交易日的收盘值
+    q_et = quoted_at.astimezone(ET)
+    data_date = q_et.strftime("%Y-%m-%d")
+    d = datetime.strptime(data_date, "%Y-%m-%d")
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    data_date = d.strftime("%Y-%m-%d")
     date_short = data_date[5:].replace("-", "/")
-    is_final = quoted_at.astimezone(ET).hour >= 16  # 16:00 ET 收盘后为定版值
+    # 会话已收盘 = 数据定版：运行时刻已过了数据日的 16:00 ET，或已是其后某天
+    now_et = datetime.now(ET)
+    is_final = (now_et.date() > d.date()) or (now_et.date() == d.date() and now_et.hour >= 16)
+
+    hist = load_history()
+    raw, fb_dealer, chain_note = _chain_fallback(hist, data_date, raw)
+    if fb_dealer is not None:
+        dealer = fb_dealer
 
     values = {
         "vixeqVix": round(quotes["vixeq"] / quotes["vix"], 2),
@@ -368,14 +417,14 @@ def main() -> int:
         "netDelta": dealer["netDelta"],
     }
 
-    # netDelta 日环比（客户侧净 delta 变化，负 = 做市商机械卖出对冲）
-    hist = load_history()
+    # netDelta 日环比（客户侧净 delta 变化，负 = 做市商机械卖出对冲）；
+    # 链退化兑底时沿用快照值，不重算日环比
     prev = _latest_before(hist, data_date)
-    data_note = ""
-    if prev is not None and prev.get("raw", {}).get("delta_shares_m") is not None:
+    data_note = chain_note
+    if not chain_note and prev is not None and prev.get("raw", {}).get("delta_shares_m") is not None:
         values["netDelta"] = round(raw["delta_shares_m"] - prev["raw"]["delta_shares_m"], 0)
-    else:
-        data_note = " · Net Delta 首日基线（无前日对比）"
+    elif not chain_note:
+        data_note += " · Net Delta 首日基线（无前日对比）"
 
     meta = {
         "date_label": f"{data_date}（{_monthly_opex_note(data_date)}"
@@ -400,6 +449,7 @@ def main() -> int:
         "values": values, "raw": raw,
         "as_of": quoted_at.strftime("%Y-%m-%d %H:%M:%S UTC"),
         "final": is_final,
+        "chain_fallback": bool(chain_note),
     }
     if len(hist) > 250:
         hist = dict(sorted(hist.items())[-250:])
