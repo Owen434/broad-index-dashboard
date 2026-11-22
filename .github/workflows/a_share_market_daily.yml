@@ -76,6 +76,9 @@ jobs:
             --retry 2 \
             --no-score
 
+      - name: Build board rotation from the same price cache
+        run: python stocks/board_rotation.py
+
       - name: Publish HTML to docs
         shell: bash
         run: |
@@ -86,14 +89,16 @@ jobs:
           cp stocks/a_share_dashboard/a_share_market_dashboard.html \
              docs/a_share_market_dashboard.html
 
+          cp stocks/a_share_dashboard/board_rotation.html docs/board_rotation.html
+
           echo "Published files:"
-          ls -lh docs/a_share_market_dashboard.html
+          ls -lh docs/a_share_market_dashboard.html docs/board_rotation.html
 
       - name: Commit and push A-share dashboard
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update A-share market dashboard ${{ steps.dates.outputs.day }}"
-          file_pattern: "docs/a_share_market_dashboard.html README.md"
+          file_pattern: "docs/a_share_market_dashboard.html docs/board_rotation.html README.md"
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
           commit_author: Owen434 <128884918+Owen434@users.noreply.github.com>
