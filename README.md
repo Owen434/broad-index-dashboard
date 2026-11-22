@@ -263,7 +263,7 @@ GitHub Actions 每天自动运行一次，并将最终页面写入 `docs/a_share
 - 工作流先运行全市场宽度脚本，再运行 `stocks/board_rotation.py`。后者读取同一批前复权个股缓存、全市场日汇总和已发布的 `docs/index_return_calendar.html`。日历中分类为“A股宽基”的指数自动进入按钮列表。各基准缺少某日或某月内任一交易日收益时，该期相对值显示为缺数。
 - 股票池接口失败时，全市场脚本使用项目原有的 `stocks/a_share_universe_seed.csv` 作为备用种子。板块匹配以代码为准；缺行情不补零。最新日取全市场汇总中最新完整交易日。
 - 单日收益按相邻交易日收盘价计算。月度收益按上月末至本月末收盘价计算，未结束的月份截至当前数据日。缺任一端点的股票退出该期统计。点击单格可查有效家数。
-- 已运行全市场任务并具备缓存、汇总及宽基日历后，可在项目根目录执行 `python stocks/board_rotation.py`。本地产物为 `stocks/a_share_dashboard/board_rotation.html`。网页模板与脚本同目录。
+- 已运行全市场任务并具备缓存、汇总及宽基日历后，可在项目根目录执行 `python stocks/board_rotation.py`。本地产物为 `stocks/a_share_dashboard/board_rotation.html`。页面模板已内置在 Python 脚本中。Actions 将生成的页面发布至 `docs/board_rotation.html`。
 
 部署时将文件按目录合并进仓库，保留原 `.github/workflows/a_share_market_daily.yml` 路径。进入 **Actions → A-share market daily update → Run workflow** 首次运行。成功后同一次提交更新两个 HTML。沿用仓库现有的 GitHub Pages 发布方式及写入权限。
 
