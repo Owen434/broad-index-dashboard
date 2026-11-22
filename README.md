@@ -191,7 +191,8 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | ETF净申赎金额日历 | <img src="docs/ETF净申赎金额日历.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_net_flow_calendar.html |
 | | 宽基收益日历 | <img src="docs/index_return_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/index_return_calendar.html |
 | | 全市场股票收益分析 |<img src="docs/全市场股票收益分析.png" width="360"> |  https://owen434.github.io/broad-index-dashboard/a_share_market_dashboard.html |
-| | 板块轮动与宽基比较 | <img src="docs/板块轮动与宽基比较.png" width="360">  | https://owen434.github.io/broad-index-dashboard/board_rotation.html |
+| | 板块轮动与宽基比较 | <img src="docs/板块轮动与宽基比较.png" width="360"> | [打开看板](https://owen434.github.io/broad-index-dashboard/board_rotation.html) |
+| | 板块异动与均线宽度 | — | [打开看板](https://owen434.github.io/broad-index-dashboard/board_anomaly.html) |
 | **② 板块基金** | 八大指标矩阵 |  <img src="docs/基金八大指标矩阵.png" width="360">  | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
 | | 风险排名百分位 | <img src="docs/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
@@ -237,13 +238,14 @@ python a_share_market_dashboard.py \
   --no-score
 # 在 stocks 目录复用上一步的行情缓存和日汇总
 python board_rotation.py
+python board_anomaly.py
 cd ../drawdown && python drawdown_backtest.py --funds-csv ../funds/funds_universe_example.csv --nav-csv ../funds/fund_nav_history.csv --out drawdown_dashboard.html --plotly-js cdn
 cd ../futures && python cffex_net_position.py --start 20240101   # 首次回填历史，之后不加参数增量更新即可
 ```
 
 跑完直接双击打开对应目录下生成的 `.html` 文件即可。
 
-板块成分由 `stocks/1.ztjj_board_stocks.csv` 维护。全市场宽度与板块轮动共用 `.github/workflows/a_share_market_daily.yml`，每日生成的两个看板发布至 `docs/`。
+板块成分由 `stocks/1.ztjj_board_stocks.csv` 维护。全市场宽度、板块轮动与板块异动共用 `.github/workflows/a_share_market_daily.yml`，每日生成的三个看板发布至 `docs/`。
 
 ## 已知限制
 
