@@ -191,7 +191,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | ETF净申赎金额日历 | <img src="docs/ETF净申赎金额日历.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_net_flow_calendar.html |
 | | 宽基收益日历 | <img src="docs/index_return_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/index_return_calendar.html |
 | | 全市场股票收益分析 |<img src="docs/全市场股票收益分析.png" width="360"> |  https://owen434.github.io/broad-index-dashboard/a_share_market_dashboard.html |
-| | 板块轮动与宽基比较 | — | [打开看板](https://owen434.github.io/broad-index-dashboard/board_rotation.html) |
+| | 板块轮动与宽基比较 | <img src="docs/板块轮动与宽基比较.png" width="360">  | https://owen434.github.io/broad-index-dashboard/board_rotation.html |
 | **② 板块基金** | 八大指标矩阵 |  <img src="docs/基金八大指标矩阵.png" width="360">  | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
 | | 风险排名百分位 | <img src="docs/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
