@@ -20,7 +20,7 @@ def build():
     if len(dates) < 2:
         raise ValueError("行情不足两个交易日")
     trend_dates = dates[-20:]
-    members = pd.read_csv(ROOT / "1.ztjj_board_stocks.csv", dtype=str, encoding="utf-8-sig")
+    members = pd.read_csv(ROOT / "ztjj_board_stocks.csv", dtype=str, encoding="utf-8-sig")
     seed = pd.read_csv(ROOT / "a_share_universe_seed.csv", dtype=str, encoding="utf-8-sig")
     names = dict(zip(members["股票代码"], members["股票名称"]))
     names.update(zip(seed.code, seed.name))
