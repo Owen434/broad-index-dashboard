@@ -2,13 +2,10 @@ name: A-share market daily update
 
 on:
   schedule:
-    # UTC 15:40 = 北京时间 23:40
     - cron: "40 15 * * *"
-
   workflow_dispatch:
 
 concurrency:
-  # 与原 daily_update.yml 使用相同的并发组，避免两个工作流同时提交 docs
   group: daily-update
   cancel-in-progress: false
 
@@ -18,87 +15,64 @@ permissions:
 jobs:
   update-a-share-market:
     runs-on: ubuntu-latest
-
     env:
       TZ: Asia/Shanghai
       PYTHONUNBUFFERED: "1"
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
 
       - name: Resolve Beijing dates
         id: dates
-        shell: bash
         run: |
-          set -euo pipefail
-
-          echo "start=$(TZ=Asia/Shanghai date -d '3 years ago' '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
-          echo "end=$(TZ=Asia/Shanghai date '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
-          echo "day=$(TZ=Asia/Shanghai date '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+          echo "start=$(date -d '3 years ago' +%F)" >> "$GITHUB_OUTPUT"
+          echo "end=$(date +%F)" >> "$GITHUB_OUTPUT"
 
       - name: Restore A-share price cache
         uses: actions/cache@v4
         with:
           path: stocks/.cache/a_share
-          key: a-share-cache-v1-${{ runner.os }}-${{ steps.dates.outputs.day }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: a-share-cache-v1-${{ runner.os }}-${{ steps.dates.outputs.end }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            a-share-cache-v1-${{ runner.os }}-${{ steps.dates.outputs.day }}
+            a-share-cache-v1-${{ runner.os }}-${{ steps.dates.outputs.end }}
             a-share-cache-v1-${{ runner.os }}-
 
       - name: Install dependencies
-        shell: bash
         run: |
-          set -euo pipefail
-
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
       - name: Run full A-share market analysis
-        shell: bash
+        working-directory: stocks
         run: |
-          set -euo pipefail
-
-          cd stocks
-
           python a_share_market_dashboard.py \
             --start-date "${{ steps.dates.outputs.start }}" \
             --end-date "${{ steps.dates.outputs.end }}" \
-            --cache-dir ".cache/a_share" \
-            --output-dir "a_share_dashboard" \
-            --workers 4 \
-            --retry 2 \
-            --no-score
+            --cache-dir .cache/a_share --output-dir a_share_dashboard \
+            --workers 4 --retry 2 --no-score
 
-      - name: Build board rotation from the same price cache
+      - name: Build board rotation
         run: python stocks/board_rotation.py
 
+      - name: Build board anomalies and MA20 breadth
+        run: python stocks/board_anomaly.py
+
       - name: Publish HTML to docs
-        shell: bash
         run: |
-          set -euo pipefail
-
           mkdir -p docs
+          for page in a_share_market_dashboard board_rotation board_anomaly; do
+            test -s "stocks/a_share_dashboard/$page.html"
+            cp "stocks/a_share_dashboard/$page.html" "docs/$page.html"
+          done
 
-          cp stocks/a_share_dashboard/a_share_market_dashboard.html \
-             docs/a_share_market_dashboard.html
-
-          cp stocks/a_share_dashboard/board_rotation.html docs/board_rotation.html
-
-          echo "Published files:"
-          ls -lh docs/a_share_market_dashboard.html docs/board_rotation.html
-
-      - name: Commit and push A-share dashboard
+      - name: Commit and push dashboards
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update A-share market dashboard ${{ steps.dates.outputs.day }}"
-          file_pattern: "docs/a_share_market_dashboard.html docs/board_rotation.html README.md"
+          commit_message: "chore: update A-share dashboards ${{ steps.dates.outputs.end }}"
+          file_pattern: "docs/a_share_market_dashboard.html docs/board_rotation.html docs/board_anomaly.html README.md"
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
           commit_author: Owen434 <128884918+Owen434@users.noreply.github.com>
