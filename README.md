@@ -191,6 +191,7 @@ docs/     HTML 输出（GitHub Actions 每个交易日自动重新生成，仅�
 | | ETF净申赎金额日历 | <img src="docs/ETF净申赎金额日历.png" width="360"> | https://owen434.github.io/broad-index-dashboard/etf_net_flow_calendar.html |
 | | 宽基收益日历 | <img src="docs/index_return_calendar.png" width="360"> | https://owen434.github.io/broad-index-dashboard/index_return_calendar.html |
 | | 全市场股票收益分析 |<img src="docs/全市场股票收益分析.png" width="360"> |  https://owen434.github.io/broad-index-dashboard/a_share_market_dashboard.html |
+| | 板块轮动与宽基比较 | — | [打开看板](https://owen434.github.io/broad-index-dashboard/board_rotation.html) |
 | **② 板块基金** | 八大指标矩阵 |  <img src="docs/基金八大指标矩阵.png" width="360">  | https://owen434.github.io/broad-index-dashboard/fund_indicators_matrix.html |
 | | 评分矩阵 | <img src="docs/基金评分矩阵.png" width="360">| https://owen434.github.io/broad-index-dashboard/fund_score_matrix.html |
 | | 风险排名百分位 | <img src="docs/基金风险排名与历史分位.png" width="360"> | https://owen434.github.io/broad-index-dashboard/fund_riskrank_percentile.html |
@@ -234,38 +235,15 @@ python a_share_market_dashboard.py \
   --workers 8 \
   --retry 2 \
   --no-score
+# 在 stocks 目录复用上一步的行情缓存和日汇总
+python board_rotation.py
 cd ../drawdown && python drawdown_backtest.py --funds-csv ../funds/funds_universe_example.csv --nav-csv ../funds/fund_nav_history.csv --out drawdown_dashboard.html --plotly-js cdn
 cd ../futures && python cffex_net_position.py --start 20240101   # 首次回填历史，之后不加参数增量更新即可
 ```
 
 跑完直接双击打开对应目录下生成的 `.html` 文件即可。
 
-## 全市场股票分析
-
-`stocks/a_share_market_dashboard.py` 面向 A 股全市场股票，默认统计近三年的：
-
-- 每日上涨、下跌家数和上涨/下跌比例；
-- 全市场股票日收益率横截面分布；
-- P5、P25、中位数、P75、P95 等分位数；
-- 年度收益统计和年度涨跌幅排名；
-- 每日收益分位数日历。
-
-GitHub Actions 每天自动运行一次，并将最终页面写入 `docs/a_share_market_dashboard.html`。
-股票池和个股行情缓存保存在 `stocks/.cache/a_share/`，不会提交到仓库。缓存恢复后，脚本只会重新获取缺失或过期的数据。
-
-全市场股票工作流位于 `.github/workflows/a_share_market_daily.yml`。它与原有工作流共用 `daily-update` 并发组，避免多个工作流同时提交 `docs/`。
-
-## 板块轮动与宽基比较
-
-打开[板块轮动看板](https://owen434.github.io/broad-index-dashboard/board_rotation.html)。单日表按日期倒序，按屏幕宽度翻页。月度表从 1 月向右排列。点击列头重排，点击色块查看有效家数、板块收益与同期宽基收益。支持行业、概念、等权均值、P25、中位数及 P75。自身收益使用 %，相对宽基的收益差使用百分点（pp）。
-
-- 成分表为 `stocks/1.ztjj_board_stocks.csv`，按“板块类别、板块名称、六位股票代码”去重。更新成分时替换此文件。历史统计按当前成分回看。
-- 工作流先运行全市场宽度脚本，再运行 `stocks/board_rotation.py`。后者读取同一批前复权个股缓存、全市场日汇总和已发布的 `docs/index_return_calendar.html`。日历中分类为“A股宽基”的指数自动进入按钮列表。各基准缺少某日或某月内任一交易日收益时，该期相对值显示为缺数。
-- 股票池接口失败时，全市场脚本使用项目原有的 `stocks/a_share_universe_seed.csv` 作为备用种子。板块匹配以代码为准；缺行情不补零。最新日取全市场汇总中最新完整交易日。
-- 单日收益按相邻交易日收盘价计算。月度收益按上月末至本月末收盘价计算，未结束的月份截至当前数据日。缺任一端点的股票退出该期统计。点击单格可查有效家数。
-- 已运行全市场任务并具备缓存、汇总及宽基日历后，可在项目根目录执行 `python stocks/board_rotation.py`。本地产物为 `stocks/a_share_dashboard/board_rotation.html`。页面模板已内置在 Python 脚本中。Actions 将生成的页面发布至 `docs/board_rotation.html`。
-
-部署时将文件按目录合并进仓库，保留原 `.github/workflows/a_share_market_daily.yml` 路径。进入 **Actions → A-share market daily update → Run workflow** 首次运行。成功后同一次提交更新两个 HTML。沿用仓库现有的 GitHub Pages 发布方式及写入权限。
+板块成分由 `stocks/1.ztjj_board_stocks.csv` 维护。全市场宽度与板块轮动共用 `.github/workflows/a_share_market_daily.yml`，每日生成的两个看板发布至 `docs/`。
 
 ## 已知限制
 
