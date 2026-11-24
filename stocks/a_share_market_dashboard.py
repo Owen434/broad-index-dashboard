@@ -652,11 +652,13 @@ def _daily_frame(
                 edges = np.linspace(vmin - span, vmax + span, 9)
             else:
                 edges = np.linspace(vmin, vmax, 21)
-            hist = np.histogram(values, bins=edges)[0].astype(int).tolist()
+            if edges[0] < 0 < edges[-1] and not np.any(edges == 0):
+                edges = np.insert(edges, np.searchsorted(edges, 0), 0.0)
+            hist = np.histogram(values[values != 0], bins=edges)[0].astype(int).tolist()
         else:
             q5 = q25 = median = q75 = q95 = np.nan
             edges = np.array([], dtype=float)
-            hist = [0] * (len(_HIST_EDGES) - 1)
+            hist = []
 
         count = int(item["count"])
         up, down, flat = int(item["up"]), int(item["down"]), int(item["flat"])
@@ -1035,9 +1037,17 @@ function renderDailyChart(rows){
 function renderDistribution(day){
  if(!day){Plotly.purge('distributionChart');$('distributionStats').innerHTML='';return;}
  $('distributionTitle').textContent=(mode==='latest'?'最新交易日':'所选交易日')+'：'+day.date+' 股票涨跌幅分布';
- const edges=day.hist_edges||[]; const counts=day.hist_counts||[];
- const labels=edges.slice(0,-1).map((v,i)=>`${Math.round(v*100)}%~${Math.round(edges[i+1]*100)}%`);
- const barColors=labels.map((_,i)=>i<Math.floor(labels.length/2)?C.green:C.red);
+ const edges=day.hist_edges||[], counts=[...(day.hist_counts||[])];
+ const pct=v=>Number((v*100).toPrecision(5))+'%';
+ const labels=edges.slice(0,-1).map((v,i)=>pct(v)+'~'+pct(edges[i+1]));
+ const barColors=edges.slice(0,-1).map(v=>v<0?C.green:C.red);
+ if(day.flat>0){
+  const position=barColors.indexOf(C.red);
+  const i=position<0?counts.length:position;
+  labels.splice(i,0,'0%（平盘）');
+  counts.splice(i,0,day.flat);
+  barColors.splice(i,0,C.muted);
+ }
  Plotly.react('distributionChart',[{x:labels,y:counts,type:'bar',marker:{color:barColors},hovertemplate:'涨跌幅区间：%{x}<br>股票数量：%{y}<extra></extra>'}],
   {...BASE,margin:{l:55,r:20,t:20,b:80},xaxis:{title:'个股日涨跌幅区间',tickangle:-50,gridcolor:THEMES[currentTheme].grid},yaxis:{title:'股票数量',gridcolor:THEMES[currentTheme].grid},showlegend:false},CFG);
  const stats=[['股票样本数',fmtNum(day.total)],['样本覆盖率',fmtPct(day.coverage_ratio)],['均值',fmtPct(day.avg_return)],['中位数 P50',fmtPct(day.median_return)],['下分位 P5',fmtPct(day.q5_return)],['下分位 P25',fmtPct(day.q25_return)],['上分位 P75',fmtPct(day.q75_return)],['上分位 P95',fmtPct(day.q95_return)],['上涨 / 下跌',fmtNum(day.up)+' / '+fmtNum(day.down)]];
